@@ -1,0 +1,182 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Invoices extends CI_Controller {
+
+	function __construct(){
+		parent::__construct();
+
+		//load models
+		$this->load->model('sir/Sir_model', 'sir');
+		$this->load->model('log/SirLog_model', 'logger');
+		$this->load->model('purchase_orders/PO_model', 'po');
+		$this->load->model('users/Users_model', 'sir_users');
+		$this->load->model('clients/Clients_model', 'clients');
+		$this->load->model('invoices/Invoice_model', 'invoice');
+		$this->load->model('session/Session_model', 'sir_session');
+		$this->load->model('suppliers/Suppliers_model', 'suppliers');
+		$this->load->model('job_titles/Jobtitles_model', 'job_titles');
+		$this->load->model('departments/Departments_model', 'departments');
+		$this->load->model('notifications/Notifications_model', 'notifications');
+
+		//load libraries
+		$this->load->library('encryption');
+
+		$this->sir->manage_session();
+	}
+
+	public function index()
+	{
+
+		$this->sir_session->clear_status_message();
+		$PageTitle = "All Invoices";
+
+		$invoices = $this->invoice->get_all_invoices();
+
+		$data = array(
+			"page_title" => $PageTitle,
+			'invoices' => $invoices
+			);
+
+		$this->load->view('invoices/list_invoices', $data);
+	}
+
+	public function view_invoice($invoice_id)
+	{
+		$this->sir_session->clear_status_message();
+		$PageTitle = "Invoice";
+
+		$invoice = $this->invoice->get_invoice_by_id($invoice_id);
+		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
+		//echo "<pre>";print_r($invoice[0]);exit;
+		$address = $this->suppliers->get_supplier_address_by_id($invoice[0]["supplier_id"]);
+		$company_address_top = $this->sir->get_settings_by_slug('address_for_forms');
+
+		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
+		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
+
+		if( !empty( $address ) ){
+			$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
+			$address_string .= ( $address[0]['address_line_2'] != null || $address[0]['address_line_2'] != '' ) ? $address[0]['address_line_2'] . '<br/>' : '';
+			$address_string .= ( $address[0]['city'] != null || $address[0]['city'] != '' ) ? $address[0]['city'] . '<br/>' : '';
+			$address_string .= ( $address[0]['state'] != null || $address[0]['state'] != '' ) ? $address[0]['state'] . '<br/>' : '';
+			$address_string .= ( $address[0]['zip'] != null || $address[0]['zip'] != '' ) ? $address[0]['zip'] . '<br/>' : '';
+		}
+
+		$data = array(
+			"page_title" => $PageTitle,
+			'invoice' => $invoice[0],
+			"supplier_address" => $address_string,
+			"bill_to_address" => $bill_to_address[0]['settings_value'],
+			"company_address_top" => $company_address_top[0]["settings_value"],
+			"company_name" => $company_name[0]["settings_value"],
+			"company_address" => $company_address[0]["settings_value"]
+			);
+
+		$this->load->view('invoices/view_invoice', $data);
+	}
+
+	public function edit_invoice($invoice_id){
+		$PageTitle = "Edit Invoice";
+
+		$invoice = $this->invoice->get_invoice_by_id($invoice_id);
+
+		if( empty( $invoice ) ){
+			show_error("Sorry, unable to retrieve the Invoice", 404, "Error Retrieving Record");
+		} else {
+			$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
+			//echo "<pre>";print_r($invoice[0]);exit;
+			$address = $this->suppliers->get_supplier_address_by_id($invoice[0]["supplier_id"]);
+			$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
+			$suppliers = $this->suppliers->get_all_suppliers();
+			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
+
+			if( !empty( $address ) ){
+				$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
+				$address_string .= ( $address[0]['address_line_2'] != null || $address[0]['address_line_2'] != '' ) ? $address[0]['address_line_2'] . '<br/>' : '';
+				$address_string .= ( $address[0]['city'] != null || $address[0]['city'] != '' ) ? $address[0]['city'] . '<br/>' : '';
+				$address_string .= ( $address[0]['state'] != null || $address[0]['state'] != '' ) ? $address[0]['state'] . '<br/>' : '';
+				$address_string .= ( $address[0]['zip'] != null || $address[0]['zip'] != '' ) ? $address[0]['zip'] . '<br/>' : '';
+			}
+
+			$data = array(
+				"page_title" => $PageTitle,
+				'invoice' => $invoice[0],
+				"supplier_address" => $address_string,
+				"bill_to_address" => $bill_to_address[0]['settings_value'],
+				"company_address" => $company_address[0]["settings_value"],
+				"suppliers" => $suppliers,
+				"invoice_id" => $invoice_id,
+				"company_name" => $company_name[0]["settings_value"]
+				);
+
+			$this->load->view('invoices/edit_invoice', $data);
+		}		
+	}
+
+	public function do_edit_invoice(){
+		//echo "<pre>";print_r($this->input->post());exit;
+		$invoice_id = $this->input->post("invoice-id");
+		$items_string = "";
+		$supplier_id = $this->input->post("supplier-id");
+		$invoice_no = $this->input->post("invoice_no");
+		//$placed_by = $this->input->post("placed-by");
+		//$approved_by = $this->input->post("approved-by");
+		$no_of_items = $this->input->post("no_of_items");
+		$total_cost = $this->input->post("total_cost");
+
+		if( $no_of_items > 0 )
+		{
+			$counter = 0;
+			$row = array();
+			$invoice_record = array();
+			for($i = 1; $i <= $no_of_items; $i++)
+			{
+				$qty = $this->input->post("qty-" . $i);
+				$desc = $this->input->post("desc-" . $i);
+				$price = $this->input->post("price-" . $i);
+				$extn = $this->input->post("extn-" . $i);
+
+				if( !empty($qty)  ){ //&& !empty($price)
+					$row["qty"] = $qty;
+					$row["desc"] = $desc;
+					$row["price"] = $price;
+					$row["extn"] = $extn;
+
+					array_push($invoice_record, $row);
+
+					unset($row);
+					$counter++;
+				}
+			}
+
+			$invoice_details = json_encode($invoice_record);
+			//echo "<pre>";print_r($invoice_record);exit;
+
+			$data = array(
+				"supplier_id" => $supplier_id,
+				"invoice_details" => $invoice_details,
+				"invoice_total_amount" => $total_cost
+			);
+
+			try{
+				$this->invoice->update_invoice($data, $invoice_id);
+
+				$old_invoice_data = $this->invoice->get_invoice_by_id($invoice_id);
+
+				try{
+					$this->logger->add_log(28, $this->session->userdata("user_id"), json_encode($old_invoice_data), json_encode($data));
+				} catch(Exception $x){
+					$this->xxx->log_exception( $x->getMessage() );
+				}
+				
+				$this->sir_session->add_status_message("Your Invoice has been updated successfully!", "success");
+			} catch( Exception $e ){
+				$this->xxx->log_exception( $e->getMessage() );
+				$this->sir_session->add_status_message("Sorry, your Invoice was not updated successfully!", "danger");
+			}
+
+			redirect("/Invoices/edit_invoice/" . $invoice_id);
+		}
+	}
+}

@@ -1,0 +1,6 @@
+SELECT un.`user_notification_id`, n.`title`, REPLACE( n.`details`, '[first_name]', u.`first_name`) details
+FROM user_notifications un
+INNER JOIN notifications n ON n.`notification_id` = un.`notification_id`
+INNER JOIN sir_users u ON u.`user_id` = un.`user_id`
+WHERE un.`user_id` = 5292
+AND un.`status_id` = 2

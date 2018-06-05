@@ -1,0 +1,4 @@
+tasks
+dashboard
+add total stock taking amount for the year
+show total amount of money based on items in stock for categories
