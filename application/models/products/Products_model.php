@@ -15,6 +15,16 @@ class Products_model extends CI_Model
 		$this->minimum_product_stock_levels_table = "minimum_product_stock_levels";
 	}
 
+	public function delete_product( $key ){
+		if( !empty($key) ){
+			if( $this->db->delete( $this->table_name, array('product_id' => $key) ) ){
+				echo "1";
+			} else {
+				echo "0";
+			}
+		}
+	}
+
 	public function get_all_products()
 	{
 		$sql = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`price`, c.`category_name`, p.`barcode`, p.`product_category_id`
@@ -305,9 +315,14 @@ class Products_model extends CI_Model
 
 	public function get_product_name_from_product_name_id($product_name_id){
 		if( !empty($product_name_id) ){
-			$last_occurrence_of_open_bracket = strrpos($product_name_id, "(");
+			if( !strstr($product_name_id, "(") ){
+				return $product_name_id;
+			} else {
+				$last_occurrence_of_open_bracket = strrpos($product_name_id, "(");
 
-			return substr($product_name_id, 0, $last_occurrence_of_open_bracket);
+				return substr($product_name_id, 0, $last_occurrence_of_open_bracket);
+			}
+			
 		} //end of if
 	} //end of function
 

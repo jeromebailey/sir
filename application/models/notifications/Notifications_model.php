@@ -245,7 +245,6 @@ class Notifications_model extends CI_Model
 			'charset'   => 'iso-8859-1'
 		);
 
-
 		$this->load->library('email', $config);
 
 		//$this->email->initialize($config);

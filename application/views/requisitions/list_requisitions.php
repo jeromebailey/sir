@@ -78,7 +78,7 @@
                         <a href="<?=base_url('Requisitions/view_requisition/'.$requisition_id)?>" title="Details"><i class="fas fa-file-alt"></i></a> |
 
                         <?if($this->sir->user_has_permission_to("duplicate_requisition")){?>
-                          <a href="<?=base_url('Requisitions/edit_duplicate_requisition/'.$requisition_id)?>" title="Dispatch"><i class="fas fa-copy"></i></a> |
+                          <a href="<?=base_url('Requisitions/edit_duplicate_requisition/'.$requisition_id)?>" title="Duplicate"><i class="fas fa-copy"></i></a> |
                         <?}?>
 
                         <?if($this->sir->user_has_permission_to("dispatch_requisition")){?>

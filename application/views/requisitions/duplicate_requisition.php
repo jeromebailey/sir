@@ -32,7 +32,7 @@
               </div>
             </div>
 
-            <form id="frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Requisitions/do_edit_requisition')?>" data-toggle="validator" role="form"> 
+            <form id="frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Requisitions/do_duplicate_requisition')?>" data-toggle="validator" role="form"> 
 
               <input type="hidden" name="requisition_id" value="<?=$requisition_id?>">
 
@@ -40,7 +40,7 @@
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Requisition Date<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" readonly="readonly" value="<?=date('M d, Y', strtotime($requisition["requisition_date"]));?>">
+                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" value="<?=date('M d, Y');?>" style="position: relative; z-index: 100000;">
                 </div>
               </div>             
 
@@ -200,7 +200,7 @@
               <div class="ln_solid"></div>
               <div class="form-group">
                 <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                  <button type="submit" id="btnSendToStores" class="btn btn-lg btn-success">Update Requisition</button>
+                  <button type="submit" id="btnSendToStores" class="btn btn-lg btn-success">Duplicate Requisition</button>
                 </div>
               </div>
 
@@ -232,11 +232,10 @@
 
     $(document).ready(function(){
       $("#msg-holder").hide();
-        $( "#dob" ).datepicker({ 
+        $( "#requisition-date" ).datepicker({ 
           dateFormat: 'yy-mm-dd',
-          changeYear: true,
-          yearRange: "-50:+0" 
-        });
+          changeYear: true
+        }).datepicker("setDate", new Date());
         //$('#add-user-frm').validator();
 
         var client_id = $("#client-id").val();

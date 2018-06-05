@@ -32,6 +32,10 @@ class Requisitions_model extends CI_Model
 		return $inserted;
 	}
 
+	public function update_requisition( $requisition_id, $data ){
+		return $this->db->update( $this->table_name, $data, "requisition_id = " . $requisition_id );
+	}
+
 	public function get_all_requisitions(){
 		$query = "SELECT r.*, c.`client_name`, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`,
 		(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`store_keeper_employee_id` ) 'created_by',
@@ -47,7 +51,7 @@ class Requisitions_model extends CI_Model
 
 	public function get_requisition_by_id( $requisition_id )
 	{
-		$query = "SELECT r.*, c.`client_name`, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`, 
+		$query = "SELECT r.*, c.`client_name`, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`, r.flight_type_id,
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`store_keeper_employee_id` ) 'created_by',
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by'
 					FROM requisitions r

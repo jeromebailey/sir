@@ -8,15 +8,18 @@ class Requisitions extends CI_Controller {
 
 		//load models
 		$this->load->model('sir/Sir_model', 'sir');
+		$this->load->model('log/SirLog_model', 'logger');
 		$this->load->model('users/Users_model', 'sir_users');
 		$this->load->model('clients/Clients_model', 'clients');
+		$this->load->model('emails/AppEmailer_model', 'emailer');
 		$this->load->model('products/Products_model', 'products');
 		$this->load->model('session/Session_model', 'sir_session');
 		$this->load->model('exceptions/AppExceptions_model', 'xxx');
+		$this->load->model('flight_types/FlightTypes_model', 'flight_types');
 		$this->load->model('requisitions/Requisitions_model', 'requisitions');
-		//$this->load->model('job_titles/Jobtitles_model', 'job_titles');
-		//$this->load->model('departments/Departments_model', 'departments');
 		$this->load->model('notifications/Notifications_model', 'notifications');
+		//$this->load->model('job_titles/Jobtitles_model', 'job_titles');
+		//$this->load->model('departments/Departments_model', 'departments');		
 		//$this->load->model('uom/uom_model', 'uom');
 
 		//load libraries
@@ -63,20 +66,162 @@ class Requisitions extends CI_Controller {
 		}		
 	}
 
-	public function edit_requisition($requisition_id){
-		$PageTitle = "Requisition";
+	public function edit_duplicate_requisition($requisition_id){
+		$PageTitle = "Duplicate Requisition";
 
 		try{
 			$requisition = $this->requisitions->get_requisition_by_id( $requisition_id );
+			//echo "<pre>";print_r($requisition);exit;
 			$company_address = $this->sir->get_settings_by_slug('address_for_forms');
+			$clients = $this->clients->get_all_clients();
+			$uom = $this->sir->get_all_uom();
+			$flight_types = $this->flight_types->get_flight_types();
 
 			if( empty($requisition) ){
 				show_error("Sorry, invalid request", 404);
 			} else {
+
+				$client_id = $requisition[0]["client_id"];
+
+				$client_flights = $this->clients->get_client_flights($client_id);
+
 				$data = array(
 					'page_title' => $PageTitle,
 					"requisition" => $requisition[0],
-					"company_address" => $company_address[0]["settings_value"]
+					"requisition_id" => $requisition_id,
+					"company_address" => $company_address[0]["settings_value"],
+					"clients" => $clients,
+					"uom" => $uom,
+					"client_flights" => $client_flights,
+					"flight_types" => $flight_types
+				);
+
+				$this->load->view('requisitions/duplicate_requisition', $data);
+			}
+		} catch( Exception $ex ){
+			$this->xxx->log_exception( $ex->getMessage() );
+			show_error("Sorry, error trying to retrieve your request", 404);
+		}		
+	}
+
+	public function do_duplicate_requisition(){
+		$items_string = "";
+		$client_id = $this->input->post("client-id");
+		$flight_type_id = $this->input->post("flight-type-id");
+		$client_flight_id = $this->input->post("client-flight-id");
+		$passenger_count = $this->input->post("passenger-count");
+		$no_of_items = $this->input->post("no_of_items");
+
+		if( $no_of_items > 0 )
+		{
+			$counter = 0;
+			$row = array();
+			$record = array();
+
+			for($i = 1; $i <= $no_of_items; $i++)
+			{
+				$product_name_id = $this->input->post("requisition-product-name-" . $i);
+				$amount = $this->input->post("requisition-amount-" . $i);
+				$unit = $this->input->post("requisition-unit-" . $i);
+
+				if( !empty($product_name_id) && !empty($amount) ){
+
+					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+
+					$row["product_name"] = $product_name;
+					$row["amount"] = $amount;
+					$row["unit"] = $unit;					
+
+					array_push($record, $row);
+
+					unset($row);
+					$counter++;
+				}
+			} //end of for loop			
+
+			$details = json_encode($record);
+			//echo "<pre>";print_r($po_record);exit;
+
+			$data = array(
+				"client_id" => $client_id,
+				"flight_type_id" => $flight_type_id,
+				"client_flight_id" => $client_flight_id,
+				"passenger_count" => $passenger_count,
+				"requisition_date" => date("Y-m-d"),
+				"details" => $details,
+				"store_keeper_employee_id" => $this->session->userdata("user_id"),
+				"dispatched" => 0
+			);
+
+			try{
+				$this->requisitions->insert_requisition($data);
+
+				$new_requisition_id = $this->db->insert_id();
+
+				try{
+					$this->logger->add_log(31, $this->session->userdata("user_id"), NULL, json_encode($data));
+				} catch(Exception $x){
+					$this->xxx->log_exception( $x->getMessage() );
+				}
+
+				$users = $this->sir_users->get_user_info_to_send_notification_to_by_action_name("requisitions");
+
+				$client = $this->clients->get_client_by_id($client_id);
+				$client_name = $client[0]["client_name"];
+
+				$client_flight_record = $this->clients->get_flight_no_from_client_flight_id( $client_flight_id );
+				$flight_no = $client_flight_record[0]["flight_no"];
+
+				try{
+					$this->notifications->insert_user_notification_from_array($users, 1);
+				} catch(Exception $ex){
+					$this->xxx->log_exception( $ex->getMessage() );
+				}
+
+				try{
+					$this->notifications->send_notification_to_dispatch_requisition($users, $client_name, $flight_no); //send notification by email
+				} catch(Exception $except){
+					$this->xxx->log_exception( $except->getMessage() );	
+				}
+				
+				$this->sir_session->add_status_message("Your Requisition has been created successfully!", "success");
+			} catch( Exception $e ){
+				$this->xxx->log_exception( $e->getMessage() );
+				$this->sir_session->add_status_message("Sorry, your Requisition was not created successfully!", "danger");
+			}
+
+			redirect("/Requisitions/edit_requisition/" . $new_requisition_id);
+		}
+	}
+
+	public function edit_requisition($requisition_id){
+		$PageTitle = "Edit Requisition";
+
+		try{
+			$requisition = $this->requisitions->get_requisition_by_id( $requisition_id );
+			//echo "<pre>";print_r($requisition);exit;
+			$company_address = $this->sir->get_settings_by_slug('address_for_forms');
+			$clients = $this->clients->get_all_clients();
+			$uom = $this->sir->get_all_uom();
+			$flight_types = $this->flight_types->get_flight_types();
+
+			if( empty($requisition) ){
+				show_error("Sorry, invalid request", 404);
+			} else {
+
+				$client_id = $requisition[0]["client_id"];
+
+				$client_flights = $this->clients->get_client_flights($client_id);
+
+				$data = array(
+					'page_title' => $PageTitle,
+					"requisition" => $requisition[0],
+					"requisition_id" => $requisition_id,
+					"company_address" => $company_address[0]["settings_value"],
+					"clients" => $clients,
+					"uom" => $uom,
+					"client_flights" => $client_flights,
+					"flight_types" => $flight_types
 				);
 
 				$this->load->view('requisitions/edit_requisition', $data);
@@ -85,6 +230,79 @@ class Requisitions extends CI_Controller {
 			$this->xxx->log_exception( $ex->getMessage() );
 			show_error("Sorry, error trying to retrieve your request", 404);
 		}		
+	}
+
+	public function do_edit_requisition(){
+		$requisition_id = $this->input->post("requisition_id");
+		$items_string = "";
+		$client_id = $this->input->post("client-id");
+		$flight_type_id = $this->input->post("flight-type-id");
+		$client_flight_id = $this->input->post("client-flight-id");
+		$passenger_count = $this->input->post("passenger-count");
+		$no_of_items = $this->input->post("no_of_items");
+
+		$old_data = $this->requisitions->get_requisition_by_id($requisition_id);
+
+		//echo "<pre>";print_r($this->input->post());exit;
+
+		if( $no_of_items > 0 )
+		{
+			$counter = 0;
+			$row = array();
+			$record = array();
+			//$low_stock_level_products = array();
+			//$products_reach_low_stock_level = false;
+			//$total_requisition_cost = 0;
+
+			for($i = 1; $i <= $no_of_items; $i++)
+			{
+				$product_name_id = $this->input->post("requisition-product-name-" . $i);
+				$amount = $this->input->post("requisition-amount-" . $i);
+				$unit = $this->input->post("requisition-unit-" . $i);
+
+				if( !empty($product_name_id) && !empty($amount) ){
+
+					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+
+					$row["product_name"] = $product_name;
+					$row["amount"] = $amount;
+					$row["unit"] = $unit;					
+
+					array_push($record, $row);
+
+					unset($row);
+					$counter++;
+				}
+			} //end of for loop			
+
+			$details = json_encode($record);
+			//echo "<pre>";print_r($details);exit;
+
+			$data = array(
+				"client_id" => $client_id,
+				"flight_type_id" => $flight_type_id,
+				"client_flight_id" => $client_flight_id,
+				"passenger_count" => $passenger_count,
+				"details" => $details
+			);
+//echo "<pre>";print_r($data);exit;
+			try{
+				$this->requisitions->update_requisition( $requisition_id, $data);
+
+				try{
+					$this->logger->add_log(30, $this->session->userdata("user_id"), json_encode($old_data), json_encode($data));
+				} catch(Exception $x){
+					$this->xxx->log_exception( $x->getMessage() );
+				}
+
+				$this->sir_session->add_status_message("Your Requisition has been updated successfully!", "success");
+			} catch( Exception $e ){
+				$this->xxx->log_exception( $e->getMessage() );
+				$this->sir_session->add_status_message("Sorry, your Requisition was not updated successfully!", "danger");
+			}
+
+			redirect("/Requisitions/edit_requisition/" . $requisition_id);
+		}
 	}
 
 	public function dispatch_requisition(){

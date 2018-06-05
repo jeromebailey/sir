@@ -37,6 +37,15 @@ class Clients_model extends CI_Model
 		echo json_encode($this->sir->format_query_result_as_array($query));
 	}
 
+	public function get_client_flights($client_id){
+		$query = "SELECT client_flight_id, flight_no
+					FROM client_flights
+					WHERE client_id = $client_id
+					ORDER BY flight_no";
+
+		return $this->sir->format_query_result_as_array($query);
+	}
+
 	public function get_flight_no_from_client_flight_id( $client_flight_id ){
 		$query = "SELECT flight_no
 					FROM client_flights

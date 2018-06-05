@@ -53,18 +53,12 @@ class Forms extends CI_Controller {
 		//$this->sir_session->clear_status_message();
 
 		$PageTitle = "Create Requisition";
-		$genders = $this->sir->get_genders();
-		$departments = $this->departments->get_all_departments();
-		$job_titles = $this->job_titles->get_all_job_titles();
 		$clients = $this->clients->get_all_clients();
 		$uom = $this->sir->get_all_uom();
 		$flight_types = $this->flight_types->get_flight_types();
 
 		$data = array(
 			"page_title" => $PageTitle,
-			"genders" => $genders,
-			"departments" => $departments,
-			"job_titles" => $job_titles,
 			"clients" => $clients,
 			"uom" => $uom,
 			"flight_types" => $flight_types

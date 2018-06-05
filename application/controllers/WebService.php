@@ -91,6 +91,10 @@ class WebService extends CI_Controller {
 				case 'quotes':
 					echo $this->quotes->delete_quote($key);
 					break;
+
+				case 'products':
+					echo $this->products->delete_product($key);
+					break;
 				
 				default:
 					# code...
