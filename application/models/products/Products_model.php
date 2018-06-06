@@ -27,49 +27,58 @@ class Products_model extends CI_Model
 
 	public function get_all_products()
 	{
-		$sql = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`price`, c.`category_name`, p.`barcode`, p.`product_category_id`
+		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`price`, c.`category_name`, p.`barcode`, p.`product_category_id`
 				FROM products p
 				INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 				ORDER BY p.`product_name`";
 
-		return $this->sir->format_query_result_as_array($sql);
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function json_get_all_products()
 	{
-		$sql = "SELECT p.`product_id`, p.`product_name`
+		$query = "SELECT p.`product_id`, p.`product_name`
 				FROM products p
 				ORDER BY p.`product_name`";
 
-		return json_encode($this->sir->format_query_result_as_array($sql));
+		return json_encode($this->sir->format_query_result_as_array($query));
 	}
 
 	public function _count_items()
 	{
-		$sql = "SELECT COUNT(*) _count_
+		$query = "SELECT COUNT(*) _count_
 				FROM $this->table_name";
 
-		return $this->sir->format_query_result_as_array($sql);
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function count_no_of_products_in_categories()
 	{
-		$sql = "SELECT COUNT(p.`product_id`) 'product_count', c.`category_name`
+		$query = "SELECT COUNT(p.`product_id`) 'product_count', c.`category_name`
 				FROM products p
 				INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 				GROUP BY c.`category_id`
 				ORDER BY c.`category_name`";
 
-		return $this->sir->format_query_result_as_array($sql);
+		return $this->sir->format_query_result_as_array($query);
+	}
+
+	public function count_no_of_items_in_a_category( $category_id ){
+		$query = "SELECT COUNT(p.`product_id`) 'product_count', c.`category_name`
+					FROM products p
+					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
+					WHERE c.`category_id` = $category_id;";
+
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function search_products($term)
 	{
-		$sql = "SELECT p.`product_id`, p.`product_name`
+		$query = "SELECT p.`product_id`, p.`product_name`
 				FROM products p
 				where p.product_name like '%$term%'";
 
-		return json_encode($this->sir->format_query_result_as_array($sql));
+		return json_encode($this->sir->format_query_result_as_array($query));
 	}
 
 	public function search_product_by_barcode($bar_code){
@@ -123,13 +132,22 @@ class Products_model extends CI_Model
 	}
 
 	public function get_total_product_category_cost(){
-		$sql = "SELECT c.`category_name`, TRUNCATE(SUM(p.`price`), 2) total_cost
+		$query = "SELECT c.`category_name`, TRUNCATE(SUM(p.`price`), 2) total_cost
 				FROM products p
 				INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 				GROUP BY c.`category_id`
 				ORDER BY total_cost";
 
-		return $this->sir->format_query_result_as_array($sql);
+		return $this->sir->format_query_result_as_array($query);
+	}
+
+	public function get_total_cost_in_a_category( $category_id ){
+		$query = "SELECT c.`category_name`, TRUNCATE(SUM(p.`price`), 2) total_cost
+					FROM products p
+					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
+					WHERE c.`category_id` = $category_id;";
+
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function get_inventory_list(){
@@ -141,6 +159,18 @@ class Products_model extends CI_Model
                     ORDER BY p.`product_name`";
 
         return $this->sir->format_query_result_as_array($query);
+	}
+
+	public function get_inventory_by_category_with_product_item_total_cost( $category_id ){
+		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, c.`category_name`, p.`barcode`, p.`product_category_id`,
+					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost
+					FROM products p
+					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
+					INNER JOIN product_stock_levels l ON l.`product_id` = p.`product_id`
+					WHERE c.`category_id` = $category_id
+					ORDER BY p.`product_name`";
+
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function get_product_id_from_product_name($product_name){

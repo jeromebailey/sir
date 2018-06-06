@@ -116,4 +116,34 @@ class Reports extends CI_Controller {
 		$this->load->view('reports/show_user_access', $data);
 	}
 
+	public function inventory_total_per_category(){
+		$PageTitle = "Total Value Per Category In Inventory";
+
+		$category_id = $this->uri->segment(3);
+		$categories = $this->categories->get_all_categories();
+
+		if(empty($category_id))
+		{
+			$product_category_items_with_item_total_cost = null;
+			$category_id = null;
+			//$no_of_items_in_category = null;
+			//$total_product_cost_in_category = null;
+		} else {
+			$product_category_items_with_item_total_cost = $this->products->get_inventory_by_category_with_product_item_total_cost( $category_id );
+			//$no_of_items_in_category = $this->products->count_no_of_items_in_a_category( $category_id );
+			//$total_product_cost_in_category = $this->products->get_total_cost_in_a_category( $category_id );
+		}
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"product_category_items_with_item_total_cost" => $product_category_items_with_item_total_cost,
+			"categories" => $categories,
+			//"no_of_items_in_category" => $no_of_items_in_category[0]["product_count"],
+			"category_id" => $category_id
+			//"total_product_cost_in_category" => $total_product_cost_in_category[0]["total_cost"]
+			);
+
+		$this->load->view('reports/inventory_total_per_category', $data);
+	}
+
 }
