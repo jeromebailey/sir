@@ -32,15 +32,26 @@
               </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-3">
+                  <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
+                </div>
+                <div class="col-md-10">
+                  <p class="text-uppercase text-center" style="margin-top: -40px;font-size: 22px;"><strong>purchase order</strong></p>
+                </div>
+              </div>
+              <br />
+
             <form id="add-user-frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_add_purchase_order')?>" data-toggle="validator" role="form">
 
               <div class="row">
-                <div class="col-md-3">
-                  <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="120" width="220">
+                <div class="col-md-2">
+                  <label for="territory">Territory</label>
+                  <select class="form-control" id="territory" name="territory" >
+                    <option value="1">Local</option>
+                    <option value="2">Overseas</option>
+                  </select>
                 </div>
-              </div>
-
-              <div class="row">
                 <div class="col-md-4">
                   <label for="supplier-id">Supplier</label>
                   <select id="supplier-id" name="supplier-id" class="form-control" required="required">
@@ -94,7 +105,7 @@
                 </div>
                 <div class="col-md-4 col-md-offset-3">
                   <label for="">Ship To:</label>
-                    <div ><?=$ship_to_address;?></div>
+                    <div id="ship_to_address" ><?=$ship_to_address;?></div>
                 </div>
               </div>
 
@@ -233,6 +244,37 @@
           $("#supplier-address").html(data);
         });
       }
+    });
+
+    $("#territory").change(function(){
+        var territory_id = $(this).val();
+
+        $.ajax({
+            url: "<?=base_url('WebService/get_suppliers_by_territory_id/" + territory_id +"');?>",
+            type: 'post',
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $("#supplier-id").empty();
+                $("#supplier-id").append("<option value=''>Select Supplier</option>");
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['supplier_id'];
+                    var name = response[i]['supplier_name'];
+                    
+                    $("#supplier-id").append("<option value='"+id+"'>"+name+"</option>");
+
+                }
+            }
+        });
+
+        $.ajax({
+            url: "<?=base_url('WebService/get_ship_to_address_by_territory_id/" + territory_id +"');?>",
+            type: 'post',
+            dataType: 'json',
+            success:function(response){
+                $("#ship_to_address").html( response);
+            }
+        });
     });
 
     $("#price").keyup(function(){

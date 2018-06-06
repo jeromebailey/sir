@@ -91,6 +91,10 @@ class Invoices extends CI_Controller {
 			$suppliers = $this->suppliers->get_all_suppliers();
 			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
 
+			$supplier_id = $invoice[0]["supplier_id"];
+			$supplier = $this->suppliers->get_supplier_by_id( $supplier_id );
+			$territory_id = $supplier[0]["is_local"];
+
 			if( !empty( $address ) ){
 				$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
 				$address_string .= ( $address[0]['address_line_2'] != null || $address[0]['address_line_2'] != '' ) ? $address[0]['address_line_2'] . '<br/>' : '';
@@ -107,7 +111,8 @@ class Invoices extends CI_Controller {
 				"company_address" => $company_address[0]["settings_value"],
 				"suppliers" => $suppliers,
 				"invoice_id" => $invoice_id,
-				"company_name" => $company_name[0]["settings_value"]
+				"company_name" => $company_name[0]["settings_value"],
+				"territory_id" => $territory_id
 				);
 
 			$this->load->view('invoices/edit_invoice', $data);

@@ -32,15 +32,19 @@
               </div>
             </div>
 
-            <!--<div class="row">
-              <div class="col-md-3">
-                <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="120" width="220">
+            <div class="row">
+                <div class="col-md-3">
+                  <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
+                </div>
+                <div class="col-md-10">
+                  <p class="text-uppercase text-center" style="margin-top: -40px;font-size: 22px;"><strong>flight check sheet</strong></p>
+                </div>
               </div>
-            </div>-->
-
-            <br />
+              <br />
 
             <form id="frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_add_flight_check_sheet')?>" data-toggle="validator" role="form"> 
+
+              
 
             <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Date &amp; Time: </label>

@@ -32,9 +32,7 @@
               </div>
             </div>
 
-            <form id="add-user-frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_add_quote')?>" data-toggle="validator" role="form">
-
-              <div class="row">
+            <div class="row">
                 <div class="col-md-3">
                   <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
                 </div>
@@ -43,6 +41,8 @@
                 </div>
               </div>
               <br />
+
+            <form id="add-user-frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_add_quote')?>" data-toggle="validator" role="form">
 
               <div class="row">
                 <div class="col-md-6">
@@ -75,6 +75,14 @@
               <br />
 
               <div class="row">
+                <div class="col-md-2">
+                  <label for="territory">Territory</label>
+                  <select class="form-control" id="territory" name="territory" >
+                    <option value="1">Local</option>
+                    <option value="2">Overseas</option>
+                  </select>
+                  <div id="supplier-address"></div>
+                </div>
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
                     <select id="supplier-id" name="supplier-id" class="form-control" required="required">
@@ -88,7 +96,7 @@
 
                     }?>
                   </select>
-                  <div id="supplier-address"></div>
+                  
                 </div>
               </div> <!-- end of row -->
 
@@ -195,6 +203,29 @@
           $("#supplier-address").html(data);
         });
       }
+    });
+
+    $("#territory").change(function(){
+        var territory_id = $(this).val();
+        $("#supplier-address").html('');
+
+        $.ajax({
+            url: "<?=base_url('WebService/get_suppliers_by_territory_id/" + territory_id +"');?>",
+            type: 'post',
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $("#supplier-id").empty();
+                $("#supplier-id").append("<option value=''>Select Supplier</option>");
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['supplier_id'];
+                    var name = response[i]['supplier_name'];
+                    
+                    $("#supplier-id").append("<option value='"+id+"'>"+name+"</option>");
+
+                }
+            }
+        });
     });
 
     $("#price").keyup(function(){

@@ -56,4 +56,10 @@ class Suppliers_model extends CI_Model
 			}
 		}
 	}
+
+	public function get_suppliers_by_territory_id( $territory_id ){
+		$query = "select * from suppliers where is_local = $territory_id order by supplier_name asc;";
+
+		return $this->sir->format_query_result_as_array($query);
+	}
 }

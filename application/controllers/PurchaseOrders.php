@@ -48,7 +48,20 @@ class PurchaseOrders extends CI_Controller {
 
 		$purchase_order = $this->po->get_purchase_order_by_id($po_id);
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
-		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
+
+		if( !empty( $purchase_order ) ){
+			$supplier_id = $purchase_order[0]["supplier_id"];
+
+			$supplier = $this->suppliers->get_supplier_by_id( $supplier_id );
+			$territory_id = $supplier[0]["is_local"];
+
+			if( $territory_id == 1 || $territory_id == null){
+				$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
+			} else {
+				$ship_to_address = $this->sir->get_settings_by_slug('ship_to_overseas');
+			}
+		}
+		
 		//echo "<pre>";print_r($purchase_order[0]);exit;
 		$address = $this->suppliers->get_supplier_address_by_id($purchase_order[0]["supplier_id"]);
 		$company_address = $this->sir->get_settings_by_slug('address_for_forms');
@@ -106,11 +119,20 @@ class PurchaseOrders extends CI_Controller {
 			show_error("Sorry, unable to retrieve the Purchase Order", 404, "Error Retrieving Record");
 		} else {
 			$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
-			$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
 			//echo "<pre>";print_r($purchase_order[0]);exit;
 			$address = $this->suppliers->get_supplier_address_by_id($purchase_order[0]["supplier_id"]);
 			$company_address = $this->sir->get_settings_by_slug('address_for_forms');
 			$suppliers = $this->suppliers->get_all_suppliers();
+
+			$supplier_id = $purchase_order[0]["supplier_id"];
+			$supplier = $this->suppliers->get_supplier_by_id( $supplier_id );
+			$territory_id = $supplier[0]["is_local"];
+
+			if( $territory_id == 1 || $territory_id == null){
+				$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
+			} else {
+				$ship_to_address = $this->sir->get_settings_by_slug('ship_to_overseas');
+			}
 
 			if( !empty( $address ) ){
 				$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
@@ -128,7 +150,8 @@ class PurchaseOrders extends CI_Controller {
 				"bill_to_address" => $bill_to_address[0]['settings_value'],
 				"company_address" => $company_address[0]["settings_value"],
 				"suppliers" => $suppliers,
-				"po_id" => $po_id
+				"po_id" => $po_id,
+				"territory_id" => $territory_id
 				);
 
 			$this->load->view('purchase_orders/edit_purchase_order', $data);

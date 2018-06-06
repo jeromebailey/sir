@@ -13,7 +13,8 @@ class WebService extends CI_Controller {
 		$this->load->model('clients/Clients_model', 'clients');
 		$this->load->model('invoices/Invoice_model', 'invoice');
 		$this->load->model('products/Products_model', 'products');
-		$this->load->model('exceptions/AppExceptions_model', 'xxx');		
+		$this->load->model('exceptions/AppExceptions_model', 'xxx');
+		$this->load->model('suppliers/Suppliers_model', 'suppliers');		
 		$this->load->model('requisitions/Requisitions_model', 'requisitions');
 		$this->load->model('flight_check_sheets/FlightCheckSheets_model', 'flight_check_sheet');
 
@@ -141,5 +142,18 @@ class WebService extends CI_Controller {
 		}		
 	} //end of function
 
+	public function get_suppliers_by_territory_id( $territory_id ){
+		echo json_encode( $this->suppliers->get_suppliers_by_territory_id( $territory_id ) );
+	}
 
+	public function get_ship_to_address_by_territory_id( $territory_id ){
+
+		if( $territory_id == 1 ){
+			$result = $this->sir->get_settings_by_slug('ship_to');
+		} else {
+			$result = $this->sir->get_settings_by_slug('ship_to_overseas');
+		}
+
+		echo json_encode($result[0]["settings_value"]);
+	}
 }

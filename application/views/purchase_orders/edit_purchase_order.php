@@ -43,6 +43,25 @@
               <input type="hidden" name="po-id" value="<?=$po_id?>">
 
               <div class="row">
+                <div class="col-md-2">
+                  <label for="territory">Territory</label>
+                  <select class="form-control" id="territory" name="territory" required="required">
+                    <?
+                    if( $territory_id == 1 ){?>
+                      <option value="1" selected="selected">Local</option>
+                    <?} else {?>
+                      <option value="1">Local</option>
+                    <?}?>
+
+                    <?
+                    if( $territory_id == 2 ){?>
+                      <option value="2" selected="selected">Overseas</option>
+                    <?} else {?>
+                      <option value="2">Overseas</option>
+                    <?}?>                   
+                    
+                  </select>
+                </div>
                 <div class="col-md-4">
                   <label for="supplier-id">Supplier</label>
                   <select id="supplier-id" name="supplier-id" class="form-control" required="required">
@@ -100,7 +119,7 @@
                 </div>
                 <div class="col-md-4 col-md-offset-3">
                   <label for="">Ship To:</label>
-                    <div ><?=$ship_to_address;?></div>
+                    <div id="ship_to_address" ><?=$ship_to_address;?></div>
                 </div>
               </div>
 
@@ -271,6 +290,37 @@
           $("#supplier-address").html(data);
         });
       }
+    });
+
+    $("#territory").change(function(){
+        var territory_id = $(this).val();
+
+        $.ajax({
+            url: "<?=base_url('WebService/get_suppliers_by_territory_id/" + territory_id +"');?>",
+            type: 'post',
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $("#supplier-id").empty();
+                $("#supplier-id").append("<option value=''>Select Supplier</option>");
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['supplier_id'];
+                    var name = response[i]['supplier_name'];
+                    
+                    $("#supplier-id").append("<option value='"+id+"'>"+name+"</option>");
+
+                }
+            }
+        });
+
+        $.ajax({
+            url: "<?=base_url('WebService/get_ship_to_address_by_territory_id/" + territory_id +"');?>",
+            type: 'post',
+            dataType: 'json',
+            success:function(response){
+                $("#ship_to_address").html( response);
+            }
+        });
     });
 
     $("#price").keyup(function(){

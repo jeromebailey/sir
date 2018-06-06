@@ -33,12 +33,14 @@
             </div>
 
             <div class="row">
-              <div class="col-md-3">
-                <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="120" width="220">
+                <div class="col-md-3">
+                  <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
+                </div>
+                <div class="col-md-10">
+                  <p class="text-uppercase text-center" style="margin-top: -40px;font-size: 22px;"><strong>product requisition</strong></p>
+                </div>
               </div>
-            </div>
-
-            <br />
+              <br />
 
             <form id="frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_create_requisition')?>" data-toggle="validator" role="form"> 
 

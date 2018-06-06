@@ -355,7 +355,7 @@ class Forms extends CI_Controller {
 		//$this->sir_session->clear_status_message();
 
 		$PageTitle = "Create Purchase Order";
-		$suppliers = $this->suppliers->get_all_suppliers();
+		$suppliers = $this->suppliers->get_suppliers_by_territory_id( 1 );
 		$uom = $this->sir->get_all_uom();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
