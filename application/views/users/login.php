@@ -35,6 +35,8 @@
 
 				<form class="login100-form validate-form" method="post" action="<?=base_url('Users/do_login');?>">
 
+					<h3 class="text-center">Inventory & Requisition System (SIR), Grand Cayman</h3>
+
 					<div class="row">
 						<div class="col-md-12 col-sm-12 col-xs-12 col-lg-12">
 							<img src="<?=base_url('assets/images/GCG-Intro.gif');?>">
@@ -66,8 +68,7 @@
 								Forgot Password?
 							</a>
 						</div>
-					</div>
-			
+					</div>			
 
 					<div class="container-login100-form-btn">
 						<input type="submit" name="" class="login100-form-btn" value="Login">
