@@ -18,6 +18,8 @@ class Users extends CI_Controller {
 
 		//load libraries
 		$this->load->library('encryption');
+
+		$this->load->helper('cookie');
 	}
 
 	public function index()
@@ -40,15 +42,36 @@ class Users extends CI_Controller {
 	public function login()
 	{
 		//$this->sir_session->clear_status_message();
-		$this->load->view('users/login');
+		//if user is not logged in and the cookie is found
+		if( empty( $this->session->userdata("user_id") ) && !empty(get_cookie("remember_sir_user")) ){
+			list( $selector, $authenticator ) = explode(":", get_cookie("remember_sir_user"));
+
+			$auth_record = $this->sir_users->get_auth_record( $selector );
+
+			if( !empty( $auth_record ) ){
+				if( hash_equals( $auth_record[0]["user_token"], hash( "sha256", base64_decode($authenticator) ) ) ){
+					$this->sir_users->login_user_by_remeber_me_cookie( $auth_record[0]["user_id"] );
+					return redirect("Dashboard/index");
+				}
+			} else {
+				$this->load->view('users/login');
+			}
+		} else if( !empty( $this->session->userdata("user_id") ) )  { 
+			//if the user is already logged in
+			return redirect("Dashboard/index");
+		} else if( empty( $this->session->userdata("user_id") ) && empty(get_cookie("remember_sir_user")) ) {
+			//if the user is not logged in and the cookie is not found
+			$this->load->view('users/login');
+		}
 	}
 
 	public function do_login()
 	{
 		$email_address = $this->input->post('email');
 		$password = $this->input->post('pass');
+		$remember_me = $this->input->post('remember-me');
 
-		if( $this->sir_users->validate_user($email_address, $password) ){			
+		if( $this->sir_users->validate_user($email_address, $password, $remember_me) ){			
 			redirect("/Dashboard/index");
 		} else {
 			$this->sir_session->add_status_message("Sorry, invalid credentials were entered. Please try again", "danger");
@@ -60,6 +83,15 @@ class Users extends CI_Controller {
 
 	public function logout(){
 		$this->session->sess_destroy();
+
+		delete_cookie('remember_sir_user', "codedbyjb.com", "/clients/gcg/sir");
+
+		/*if( !empty(get_cookie("remember_sir_user")) ){
+			list( $selector, $authenticator ) = explode(":", get_cookie("remember_sir_user"));
+
+			$this->sir_users->delete_auth_record( $selector );
+		}*/
+
 		redirect("/Users/login");
 	}
 

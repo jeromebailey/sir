@@ -77,7 +77,7 @@ class Users_model extends CI_Model
 		return $result;
 	}
 
-	public function validate_user($email_address, $password)
+	public function validate_user($email_address, $password, $remember_me)
 	{
 		$options = [
 		    'cost' => $this->config->item("sir_salt_cost"),
@@ -98,6 +98,30 @@ class Users_model extends CI_Model
 				//echo "valid";exit;
 				//set user details in session
 
+				if( $remember_me == "on" ){
+					$selector = base64_encode(random_bytes(9));
+					$authenticator = random_bytes(33);
+
+					setcookie(
+						"remember_sir_user", 
+						$selector . ":" . base64_encode($authenticator),
+						time() + 8640000, //100 days
+						"/clients/gcg/sir", //
+						"codedbyjb.com", //
+						true,
+						true
+					);
+
+					$cookie_data = array(
+						"identifier" => $selector,
+						 "user_token" => hash('sha256', $authenticator),
+						 "user_id" => $user_id,
+						 "expiry_date" => date("Y-m-d\TH:i:s", time() + 8640000)
+					);
+
+					$this->db->insert( "auth_tokens", $cookie_data );
+				} //end of check for remember me
+
 				$permissions = Users_model::get_user_permissions($user_id);
 				$permissions_array = $this->sir->format_result_array_as_array($permissions, "permission");
 
@@ -114,7 +138,72 @@ class Users_model extends CI_Model
 		}
 
 		
-		//echo $sql = "select * from sir_users where email_address = '$email_address' and user_password = '$encrypted_password' and status_id = 1";exit;
+		//echo $query = "select * from sir_users where email_address = '$email_address' and user_password = '$encrypted_password' and status_id = 1";exit;
+	}
+
+	public function login_user_by_remeber_me_cookie( $user_id ){
+		$result = Users_model::get_user_details_by_id($user_id);
+
+		if( empty( $result ) ){
+			return false;
+		} else {
+			//$result_2 = $result->result_array();
+			$pwd = $result[0]["user_password"];
+
+			//if( password_verify($password, $pwd) ){
+			//$user_id = $result[0]["user_id"];
+			$this->sir->log_login($user_id);
+			//echo "valid";exit;
+			//set user details in session
+
+			if( $remember_me == "on" ){
+				$selector = base64_encode(random_bytes(9));
+				$authenticator = random_bytes(33);
+
+				setcookie(
+					"remember_sir_user", 
+					$selector . ":" . base64_encode($authenticator),
+					time() + 8640000, //100 days
+					"/clients/gcg/sir", //
+					"codedbyjb.com", //
+					true,
+					true
+				);
+
+				$cookie_data = array(
+					"identifier" => $selector,
+					 "user_token" => hash('sha256', $authenticator),
+					 "user_id" => $user_id,
+					 "expiry_date" => date("Y-m-d\TH:i:s", time() + 8640000)
+				);
+
+				$this->db->insert( "auth_tokens", $cookie_data );
+			} //end of check for remember me
+
+			$permissions = Users_model::get_user_permissions($user_id);
+			$permissions_array = $this->sir->format_result_array_as_array($permissions, "permission");
+
+			$encrypted_user_id = $this->encryption->encrypt($user_id);
+			$this->session->set_userdata($result[0]);
+			$this->session->set_userdata('logged_in', 1);
+			$this->session->set_userdata('encrypted_user_id', $encrypted_user_id);
+			$this->session->set_userdata("permissions", $permissions_array);
+			return true;
+			//} 
+		//echo "not valid";
+		//return false;
+		//exit;
+		}
+	}
+
+	public function get_auth_record( $selector ){
+		$query = "select * from auth_tokens where identifier = '$selector';";
+
+		return $this->sir->format_query_result_as_array( $query );
+	}
+
+	public function delete_auth_record( $selector ){
+		return $this->db->delete( "auth_tokens", array( "token_id => " . $selector ) );
 	}
 
 	public function insert_user($user_details){
@@ -158,9 +247,9 @@ class Users_model extends CI_Model
 	}
 
 	public function get_user_details_by_email_address($email_address){
-		$sql = "select * from sir_users where email_address = '$email_address' and status_id = 1";
+		$query = "select * from sir_users where email_address = '$email_address' and status_id = 1";
 
-		$result = $this->db->query( $sql );
+		$result = $this->db->query( $query );
 
 		$details = $result->result_array();
 		//echo "<pre>";print_r($details);exit;
@@ -171,20 +260,20 @@ class Users_model extends CI_Model
 		$decrypted_user_id = base64_decode(urldecode($encrypted_user_id));
 		//$decrypted_user_id = $this->encryption->decrypt($encrypted_user_id);
 
-		$sql = "select *
+		$query = "select *
 				from sir_users 
 				where user_id = $decrypted_user_id";
 
-		return $this->sir->format_query_result_as_array( $sql );
+		return $this->sir->format_query_result_as_array( $query );
 	}
 
 	public function get_user_details_by_id($user_id){
 
-		$sql = "select *
+		$query = "select *
 				from sir_users 
 				where user_id = $user_id";
 
-		return $this->sir->format_query_result_as_array( $sql );
+		return $this->sir->format_query_result_as_array( $query );
 	}
 
 	public function get_user_profile_details_by_encrypted_id($encrypted_user_id){
@@ -203,20 +292,20 @@ class Users_model extends CI_Model
 	}
 
 	public function get_user_permissions($user_id){
-		$sql = "SELECT p.`permission`
+		$query = "SELECT p.`permission`
 					FROM user_permissions up
 					INNER JOIN permissions p ON p.`permission_id` = up.`permission_id`
 					WHERE user_id = $user_id";
 
-		return $this->sir->format_query_result_as_array( $sql );
+		return $this->sir->format_query_result_as_array( $query );
 	}
 
 	public function _count_items()
 	{
-		$sql = "SELECT COUNT(*) _count_
+		$query = "SELECT COUNT(*) _count_
 				FROM $this->table_name";
 
-		return $this->sir->format_query_result_as_array($sql);
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function get_user_info_to_send_notification_to_by_permission_group( $group_id )
