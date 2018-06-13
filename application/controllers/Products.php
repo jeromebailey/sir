@@ -111,6 +111,34 @@ class Products extends CI_Controller {
 		$this->load->view('products/add_inventory', $data);
 	}
 
+	public function view_product($product_id)
+	{
+		$PageTitle = "View Product";
+
+	    $product_to_edit = $this->products->get_product_by_product_id($product_id);
+	    $uom = $this->sir->get_all_uom();
+		$categories = $this->categories->get_all_categories();
+		$product_min_max_data = $this->products->get_minimum_maximum_stock_level_by_product_id($product_id);
+
+		$data = array(
+	        "page_title" => $PageTitle,
+	        "product" => $product_to_edit[0],
+	        "uom" => $uom,
+			"categories" => $categories,
+			"product_id" => $product_id
+			//"product_min_max_data" => $product_min_max_data[0]
+	    );
+
+		if( empty( $product_min_max_data ) ){
+			$data["product_min_max_data"] = null;
+		} else {
+			$data["product_min_max_data"] = $product_min_max_data[0];
+		}
+	    //echo "<pre>";print_r($data);exit;
+
+	    $this->load->view('products/view_product', $data);
+	}
+
 	public function edit_product($product_id)
 	{
 		$PageTitle = "Edit Product";

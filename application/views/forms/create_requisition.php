@@ -262,7 +262,11 @@
     $("#client-id").change(function(){
         var client_id = $(this).val();
 
-        $.ajax({
+        if( client_id == 6 ){
+          prep_fields_for_staff_requisition();
+        } else {
+          $("#flight-type-id").val( "" );
+          $.ajax({
             url: "<?=base_url('WebService/get_client_flights/" + client_id +"');?>",
             type: 'post',
             data: {client_id:client_id},
@@ -281,8 +285,17 @@
 
                 }
             }
-        });
+          });
+        }        
     });
+
+    function prep_fields_for_staff_requisition(){
+      $("#flight-type-id").append("<option value='STAFF'>Staff</option>");
+      $("#client-flight-id").append("<option value='STAFF'>Staff</option>");
+
+      $("#flight-type-id").val( "STAFF" );
+      $("#client-flight-id").val( "STAFF" );
+    }
 
     $('#edit_item_modal').on('show.bs.modal', function (e) {
         $("#m_product_name").autocomplete({
@@ -329,14 +342,43 @@
           dataType: "json",
           data: { searchText: request.term },
           success: function (data) {
-              response($.map(data, function (item) {
-                  return {
-                      label: item.product_name + ' (' +  item.product_id + ')',
-                      value: item.product_name + ' (' +  item.product_id + ')'
-                  };
-              }))
+            response($.map(data, function (item) {                          
+                return {                  
+                    label: item.product_name + ' (' +  item.product_id + ')',
+                    value: item.product_name + ' (' +  item.product_id + ')'
+                };
+            }));              
           }
           })
+      },
+      select: function(event, ui){
+        //var obj = $.parseJSON(ui);
+        var index_of_open_bracket = ui.item.value.lastIndexOf("(");
+        var index_of_closing_bracket = ui.item.value.lastIndexOf(")");
+
+          //console.log(index_of_open_bracket);
+          //console.log(index_of_closing_bracket);
+
+          if( index_of_open_bracket != -1 && index_of_closing_bracket != -1 ){
+            var product_id = ui.item.value.substring(index_of_open_bracket+1, index_of_closing_bracket);
+            //console.log( "id: " + product_id );
+            $.post( "<?=base_url('WebService/find_product_by_product_id/" + product_id + "');?>")
+            .done(function( data ) {
+                //var a = $.parseJSON(data);
+                //console.log(data['unit_id']); //works
+                //var b = JSON.parse(data);
+                //console.log(b[0].product_id); works
+                //console.log( "data: " + data );
+
+                if( data == '[]' ){
+                  //do nothing. no unit id is present
+                } else {
+                    var obj = $.parseJSON(data);
+                    //console.log( obj[0].unit_id );
+                    $("#unit-id").val( obj[0].unit_id );
+                }              
+            });
+          }
       },
       messages: {
           noResults: "No results found",
@@ -345,6 +387,10 @@
           }
       }
     });
+
+    function check( data ){
+      console.log( data );
+    }
 
     function clearProductFieldInputs(){
       $("#product-name").val('');

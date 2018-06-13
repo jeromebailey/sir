@@ -107,7 +107,7 @@ class Products_model extends CI_Model
 
 	public function get_product_by_product_name($product_name){
 	    $query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`barcode`, c.`category_name`, p.`price`, p.`product_category_id`,
-					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, pl.`maximum_stock_level`, pl.`minimum_stock_level`
+					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, pl.`maximum_stock_level`, pl.`minimum_stock_level`, p.unit_id
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`
@@ -120,7 +120,7 @@ class Products_model extends CI_Model
 
 	public function search_product_by_product_id($product_id){
 	    $query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`barcode`, c.`category_name`, p.`price`, p.`product_category_id`,
-					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, pl.`maximum_stock_level`, pl.`minimum_stock_level`
+					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, pl.`maximum_stock_level`, pl.`minimum_stock_level`, p.unit_id
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`

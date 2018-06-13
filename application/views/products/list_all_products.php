@@ -54,7 +54,7 @@
                       <td><?=$value["price"];?></td>
 
                       <td>
-                        <a href="" title="Details"><i class="fas fa-file-alt"></i></a> |
+                        <a href="<?=base_url('Products/view_product/'.$product_id);?>" title="Details"><i class="fas fa-file-alt"></i></a> |
                         <a href="<?=base_url('Products/edit_product/'.$product_id);?>" title="Edit"><i class="fas fa-edit"></i></a> |
                         <a href="#" onClick = "do_delete_item(<?=$product_id;?>)" title="Delete"><i class="fas fa-trash-alt"></i></a>
                       </td>

@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Forms extends CI_Controller {
 
+	const staff_requisition_key = 6;
+
 	function __construct(){
 		parent::__construct();
 
@@ -30,6 +32,7 @@ class Forms extends CI_Controller {
 		$this->load->library('encryption');
 
 		$this->sir->manage_session();
+
 	}
 
 	public function index()
@@ -71,8 +74,15 @@ class Forms extends CI_Controller {
 	{
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
-		$flight_type_id = $this->input->post("flight-type-id");
-		$client_flight_id = $this->input->post("client-flight-id");
+
+		if( $client_id == self::staff_requisition_key ){
+			$flight_type_id = 0;
+			$client_flight_id = 0;
+		} else {
+			$flight_type_id = $this->input->post("flight-type-id");
+			$client_flight_id = $this->input->post("client-flight-id");
+		}
+		
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
 
@@ -107,7 +117,7 @@ class Forms extends CI_Controller {
 			} //end of for loop			
 
 			$details = json_encode($record);
-			//echo "<pre>";print_r($po_record);exit;
+			
 
 			$data = array(
 				"client_id" => $client_id,
@@ -119,6 +129,8 @@ class Forms extends CI_Controller {
 				"store_keeper_employee_id" => $this->session->userdata("user_id"),
 				"dispatched" => 0
 			);
+
+			//echo "<pre>";print_r($data);exit;
 
 			try{
 				$this->requisitions->insert_requisition($data);
@@ -134,8 +146,12 @@ class Forms extends CI_Controller {
 				$client = $this->clients->get_client_by_id($client_id);
 				$client_name = $client[0]["client_name"];
 
-				$client_flight_record = $this->clients->get_flight_no_from_client_flight_id( $client_flight_id );
-				$flight_no = $client_flight_record[0]["flight_no"];
+				if( $client_id == self::staff_requisition_key ){
+					$flight_no = "Staff";
+				} else {
+					$client_flight_record = $this->clients->get_flight_no_from_client_flight_id( $client_flight_id );
+					$flight_no = $client_flight_record[0]["flight_no"];
+				}
 
 				try{
 					$this->notifications->insert_user_notification_from_array($users, 1);
