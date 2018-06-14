@@ -12,6 +12,7 @@ class Products extends CI_Controller {
 		$this->load->model('users/Users_model', 'sir_users');
 		$this->load->model('products/Products_model', 'products');
 		$this->load->model('session/Session_model', 'sir_session');
+		$this->load->model('session/Session_model', 'sir_session');
 		$this->load->model('exceptions/AppExceptions_model', 'xxx');
 		$this->load->model('categories/Categories_model', 'categories');
 		$this->load->model('notifications/Notifications_model', 'notifications');
@@ -113,6 +114,8 @@ class Products extends CI_Controller {
 
 	public function view_product($product_id)
 	{
+		$this->sir_session->clear_status_message();
+
 		$PageTitle = "View Product";
 
 	    $product_to_edit = $this->products->get_product_by_product_id($product_id);

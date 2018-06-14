@@ -49,7 +49,7 @@
                       <td><?=$value["current_stock_level"];?></td>
 
                       <td>
-                        <a href="" title="Details"><i class="fas fa-file-alt"></i></a> |
+                        <a href="<?=base_url('Products/view_product/'.$product_id);?>" title="Details"><i class="fas fa-file-alt"></i></a> |
                         <a href="<?=base_url('Products/edit_product/'.$product_id);?>" title="Edit"><i class="fas fa-edit"></i></a> |
                       </td>
                     </tr>
