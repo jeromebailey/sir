@@ -161,7 +161,7 @@
                 </div>
 
                 
-                <div class="col-md- col-md-offset-2 pull-right">
+                <div class="col-md-2 col-md-offset-4 pull-right">
                   <label >Approved by:</label> <br />
                   <?if( $purchase_order["approved"] == 1 ){
                     echo "<u>". $purchase_order["approved_by"] . "</u>";
@@ -195,7 +195,7 @@
           </div>
         </div>-->
 
-          </div>
+          
           <!-- top tiles -->
 
         </div>

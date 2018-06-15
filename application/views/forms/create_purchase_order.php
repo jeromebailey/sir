@@ -185,10 +185,10 @@
                   <input type="text" id="placed-by" readonly="readonly" placeholder="johnjackson@gmail.com" name="placed-by" autocomplete="off" class="form-control" value="<?=$this->session->userdata("first_name") . " " .$this->session->userdata("last_name");?>">
                 </div>
 
-                <div class="col-md-4 col-md-offset-2">
+                <!--<div class="col-md-4 col-md-offset-2">
                   <label >Approved by:</label>
                   <input type="text" id="approved-by" readonly="readonly" placeholder="John Jackson" name="approved-by" autocomplete="off" class="form-control" value="">
-                </div>
+                </div>-->
               </div>
 
               <div class="row">

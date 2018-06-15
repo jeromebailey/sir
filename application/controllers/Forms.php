@@ -396,6 +396,7 @@ class Forms extends CI_Controller {
 
 		//echo "<pre>";print_r($this->input->post());exit;
 		$items_string = "";
+		$calculated_total_cost = 0;
 		$supplier_id = $this->input->post("supplier-id");
 		$po_no = $this->input->post("po_no");
 		$placed_by = $this->input->post("placed-by");
@@ -423,6 +424,8 @@ class Forms extends CI_Controller {
 					$row["price"] = $price;
 					$row["extn"] = $extn;
 
+					$calculated_total_cost += $extn;
+
 					array_push($po_record, $row);
 
 					unset($row);
@@ -432,6 +435,10 @@ class Forms extends CI_Controller {
 
 			$po_details = json_encode($po_record);
 			//echo "<pre>";print_r($po_record);exit;
+
+			if( $calculated_total_cost != $total_cost ){
+				$total_cost = $calculated_total_cost;
+			}
 
 			$data = array(
 				"po_no" => $po_no,
