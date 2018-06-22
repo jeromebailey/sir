@@ -4,7 +4,6 @@
     <?include_once 'includes/head.inc'; ?>
     <link rel="stylesheet" href="<?=base_url('assets/css/jquery-ui.min.css');?>">
     <link rel="stylesheet" href="<?=base_url('assets/css/bootstrapValidator.css');?>">
-</style>
     
   </head>
 
@@ -36,24 +35,20 @@
               </div>
             </div>
 
-            <a href="#" class="btn btn-primary" id="btnt" download="barcode.pub">test print</a>
-
-            <div id="area_to_print" class="border border-danger">
-
-              <div class="row">
-                <div class="col-md-12">
-                  <p class="text-uppercase text-center" style="font-size: 11px">Product Name: <?=$products_and_barcode["product_name"];?> <br />                  
-                Category Name: <?=$products_and_barcode["category_name"];?></p>
-                </div>
-              </div>
+            <div id="area_to_print" style="border: 1px; border-style: solid; width: 220px;padding: 2px" >
 
               <div class="row">
                 <div class="col-md-12 text-center">
-                    <img src="<?=$uploaded_barcode_path?>/<?=$products_and_barcode['barcode']?>.png" width="160" height = "38" style = "margin-top: -12px"> 
+                    <img src="<?=$uploaded_barcode_path?>/<?=$products_and_barcode['barcode']?>.png" width="210" height = "60" style = ""> 
                 </div>
               </div>
 
-              <br />
+              <div class="row">
+                <div class="col-md-12">
+                  <p class="text-uppercase text-center" style="font-size: 10px">Product Name: <?=$products_and_barcode["product_name"];?> <br />                  
+                Category Name: <?=$products_and_barcode["category_name"];?></p>
+                </div>
+              </div>
 
           </div>
           </div>
