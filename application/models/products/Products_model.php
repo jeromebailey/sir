@@ -228,6 +228,30 @@ class Products_model extends CI_Model
 		}
 	}
 
+	public function update_product_stock_level_from_scanner($product_info_data, $current_stock_level, $new_stock_level, $product_id){
+		//update the product information
+		if( $this->update_product( $product_id, $product_info_data ) ){
+
+			//get the previous stock level
+			$previous_stock_level_result = $this->get_stock_level_by_product_id($product_id);
+			$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];
+
+			$new_product_stock_level = $current_stock_level + $new_stock_level;
+
+			$stock_level_data = array(
+				//"product_id" = >$product_id,
+				"current_stock_level" => $new_product_stock_level
+			);
+
+			//update the product's current stock level
+			if( $this->db->update($this->product_stock_levels_table, $stock_level_data, array("product_id" => $product_id)) ){
+				return true;
+			} else {
+				return false;
+			}			
+		}
+	}
+
 	public function insert_minimum_stock_level($product_id, $stock_level, $unit_id){
 		$data = array(
 			'product_id' => $product_id,
