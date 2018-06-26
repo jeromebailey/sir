@@ -40,10 +40,12 @@ class Products extends CI_Controller {
 
 		$uom = $this->sir->get_all_uom();
 		$categories = $this->categories->get_all_categories();
+		$next_product_id = $this->products->get_next_product_id();
 
 		$data = array(
 			"page_title" => $PageTitle,
 			"uom" => $uom,
+			"product_id" => $next_product_id,
 			"categories" => $categories
 			);
 
@@ -166,8 +168,6 @@ class Products extends CI_Controller {
 			$data["product_min_max_data"] = $product_min_max_data[0];
 		}
 	    //echo "<pre>";print_r($data);exit;
-
-	    
 
 	    $this->load->view('products/edit_product', $data);
 	}

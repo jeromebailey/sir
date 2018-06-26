@@ -34,8 +34,6 @@
     <?include_once 'includes/scripts.inc';?>
     <script src="<?=base_url('assets/js/bootstrap-wysiwyg.min.js');?>"></script>
     <script src="<?=base_url('assets/js/jquery-ui.min.js');?>"></script>
-    <script type="text/javascript">
-      setTimeout(function() { document.getElementById('s-bar-code').focus(); }, 10);
-    </script>
+
   </body>
 </html>

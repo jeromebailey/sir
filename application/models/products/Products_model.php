@@ -25,6 +25,16 @@ class Products_model extends CI_Model
 		}
 	}
 
+	public function get_next_product_id(){
+		$query = "SELECT MAX(product_id) product_id FROM products";
+
+		$result = $this->db->query( $query );
+
+		$product_id_result = $result->result_array();
+		//echo "<pre>";print_r($product_id_result);exit;
+		return $product_id = $product_id_result[0]["product_id"];
+	}
+
 	public function get_all_products()
 	{
 		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`price`, c.`category_name`, p.`barcode`, p.`product_category_id`
@@ -234,21 +244,40 @@ class Products_model extends CI_Model
 
 			//get the previous stock level
 			$previous_stock_level_result = $this->get_stock_level_by_product_id($product_id);
-			$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];
 
-			$new_product_stock_level = $current_stock_level + $new_stock_level;
+			if( empty( $previous_stock_level_result ) ){
+				$previous_stock_level = 0;
 
-			$stock_level_data = array(
-				//"product_id" = >$product_id,
-				"current_stock_level" => $new_product_stock_level
-			);
+				$new_product_stock_level = $current_stock_level + $new_stock_level;
 
-			//update the product's current stock level
-			if( $this->db->update($this->product_stock_levels_table, $stock_level_data, array("product_id" => $product_id)) ){
-				return true;
+				$stock_level_data = array(
+					"product_id" => $product_id,
+					"current_stock_level" => $new_product_stock_level
+				);
+
+				//update the product's current stock level
+				if( $this->db->insert($this->product_stock_levels_table, $stock_level_data) ){
+					return true;
+				} else {
+					return false;
+				}
 			} else {
-				return false;
-			}			
+				$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];	
+
+				$new_product_stock_level = $current_stock_level + $new_stock_level;
+
+				$stock_level_data = array(
+					//"product_id" = >$product_id,
+					"current_stock_level" => $new_product_stock_level
+				);
+
+				//update the product's current stock level
+				if( $this->db->update($this->product_stock_levels_table, $stock_level_data, array("product_id" => $product_id)) ){
+					return true;
+				} else {
+					return false;
+				}
+			}
 		}
 	}
 

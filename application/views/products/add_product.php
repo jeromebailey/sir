@@ -43,8 +43,7 @@
                       </label>
                       <div class="col-md-6 col-sm-6 col-xs-12">
                         <input type="text" id="bar-code" name="bar-code" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12">
-
-                        
+                        <a href="#" onclick="generate_barcode_for_product(<?=$product_id;?>)">Generate Barcode</a>                        
                       </div>
                     </div>
 
@@ -190,7 +189,7 @@
 
         if( product_category_id == "" ){
           $("#msg-holder").addClass('alert-danger');
-          $("#msg-holder").html("Please update the Product Category before trying to generate a barcode for this product.");
+          $("#msg-holder").html("Please select the Product Category before trying to generate a barcode for this product.");
           $("#msg-holder").show();
         } else {
           $.post( "<?=base_url('WebService/generate_product_barcode/" + product_id + "');?>")

@@ -50,13 +50,13 @@
                 <div class="form-group">
                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">Product Bar Code </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>" readonly> 
-
                       <?
                       if( empty($product['barcode']) ){?>
+                        <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>" >
                         <a href="#" onclick="generate_barcode_for_product(<?=$product['product_id'];?>)">Generate Barcode</a>
+                      <?} else {?>
+                        <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>" readonly>
                       <?}?>
-
                     </div>
                   </div>
 

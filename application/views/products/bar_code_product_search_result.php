@@ -144,7 +144,7 @@
                       <br />
 
                       <div class="form-group">
-                        <div class="col-md-6 col-sm-6 col-xs-8 col-md-offset-3">
+                        <div class="col-md-6 col-sm-6 col-xs-8">
                           <button type="submit" class="btn btn-success">Update Stock Information</button>
                         </div>
                       </div>
