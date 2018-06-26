@@ -307,7 +307,7 @@ class PurchaseOrders extends CI_Controller {
 			}
 
 			$po_details = json_encode($po_record);
-			echo "<pre>";print_r($po_record);exit;
+			//echo "<pre>";print_r($po_record);exit;
 
 			$data = array(
 				"po_no" => $po_no,

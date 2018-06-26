@@ -122,14 +122,14 @@
 
                 <?
                 //check if a new product has been inserted and the new product id returned
-                if( empty($new_product_id) || $new_product_id == null ){?>
+                if( empty($product_id) || $product_id == null ){?>
                   <div class="alert alert-warning">
                     <strong>You must add a product first before adding the stock levels!</strong>
                   </div>                  
                 <?} else {?>
                   <form id="frm-sl" data-toggle="validator" class="form-horizontal form-label-left" method="post" action="<?=base_url('Products/do_add_product_stock_level');?>">
 
-                    <input type="hidden" name="product_id" id="product_id" value="<?=$new_product_id;?>">
+                    <input type="hidden" name="product_id" id="product_id" value="<?=$product_id;?>">
 
                   <div class="form-group">
                       <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">New Stock Level <span class="required">*</span>
@@ -155,9 +155,7 @@
                     </div>
 
                   </form>
-                <?}
-                ?>
-
+                <?}?>
                 
               </div>
             </div>      
@@ -197,18 +195,21 @@
             console.log( "response: " + data );
 
             if( data != "" ){
+              $("#msg-holder").removeClass('alert-danger');
               $("#msg-holder").addClass('alert-success');
               $("#msg-holder").html("The barcode was successfully generated for the product!");
               $("#msg-holder").show();
               $("#bar-code").val( data );
             } else {
               $("#msg-holder").addClass('alert-danger');
+              $("#msg-holder").removeClass('alert-success');
               $("#msg-holder").html("Sorry, no barcode was generated for the product. Please try again.");
               $("#msg-holder").show();
             }            
           })
           .fail(function() {
             $("#msg-holder").addClass('alert-danger');
+            $("#msg-holder").removeClass('alert-success');
             $("#msg-holder").html("Sorry, there was a problem generating the barcode for the product. Please try again.");
             $("#msg-holder").show();
           });
