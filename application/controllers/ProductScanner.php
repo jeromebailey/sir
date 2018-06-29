@@ -84,7 +84,8 @@ class ProductScanner extends CI_Controller {
 		if( empty( $product_info ) ){
 			$data = array(
 				"product" => NULL,
-				"page_title" => $PageTitle
+				"page_title" => $PageTitle,
+				"bar_code" => $bar_code
 			);
 		} else {
 			$data = array(
@@ -96,6 +97,65 @@ class ProductScanner extends CI_Controller {
 		}
 
 		$this->load->view('products/bar_code_product_search_result', $data);
+	}
+
+	public function add_product()
+	{
+		$PageTitle = "Add Product";
+
+		$barcode = $this->uri->segment(3);
+
+		$uom = $this->sir->get_all_uom();
+		$categories = $this->categories->get_all_categories();
+		$next_product_id = $this->products->get_next_product_id();
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"uom" => $uom,
+			"product_id" => $next_product_id,
+			"categories" => $categories,
+			"barcode" => $barcode
+			);
+
+		$this->load->view('products/bar_code_add_product', $data);
+	}
+
+	public function do_add_product(){
+		$barcode = $this->input->post("bar-code");
+		$product_name = $this->input->post("product-name");
+		$category_id = $this->input->post("product-category");
+		$price = $this->input->post("product-price");
+		$weight = $this->input->post("product-weight");
+		$uom_id = $this->input->post("unit-id");
+		$description = $this->input->post("product-description");
+		$new_stock_level = $this->input->post("inventory-amt");
+
+		$product_info_data = array(
+			"product_name" => $product_name,
+			"description" => $description,
+			"barcode" => $barcode,
+			"product_category_id" => $category_id,
+			"price" => $price,
+			"weight" => $weight,
+			"unit_id" => $uom_id
+		);
+
+		try{
+			$this->products->insert_product_and_stock_level_from_scanner( $product_info_data, $new_stock_level );
+
+			try{
+				$this->logger->add_log(14, "786737", NULL, json_encode($product_info_data));
+			} catch(Exception $x){
+				$this->xxx->log_exception( $x->getMessage() );
+			}
+
+			$this->sir_session->add_status_message("Product information was successfully added", "success");
+		} catch(Exception $ex){
+			$this->xxx->log_exception( $ex->getMessage() );
+			$this->sir_session->add_status_message("Sorry, product information was not added", "danger");
+		}
+
+		$this->load->view('products/update_product_message');
 	}
 
 	public function view_product($product_id)

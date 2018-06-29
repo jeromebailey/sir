@@ -376,6 +376,7 @@
                     var obj = $.parseJSON(data);
                     //console.log( obj[0].unit_id );
                     $("#unit-id").val( obj[0].unit_id );
+                    $("#unit-id").prop('disabled', 'disabled');
                 }              
             });
           }

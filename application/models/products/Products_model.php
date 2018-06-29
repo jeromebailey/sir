@@ -246,7 +246,7 @@ class Products_model extends CI_Model
 			$previous_stock_level_result = $this->get_stock_level_by_product_id($product_id);
 
 			if( empty( $previous_stock_level_result ) ){
-				$previous_stock_level = 0;
+				//$previous_stock_level = 0;
 
 				$new_product_stock_level = $current_stock_level + $new_stock_level;
 
@@ -262,7 +262,7 @@ class Products_model extends CI_Model
 					return false;
 				}
 			} else {
-				$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];	
+				//$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];	
 
 				$new_product_stock_level = $current_stock_level + $new_stock_level;
 
@@ -279,6 +279,37 @@ class Products_model extends CI_Model
 				}
 			}
 		}
+	}
+
+	public function insert_product_and_stock_level_from_scanner($product_info_data, $new_stock_level ){
+		//update the product information
+		if( $this->insert_product( $product_info_data ) ){
+
+			//get newly inserted product id
+			$product_id = $this->db->insert_id();
+
+			//get the previous stock level
+			$previous_stock_level_result = $this->get_stock_level_by_product_id($product_id);
+
+			if( empty( $previous_stock_level_result ) ){
+				$previous_stock_level = 0;
+
+				$new_product_stock_level = $previous_stock_level + $new_stock_level;
+
+				$stock_level_data = array(
+					"product_id" => $product_id,
+					"current_stock_level" => $new_product_stock_level
+				);
+
+				//update the product's current stock level
+				if( $this->db->insert($this->product_stock_levels_table, $stock_level_data) ){
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	public function insert_minimum_stock_level($product_id, $stock_level, $unit_id){

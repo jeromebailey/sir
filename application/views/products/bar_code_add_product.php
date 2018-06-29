@@ -24,144 +24,93 @@
             
             <h3><?=$page_title;?> <i class="fas fa-box"></i></h3>
 
-            <?
-            if( empty($product) ){?>
-              <div class="row" >
-                <div class="col-md-12 col-sm-12 col-xs-8">
-                  <div class="alert alert-danger" >Sorry, no product exist with that barcode</div>
-                </div>
-              </div> 
-
-              <?
-              if( !empty($barcode) ){?>
-                <div class="form-group">
-                  <div class="col-md-6 col-sm-6 col-xs-8">
-                    <button type="button" class="btn btn-success" onclick="window.location.href = '../ProductScanner/add_product/<?=$bar_code?>'">Add Product?</button>
-                  </div>
-                </div>
-              <?}?>
-
-              <br />
+            <form id="demo-form2" data-toggle="validator" class="form-horizontal form-label-left" method="post" action="<?=base_url('ProductScanner/do_add_product');?>">
 
               <div class="form-group">
-                <div class="col-md-6 col-sm-6 col-xs-8">
-                  <button type="button" class="btn btn-primary" onclick="window.location.href = '../ProductScanner/search'">Find another Product</button>
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="bar-code">Product Bar Code <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <input type="text" id="bar-code" name="bar-code" required="required" value="<?=$barcode?>" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                  </div>
                 </div>
-              </div>
-            <?} else {?>
-              <form id="demo-form2" method="post" data-toggle="validator" class="form-horizontal form-label-left" action="<?=base_url('ProductScanner/update_product_stock_level');?>">
 
-                <fieldset>
-                  <legend>Product Details</legend>
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="product-name">Product Name <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <input type="text" id="product-name" name="product-name" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                  </div>
+                </div>
 
-                  <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">Product Bar Code <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="bar-code" name="bar-code" required="required" value="<?=$product['barcode'];?>" autocomplete="off" class="form-control col-md-7 col-xs-8">
-                        </div>
-                      </div>
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="bar-code">Product Category <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <select id="product-category" name="product-category" required="required" class="form-control col-md-7 col-xs-8">
+                    <option value="">Select Product Category</option>
+                    <?if( !empty($categories) ){
+                        foreach ($categories as $key => $value) {?>
+                          <option value="<?=$value["category_id"]?>"><?=$value["category_name"];?></option>
+                        <?}
+                      } else {
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-name">Product Name <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="product-name" name="product-name" value="<?=$product['product_name'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
-                        </div>
-                      </div>
+                      }?>
+                    </select>
+                  </div>
+                </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-category">Product Category <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <select id="product-category" name="product-category" required="required" class="form-control col-md-7 col-xs-8">
-                            <option value="">Select Product Category</option>
-                            <?if( !empty($categories) ){
-                              foreach ($categories as $key => $value) {
-                                if( $value["category_id"] == $product['product_category_id'] ){?>
-                                  <option value="<?=$value["category_id"];?>" selected><?=$value["category_name"];?></option>
-                                <?} else {?>
-                                  <option value="<?=$value["category_id"];?>"><?=$value["category_name"];?></option>
-                                <?}
-                              }
-                            } else {
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="bar-code">Product Price <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <input type="text" id="product-price" name="product-price" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">                  
+                  </div>
+                </div>
 
-                            }?>
-                          </select>
-                        </div>
-                      </div>
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="bar-code">Product Weight <span class="required">*</span>
+                  </label>
+                  <div class="col-md-4 col-sm-6 col-xs-8">
+                    <input type="text" id="product-weight" name="product-weight" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">                  
+                  </div>
+                  <div class="col-md-2 col-sm-6 col-xs-8">
+                    <select id="unit-id" name="unit-id" class="form-control" required="required">
+                      <?if( !empty($uom) ){
+                          foreach ($uom as $key => $value) {?>
+                            <option value="<?=$value["unit_id"];?>"><?=$value["unit_abbreviation"];?></option>
+                          <?}
+                        } else {
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-price">Product Price <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="product-price" name="product-price" value="<?=$product['price'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
-                        </div>
-                      </div>
+                        }?>
+                    </select>                
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-8" for="product-description">Product Description </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <?//include_once 'includes/text-area-toolbar-with-image.inc'; ?>
+                    <!--<div id="editor-one" class="editor-wrapper"></div>-->
+                    <textarea name="product-description" id="product-description" class="form-control" ></textarea> <!-- style="display:none;" -->
+                  </div>
+                </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-weight">Product Weight <span class="required">*</span>
-                        </label>
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="inventory-amt">New Amount to add <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-8">
+                    <input type="text" id="inventory-amt" name="inventory-amt" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                  </div>
+                </div>
+                
+                <div class="ln_solid"></div>
+                <div class="form-group">
+                  <div class="col-md-6 col-sm-6 col-xs-8 col-md-offset-3">
+                    <button type="submit" class="btn btn-lg btn-success">Submit</button>
+                  </div>
+                </div>
 
-                        <div class="col-md-4 col-sm-6 col-xs-8">
-                          <input type="text" id="product-weight" name="product-weight" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['weight'];?>">
-                        </div>
-                        <div class="col-md-2 col-sm-6 col-xs-8">
-                          <select id="unit-id" name="unit-id" class="form-control" >
-                        <?if( !empty($uom) ){
-                            foreach ($uom as $key => $value) {
-                              if($product["unit_id"] == $value["unit_id"]){?>
-                                <option value="<?=$value["unit_id"]?>" selected><?=$value["unit_abbreviation"];?></option>
-                              <?} else {?>
-                                <option value="<?=$value["unit_id"]?>"><?=$value["unit_abbreviation"];?></option>
-                              <?}                              
-                            }
-                          } else {
-
-                          }?>
-                      </select>
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-description">Product Description </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <?//include_once 'includes/text-area-toolbar-with-image.inc'; ?>
-                          <!--<div id="editor-one" class="editor-wrapper"></div>-->
-                          <textarea name="product-description" id="product-description" class="form-control" ><?=$product['description'];?></textarea> <!-- style="display:none;" -->
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="amt-in-stock">Current Stock Level <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="amt-in-stock" name="amt-in-stock" autocomplete="off" class="form-control col-md-7 col-xs-12" readonly="readonly" value="<?=$product['current_stock_level']?>">
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="inventory-amt">New Amount to add <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="inventory-amt" name="inventory-amt" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
-                        </div>
-                      </div>
-
-                      <div class="ln_solid"></div>
-
-                      <input type="hidden" name="product_id" id="product_id" value="<?=$product['product_id'];?>">
-
-                      <br />
-
-                      <div class="form-group">
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <button type="submit" class="btn btn-success">Update Stock Information</button>
-                        </div>
-                      </div>
-                </fieldset>
               </form>
-            <?}?>
 
     </div>
 
