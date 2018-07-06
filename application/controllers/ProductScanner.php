@@ -99,6 +99,43 @@ class ProductScanner extends CI_Controller {
 		$this->load->view('products/bar_code_product_search_result', $data);
 	}
 
+	public function do_search_by_product_name(){
+		$this->sir_session->clear_status_message();
+		
+		$PageTitle = "Product Search Result";
+
+		$product_name_id = $this->input->post("s-product-name");
+		$product_id = 0;
+		$product_name = "";
+		$product_info = NULL;
+
+		if( !empty( $product_name_id ) ){
+			$product_id = $this->products->get_product_id_from_product_name_id( $product_name_id );
+			$product_name = $this->products->get_product_name_from_product_name_id( $product_name_id );
+			$product_info = $this->products->search_product_by_product_id($product_id);
+		} 
+		
+		$uom = $this->sir->get_all_uom();
+		$categories = $this->categories->get_all_categories();
+
+		if( empty( $product_info ) ){
+			$data = array(
+				"product" => NULL,
+				"page_title" => $PageTitle,
+				"product_name" => $product_name
+			);
+		} else {
+			$data = array(
+				"product" => $product_info[0],
+				"page_title" => $PageTitle,
+				"uom" => $uom,
+				"categories" => $categories
+			);
+		}
+
+		$this->load->view('products/bar_code_product_search_result', $data);
+	}
+
 	public function add_product()
 	{
 		$PageTitle = "Add Product";
@@ -115,6 +152,27 @@ class ProductScanner extends CI_Controller {
 			"product_id" => $next_product_id,
 			"categories" => $categories,
 			"barcode" => $barcode
+			);
+
+		$this->load->view('products/bar_code_add_product', $data);
+	}
+
+	public function add_product_by_product_name()
+	{
+		$PageTitle = "Add Product";
+
+		$product_name = $this->uri->segment(3);
+
+		$uom = $this->sir->get_all_uom();
+		$categories = $this->categories->get_all_categories();
+		$next_product_id = $this->products->get_next_product_id();
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"uom" => $uom,
+			"product_id" => $next_product_id,
+			"categories" => $categories,
+			"product_name" => $product_name
 			);
 
 		$this->load->view('products/bar_code_add_product', $data);

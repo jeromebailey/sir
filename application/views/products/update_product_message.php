@@ -22,8 +22,8 @@
 
     <?include_once 'includes/status_message.inc';?> 
 
-    <div class="form-group">
-      <div class="col-md-6 col-sm-6 col-xs-8">
+    <div class="row">
+      <div class="col-md-6 col-sm-6 col-xs-12">
         <button type="button" class="btn btn-primary" onclick="window.location.href = '../ProductScanner/search'">Find another Product</button>
       </div>
     </div>

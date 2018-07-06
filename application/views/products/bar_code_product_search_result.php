@@ -25,56 +25,60 @@
             <h3><?=$page_title;?> <i class="fas fa-box"></i></h3>
 
             <?
-            if( empty($product) ){?>
+            if( empty($product) ){
+                  $to_use = !empty( $bar_code ) ? "barcode" : "product name";?>
               <div class="row" >
-                <div class="col-md-12 col-sm-12 col-xs-8">
-                  <div class="alert alert-danger" >Sorry, no product exist with that barcode</div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                  <div class="alert alert-danger" >Sorry, no product exist with that <?=$to_use;?></div>
                 </div>
               </div> 
 
               <?
-              if( !empty($barcode) ){?>
-                <div class="form-group">
-                  <div class="col-md-6 col-sm-6 col-xs-8">
-                    <button type="button" class="btn btn-success" onclick="window.location.href = '../ProductScanner/add_product/<?=$bar_code?>'">Add Product?</button>
-                  </div>
-                </div>
-              <?}?>
+                if( !empty( $bar_code ) ){?>
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <button type="button" class="btn btn-success" onclick="window.location.href = '../ProductScanner/add_product/<?=$bar_code?>'">Add Product?</button>
+                      </div>
+                    </div>
+                <?} else {?>
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <button type="button" class="btn btn-success" onclick="window.location.href = '../ProductScanner/add_product_by_product_name/<?=$product_name?>'">Add Product?</button>
+                      </div>
+                    </div>
+                <?}?>                
 
               <br />
 
-              <div class="form-group">
-                <div class="col-md-6 col-sm-6 col-xs-8">
+              <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-12">
                   <button type="button" class="btn btn-primary" onclick="window.location.href = '../ProductScanner/search'">Find another Product</button>
                 </div>
               </div>
             <?} else {?>
               <form id="demo-form2" method="post" data-toggle="validator" class="form-horizontal form-label-left" action="<?=base_url('ProductScanner/update_product_stock_level');?>">
 
-                <fieldset>
-                  <legend>Product Details</legend>
+                <!--<fieldset>
+                  <legend>Product Details</legend>-->
 
-                  <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">Product Bar Code <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="bar-code" name="bar-code" required="required" value="<?=$product['barcode'];?>" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                  <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="bar-code">Product Bar Code <span class="required">*</span></label>
+                          <input type="text" id="bar-code" name="bar-code" required="required" value="<?=$product['barcode'];?>" autocomplete="off" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-name">Product Name <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="product-name" name="product-name" value="<?=$product['product_name'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="product-name">Product Name <span class="required">*</span></label>
+                          <input type="text" id="product-name" name="product-name" value="<?=$product['product_name'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-category">Product Category <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <select id="product-category" name="product-category" required="required" class="form-control col-md-7 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="product-category">Product Category <span class="required">*</span></label>
+                          <select id="product-category" name="product-category" required="required" class="form-control col-md-7 col-xs-12">
                             <option value="">Select Product Category</option>
                             <?if( !empty($categories) ){
                               foreach ($categories as $key => $value) {
@@ -91,22 +95,19 @@
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-price">Product Price <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="product-price" name="product-price" value="<?=$product['price'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="product-price">Product Price <span class="required">*</span></label>
+                          <input type="text" id="product-price" name="product-price" value="<?=$product['price'];?>" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-weight">Product Weight <span class="required">*</span>
-                        </label>
-
-                        <div class="col-md-4 col-sm-6 col-xs-8">
+                      <div class="row">
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+                          <label class="" for="product-weight">Product Weight <span class="required">*</span></label>
                           <input type="text" id="product-weight" name="product-weight" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['weight'];?>">
                         </div>
-                        <div class="col-md-2 col-sm-6 col-xs-8">
+                        <div class="col-md-2 col-sm-6 col-xs-12">
                           <select id="unit-id" name="unit-id" class="form-control" >
                         <?if( !empty($uom) ){
                             foreach ($uom as $key => $value) {
@@ -123,28 +124,26 @@
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="product-description">Product Description </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="product-description">Product Description </label>
                           <?//include_once 'includes/text-area-toolbar-with-image.inc'; ?>
                           <!--<div id="editor-one" class="editor-wrapper"></div>-->
                           <textarea name="product-description" id="product-description" class="form-control" ><?=$product['description'];?></textarea> <!-- style="display:none;" -->
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="amt-in-stock">Current Stock Level <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="amt-in-stock">Current Stock Level <span class="required">*</span></label>
                           <input type="text" id="amt-in-stock" name="amt-in-stock" autocomplete="off" class="form-control col-md-7 col-xs-12" readonly="readonly" value="<?=$product['current_stock_level']?>">
                         </div>
                       </div>
 
-                      <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="inventory-amt">New Amount to add <span class="required">*</span>
-                        </label>
-                        <div class="col-md-6 col-sm-6 col-xs-8">
-                          <input type="text" id="inventory-amt" name="inventory-amt" required="required" autocomplete="off" class="form-control col-md-7 col-xs-8">
+                      <div class="row">                        
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <label class="" for="inventory-amt">New Amount to add <span class="required">*</span></label>
+                          <input type="text" id="inventory-amt" name="inventory-amt" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12">
                         </div>
                       </div>
 
@@ -154,12 +153,20 @@
 
                       <br />
 
-                      <div class="form-group">
-                        <div class="col-md-6 col-sm-6 col-xs-8">
+                      <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
                           <button type="submit" class="btn btn-success">Update Stock Information</button>
                         </div>
                       </div>
-                </fieldset>
+
+                      <br />
+
+                      <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <button type="button" onClick = "window.location.href='../ProductScanner/search'" class="btn btn-primary">Cancel</button>
+                        </div>
+                      </div>
+                <!--</fieldset>-->
               </form>
             <?}?>
 
@@ -171,6 +178,7 @@
     <script src="<?=base_url('assets/js/prettify.js');?>"></script>
     <script src="<?=base_url('assets/js/bootstrapValidator.js');?>"></script>
     <script src="<?=base_url('assets/js/jquery-ui.min.js');?>"></script>
+    <script src="<?=base_url('assets/js/ebapi-modules.js');?>"></script>
 
     <script type="text/javascript">
 

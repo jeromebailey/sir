@@ -32,7 +32,7 @@ class Products_model extends CI_Model
 
 		$product_id_result = $result->result_array();
 		//echo "<pre>";print_r($product_id_result);exit;
-		return $product_id = $product_id_result[0]["product_id"];
+		return $product_id = $product_id_result[0]["product_id"] + 1;
 	}
 
 	public function get_all_products()
@@ -93,12 +93,16 @@ class Products_model extends CI_Model
 
 	public function search_product_by_barcode($bar_code){
 	    $query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`barcode`, c.`category_name`, p.`price`, p.`product_category_id`,
-					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, p.unit_id
+					u.`unit_abbreviation`, p.`weight`, 
+					CASE 
+					WHEN l.`current_stock_level` IS NULL THEN 0 ELSE l.`current_stock_level`
+					END current_stock_level, pl.`maximum_stock_level`, pl.`minimum_stock_level`, p.unit_id
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`
-					LEFT JOIN $this->product_stock_levels_table l ON l.`product_id` = p.`product_id`
-                    WHERE barcode = '$bar_code'";
+					LEFT JOIN product_stock_levels l ON l.`product_id` = p.`product_id`
+					LEFT JOIN minimum_product_stock_levels pl ON pl.`product_id` = p.`product_id`
+					WHERE barcode = '$bar_code'";
 
 	    return $this->sir->format_query_result_as_array($query);
 	}
@@ -130,7 +134,10 @@ class Products_model extends CI_Model
 
 	public function search_product_by_product_id($product_id){
 	    $query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`barcode`, c.`category_name`, p.`price`, p.`product_category_id`,
-					u.`unit_abbreviation`, p.`weight`, l.`current_stock_level`, pl.`maximum_stock_level`, pl.`minimum_stock_level`, p.unit_id
+					u.`unit_abbreviation`, p.`weight`, 
+					CASE 
+					WHEN l.`current_stock_level` IS NULL THEN 0 ELSE l.`current_stock_level`
+					END current_stock_level, pl.`maximum_stock_level`, pl.`minimum_stock_level`, p.unit_id
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`
