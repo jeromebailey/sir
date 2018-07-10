@@ -80,8 +80,8 @@
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
                     <div class="" >
-                      <?=$quote["supplier_name"];?> <br />
-                      <?=$supplier_address;?>
+                      <?=$quote["client_name"];?> <br />
+                      <?=$client_address;?>
                     </div>
                 </div>
               </div>

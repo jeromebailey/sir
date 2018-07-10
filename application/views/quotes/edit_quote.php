@@ -75,37 +75,17 @@
               <br />
 
               <div class="row">
-                <div class="col-md-2">
-                  <label for="territory">Territory</label>
-                  <select class="form-control" id="territory" name="territory" required="required">
-                    <?
-                    if( $territory_id == 1 ){?>
-                      <option value="1" selected="selected">Local</option>
-                    <?} else {?>
-                      <option value="1">Local</option>
-                    <?}?>
-
-                    <?
-                    if( $territory_id == 2 ){?>
-                      <option value="2" selected="selected">Overseas</option>
-                    <?} else {?>
-                      <option value="2">Overseas</option>
-                    <?}?>                   
-                    
-                  </select>
-                  <div id="supplier-address"></div>
-                </div>
                 <div class="col-md-4">
                   <label for="supplier-id">Bill To:</label>
-                  <select id="supplier-id" name="supplier-id" class="form-control" required="required">
-                    <option value="">Select Supplier</option>
+                  <select id="client-id" name="client-id" class="form-control" required="required">
+                    <option value="">Select Client</option>
                     <?
-                    if( !empty($suppliers) ){
-                      foreach ($suppliers as $key => $value) {
-                        if( $quote["supplier_id"] == $value["supplier_id"] ){?>
-                          <option value="<?=$value["supplier_id"]?>" selected><?=$value["supplier_name"]?></option>
+                    if( !empty($clients) ){
+                      foreach ($clients as $key => $value) {
+                        if( $quote["client_id"] == $value["client_id"] ){?>
+                          <option value="<?=$value["client_id"]?>" selected><?=$value["client_name"]?></option>
                         <?} else {?>
-                          <option value="<?=$value["supplier_id"]?>"><?=$value["supplier_name"]?></option>
+                          <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
                         <?}
                       }
                     } else {

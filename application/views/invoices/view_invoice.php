@@ -80,8 +80,8 @@
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
                     <div class="" >
-                      <?=$invoice["supplier_name"];?> <br />
-                      <?=$supplier_address;?>
+                      <?=$invoice["client_name"];?> <br />
+                      <?=$client_address;?>
                     </div>
                 </div>
               </div>

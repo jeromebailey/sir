@@ -181,7 +181,7 @@ class Forms extends CI_Controller {
 		//$this->sir_session->clear_status_message();
 
 		$PageTitle = "Create Quote";
-		$suppliers = $this->suppliers->get_all_suppliers();
+		$clients = $this->clients->get_all_clients();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
 		$next_quote_no = $this->sir->get_next_quote_no();
@@ -190,7 +190,7 @@ class Forms extends CI_Controller {
 
 		$data = array(
 			"page_title" => $PageTitle,
-			"suppliers" => $suppliers,
+			"clients" => $clients,
 			"ship_to_address" => $ship_to_address[0]['settings_value'],
 			"bill_to_address" => $bill_to_address[0]['settings_value'],
 			"next_quote_no" => $next_quote_no[0]['next_quote_no'],
@@ -206,7 +206,7 @@ class Forms extends CI_Controller {
 
 		//echo "<pre>";print_r($this->input->post());exit;
 		$items_string = "";
-		$supplier_id = $this->input->post("supplier-id");
+		$client_id = $this->input->post("client-id");
 		$quote_no = $this->input->post("quote_no");
 		//$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
@@ -243,7 +243,7 @@ class Forms extends CI_Controller {
 
 			$data = array(
 				"quote_no" => $quote_no,
-				"supplier_id" => $supplier_id,
+				"client_id" => $client_id,
 				"quote_date" => date("Y-m-d"),
 				"quote_details" => $quote_details,
 				"quote_total_amount" => $total_cost,
@@ -276,7 +276,7 @@ class Forms extends CI_Controller {
 		//$this->sir_session->clear_status_message();
 
 		$PageTitle = "Create Invoice";
-		$suppliers = $this->suppliers->get_all_suppliers();
+		$clients = $this->clients->get_all_clients();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
 		$next_invoice_no = $this->sir->get_next_invoice_no();
@@ -285,7 +285,7 @@ class Forms extends CI_Controller {
 
 		$data = array(
 			"page_title" => $PageTitle,
-			"suppliers" => $suppliers,
+			"clients" => $clients,
 			"ship_to_address" => $ship_to_address[0]['settings_value'],
 			"bill_to_address" => $bill_to_address[0]['settings_value'],
 			"next_invoice_no" => $next_invoice_no[0]['next_invoice_no'],
@@ -301,7 +301,7 @@ class Forms extends CI_Controller {
 
 		//echo "<pre>";print_r($this->input->post());exit;
 		$items_string = "";
-		$supplier_id = $this->input->post("supplier-id");
+		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
 		//$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
@@ -334,11 +334,11 @@ class Forms extends CI_Controller {
 			}
 
 			$invoice_details = json_encode($invoice_record);
-			//echo "<pre>";print_r($po_record);exit;
+			
 
 			$data = array(
 				"invoice_no" => $invoice_no,
-				"supplier_id" => $supplier_id,
+				"client_id" => $client_id,
 				"invoice_date" => date("Y-m-d"),
 				"invoice_details" => $invoice_details,
 				"invoice_total_amount" => $total_cost,

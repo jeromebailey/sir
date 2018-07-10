@@ -60,6 +60,14 @@ class Sir_model extends CI_Model
 		return $result[0]["category_id"];
 	}
 
+	public function get_category_name($category_id){
+		$sql = "select * from product_location_categories where category_id ='$category_id'";
+
+		$result = Sir_model::format_query_result_as_array( $sql );
+
+		return $result[0]["category_name"];
+	}
+
 	public function get_category_id_from_new_category($category_name){
 		if($this->db->insert("product_location_categories", array("category_name" => $category_name))){
 			return $this->db->insert_id();

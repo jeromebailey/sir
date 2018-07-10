@@ -31,7 +31,7 @@
               <thead>
                 <tr>
                   <th>Invoice No</th>
-                  <th>Supplier Name</th>
+                  <th>Client Name</th>
                   <th>Invoice Date</th>
                   <th>Created By</th>
                   <th>Options</th>
@@ -50,7 +50,7 @@
                     ?>
                     <tr>
                       <td><?=$value["invoice_no"];?></td>
-                      <td><?=$value["supplier_name"];?></td>
+                      <td><?=$value["client_name"];?></td>
                       <td><?= date('M d, y', strtotime($value["invoice_date"]));?></td>
                       <td><?=$value["created_by"];?></td>
                         <td>

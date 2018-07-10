@@ -75,22 +75,14 @@
               <br />
 
               <div class="row">
-                <div class="col-md-2">
-                  <label for="territory">Territory</label>
-                  <select class="form-control" id="territory" name="territory" >
-                    <option value="1">Local</option>
-                    <option value="2">Overseas</option>
-                  </select>
-                  <div id="supplier-address"></div>
-                </div>
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
-                    <select id="supplier-id" name="supplier-id" class="form-control" required="required">
-                    <option value="">Select Supplier</option>
+                    <select id="client-id" name="client-id" class="form-control" required="required">
+                    <option value="">Select Client</option>
                     <?
-                    if( !empty($suppliers) ){
-                      foreach ($suppliers as $key => $value) {?>
-                        <option value="<?=$value["supplier_id"]?>"><?=$value["supplier_name"]?></option>
+                    if( !empty($clients) ){
+                      foreach ($clients as $key => $value) {?>
+                        <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
                       <?}
                     } else {
 

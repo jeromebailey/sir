@@ -80,6 +80,15 @@ class Clients_model extends CI_Model
 		echo json_encode($row[0]["abbreviation"]);
 	}
 
+	public function get_client_address_by_id($client_id)
+	{
+		$sql = "SELECT s.`address_line_1`, s.`address_line_2`, s.`city`, s.`state`, s.`zip`
+				FROM clients s
+				WHERE s.`client_id` = $client_id";
+
+		return $this->sir->format_query_result_as_array($sql);
+	}
+
 	public function get_client_by_id($client_id){
 		$query = "SELECT *
 					FROM clients

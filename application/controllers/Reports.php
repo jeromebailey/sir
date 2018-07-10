@@ -147,10 +147,12 @@ class Reports extends CI_Controller {
 	}
 
 	public function inventory_items_in_category(){
-		$PageTitle = "Total Inventory Items In Inventory";
+		
 
 		$category_id = $this->uri->segment(3);
 		$categories = $this->categories->get_all_categories();
+		$todays_date = date("F d, Y");
+		$category_name = "" ;
 
 		if(empty($category_id))
 		{
@@ -159,10 +161,13 @@ class Reports extends CI_Controller {
 			//$no_of_items_in_category = null;
 			//$total_product_cost_in_category = null;
 		} else {
+			$category_name = $this->sir->get_category_name($category_id);
 			$product_category_items_with_item_total_cost = $this->products->get_inventory_by_category_with_product_item_total_cost( $category_id );
 			//$no_of_items_in_category = $this->products->count_no_of_items_in_a_category( $category_id );
 			//$total_product_cost_in_category = $this->products->get_total_cost_in_a_category( $category_id );
 		}
+
+		$PageTitle =  $category_name . " Inventory Items for " . $todays_date; 
 
 		$data = array(
 			"page_title" => $PageTitle,

@@ -190,7 +190,7 @@
           $("#msg-holder").html("Please select the Product Category before trying to generate a barcode for this product.");
           $("#msg-holder").show();
         } else {
-          $.post( "<?=base_url('WebService/generate_product_barcode/" + product_id + "');?>")
+          $.post( "<?=base_url('WebService/generate_new_product_barcode/" + product_id + "/" + product_category_id + "');?>")
             .done(function( data ) {
             console.log( "response: " + data );
 

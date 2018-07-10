@@ -49,7 +49,7 @@ class Quotes extends CI_Controller {
 		$quote = $this->quotes->get_quote_by_id($quote_id);
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		//echo "<pre>";print_r($quote[0]);exit;
-		$address = $this->suppliers->get_supplier_address_by_id($quote[0]["supplier_id"]);
+		$address = $this->clients->get_client_address_by_id($quote[0]["client_id"]);
 		$company_address_top = $this->sir->get_settings_by_slug('address_for_forms');
 
 		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
@@ -66,7 +66,7 @@ class Quotes extends CI_Controller {
 		$data = array(
 			"page_title" => $PageTitle,
 			'quote' => $quote[0],
-			"supplier_address" => $address_string,
+			"client_address" => $address_string,
 			"bill_to_address" => $bill_to_address[0]['settings_value'],
 			"company_address_top" => $company_address_top[0]["settings_value"],
 			"company_name" => $company_name[0]["settings_value"],
@@ -86,14 +86,13 @@ class Quotes extends CI_Controller {
 		} else {
 			$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 			//echo "<pre>";print_r($quote[0]);exit;
-			$address = $this->suppliers->get_supplier_address_by_id($quote[0]["supplier_id"]);
+			$address = $this->clients->get_client_address_by_id($quote[0]["client_id"]);
 			$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
-			$suppliers = $this->suppliers->get_all_suppliers();
+			$clients = $this->clients->get_all_clients();
 			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
 
-			$supplier_id = $quote[0]["supplier_id"];
-			$supplier = $this->suppliers->get_supplier_by_id( $supplier_id );
-			$territory_id = $supplier[0]["is_local"];
+			$client_id = $quote[0]["client_id"];
+			$client = $this->clients->get_client_by_id( $client_id );
 
 			if( !empty( $address ) ){
 				$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
@@ -106,13 +105,12 @@ class Quotes extends CI_Controller {
 			$data = array(
 				"page_title" => $PageTitle,
 				'quote' => $quote[0],
-				"supplier_address" => $address_string,
+				"client_address" => $address_string,
 				"bill_to_address" => $bill_to_address[0]['settings_value'],
 				"company_address" => $company_address[0]["settings_value"],
-				"suppliers" => $suppliers,
+				"clients" => $clients,
 				"quote_id" => $quote_id,
-				"company_name" => $company_name[0]["settings_value"],
-				"territory_id" => $territory_id
+				"company_name" => $company_name[0]["settings_value"]
 				);
 
 			$this->load->view('quotes/edit_quote', $data);
@@ -123,7 +121,7 @@ class Quotes extends CI_Controller {
 		//echo "<pre>";print_r($this->input->post());exit;
 		$quote_id = $this->input->post("quote-id");
 		$items_string = "";
-		$supplier_id = $this->input->post("supplier-id");
+		$client_id = $this->input->post("client-id");
 		$quote_no = $this->input->post("quote_no");
 		//$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
@@ -159,7 +157,7 @@ class Quotes extends CI_Controller {
 			//echo "<pre>";print_r($quote_record);exit;
 
 			$data = array(
-				"supplier_id" => $supplier_id,
+				"client_id" => $client_id,
 				"quote_details" => $quote_details,
 				"quote_total_amount" => $total_cost
 			);

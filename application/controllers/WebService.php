@@ -142,6 +142,44 @@ class WebService extends CI_Controller {
 		}		
 	} //end of function
 
+	public function generate_new_product_barcode( $product_id, $category_id ){
+		if( !empty($product_id) ){
+
+			$barcode = "";
+
+			//$product = $this->products->get_product_by_product_id($product_id);
+			//$product_category_id = $product[0]["product_category_id"];
+
+			$this->load->config("sir_config");
+			$company_prefix = $this->config->item("company_barcode_prefix");
+
+			$this->load->library('Zend');
+			$this->zend->load('Zend/Barcode');
+
+			$_category_id = $this->sir->pad_product_category_id( $category_id );
+			$_product_id = $this->sir->pad_product_id( $product_id );
+
+			$barcode .= $company_prefix . $_category_id . $_product_id;
+
+			try{
+				$this->products->save_generated_product_barcode( $product_id, $barcode );
+
+				$this->products->store_generated_barcode( $barcode );
+
+				$data = array(
+					"product_information" => NULL,
+					"barcode" => $barcode
+				);
+
+				$this->logger->add_log(20, $this->session->userdata("user_id"), NULL, json_encode($data));
+				echo $barcode;
+			} catch( Exception $ex){
+				echo $barcode;
+				$this->xxx->log_exception( $ex->getMessage() );
+			}
+		}		
+	} //end of function
+
 	public function get_suppliers_by_territory_id( $territory_id ){
 		echo json_encode( $this->suppliers->get_suppliers_by_territory_id( $territory_id ) );
 	}

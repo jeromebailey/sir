@@ -49,7 +49,7 @@ class Invoices extends CI_Controller {
 		$invoice = $this->invoice->get_invoice_by_id($invoice_id);
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		//echo "<pre>";print_r($invoice[0]);exit;
-		$address = $this->suppliers->get_supplier_address_by_id($invoice[0]["supplier_id"]);
+		$address = $this->clients->get_client_address_by_id($invoice[0]["client_id"]);
 		$company_address_top = $this->sir->get_settings_by_slug('address_for_forms');
 
 		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
@@ -66,7 +66,7 @@ class Invoices extends CI_Controller {
 		$data = array(
 			"page_title" => $PageTitle,
 			'invoice' => $invoice[0],
-			"supplier_address" => $address_string,
+			"client_address" => $address_string,
 			"bill_to_address" => $bill_to_address[0]['settings_value'],
 			"company_address_top" => $company_address_top[0]["settings_value"],
 			"company_name" => $company_name[0]["settings_value"],
@@ -86,14 +86,13 @@ class Invoices extends CI_Controller {
 		} else {
 			$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 			//echo "<pre>";print_r($invoice[0]);exit;
-			$address = $this->suppliers->get_supplier_address_by_id($invoice[0]["supplier_id"]);
+			$address = $this->clients->get_client_address_by_id($invoice[0]["client_id"]);
 			$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
-			$suppliers = $this->suppliers->get_all_suppliers();
+			$clients = $this->clients->get_all_clients();
 			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
 
-			$supplier_id = $invoice[0]["supplier_id"];
-			$supplier = $this->suppliers->get_supplier_by_id( $supplier_id );
-			$territory_id = $supplier[0]["is_local"];
+			//$client_id = $invoice[0]["client_id"];
+			//$client = $this->client->get_client_by_id( $client_id );
 
 			if( !empty( $address ) ){
 				$address_string = ( $address[0]['address_line_1'] != null || $address[0]['address_line_1'] != '' ) ? $address[0]['address_line_1'] . '<br/>' : '';
@@ -106,13 +105,12 @@ class Invoices extends CI_Controller {
 			$data = array(
 				"page_title" => $PageTitle,
 				'invoice' => $invoice[0],
-				"supplier_address" => $address_string,
+				"client_address" => $address_string,
 				"bill_to_address" => $bill_to_address[0]['settings_value'],
 				"company_address" => $company_address[0]["settings_value"],
-				"suppliers" => $suppliers,
+				"clients" => $clients,
 				"invoice_id" => $invoice_id,
-				"company_name" => $company_name[0]["settings_value"],
-				"territory_id" => $territory_id
+				"company_name" => $company_name[0]["settings_value"]
 				);
 
 			$this->load->view('invoices/edit_invoice', $data);
@@ -123,7 +121,7 @@ class Invoices extends CI_Controller {
 		//echo "<pre>";print_r($this->input->post());exit;
 		$invoice_id = $this->input->post("invoice-id");
 		$items_string = "";
-		$supplier_id = $this->input->post("supplier-id");
+		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
 		//$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
@@ -159,7 +157,7 @@ class Invoices extends CI_Controller {
 			//echo "<pre>";print_r($invoice_record);exit;
 
 			$data = array(
-				"supplier_id" => $supplier_id,
+				"client_id" => $client_id,
 				"invoice_details" => $invoice_details,
 				"invoice_total_amount" => $total_cost
 			);

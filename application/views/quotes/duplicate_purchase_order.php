@@ -44,16 +44,16 @@
 
               <div class="row">
                 <div class="col-md-4">
-                  <label for="supplier-id">Supplier</label>
-                  <select id="supplier-id" name="supplier-id" class="form-control" required="required">
-                    <option value="">Select Supplier</option>
+                  <label for="client-id-id">Client</label>
+                  <select id="client-id" name="client-id" class="form-control" required="required">
+                    <option value="">Select Client</option>
                     <?
-                    if( !empty($suppliers) ){
-                      foreach ($suppliers as $key => $value) {
-                        if( $purchase_order["supplier_id"] == $value["supplier_id"] ){?>
-                          <option value="<?=$value["supplier_id"]?>" selected><?=$value["supplier_name"]?></option>
+                    if( !empty($clients) ){
+                      foreach ($clients as $key => $value) {
+                        if( $quote["client_id"] == $value["client_id"] ){?>
+                          <option value="<?=$value["client_id"]?>" selected><?=$value["client_name"]?></option>
                         <?} else {?>
-                          <option value="<?=$value["supplier_id"]?>"><?=$value["supplier_name"]?></option>
+                          <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
                         <?}
                       }
                     } else {

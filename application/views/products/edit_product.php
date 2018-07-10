@@ -55,7 +55,7 @@
                         <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>" >
                         <a href="#" onclick="generate_barcode_for_product(<?=$product['product_id'];?>)">Generate Barcode</a>
                       <?} else {?>
-                        <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>" readonly>
+                        <input type="text" id="bar-code" name="bar-code" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product['barcode'];?>">
                       <?}?>
                     </div>
                   </div>

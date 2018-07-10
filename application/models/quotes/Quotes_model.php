@@ -30,10 +30,10 @@ class Quotes_model extends CI_Model
 	}
 
 	public function get_all_quotes(){
-		$query = "SELECT a.*, s.`supplier_name`, 
+		$query = "SELECT a.*, c.`client_name`, 
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = a.`created_by_employee_id` ) 'created_by'
 					FROM quotes a
-					INNER JOIN suppliers s ON s.`supplier_id` = a.`supplier_id`
+					INNER JOIN clients c ON c.`client_id` = a.`client_id`
 					ORDER BY a.`quote_date` DESC";
 
 		return $this->sir->format_query_result_as_array($query);
@@ -41,10 +41,10 @@ class Quotes_model extends CI_Model
 
 	public function get_quote_by_id($quote_id)
 	{
-		$query = "SELECT a.*, s.`supplier_name`, 
+		$query = "SELECT a.*, c.`client_name`, 
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = a.`created_by_employee_id` ) 'created_by'
 					FROM quotes a
-					INNER JOIN suppliers s ON s.`supplier_id` = a.`supplier_id`
+					INNER JOIN clients c ON c.`client_id` = a.`client_id`
 					where a.quote_id = $quote_id";
 
 		return $this->sir->format_query_result_as_array($query);
