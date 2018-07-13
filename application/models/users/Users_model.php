@@ -24,6 +24,7 @@ class Users_model extends CI_Model
 					INNER JOIN permissions p ON p.`permission_id` = upr.`permission_id`
 					INNER JOIN departments d ON d.`department_id` = u.`department_id`
 					WHERE u.`user_id` <> 5292
+					and u.status_id = 1
 					GROUP BY u.`user_id`, u.`first_name`, u.`last_name`
 					ORDER BY u.`user_id`;";
 
