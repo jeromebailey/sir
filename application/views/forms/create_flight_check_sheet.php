@@ -49,7 +49,7 @@
             <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Date &amp; Time: </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                <input type = "text" name="date-and-time" id="date-and-time" autocomplete="off" class="form-control col-md-7 col-xs-12" style="position: relative; z-index: 100000;" />
+                <input type = "text" name="date-and-time" id="date-and-time" autocomplete="off" class="form-control col-md-7 col-xs-12" style="position: relative; z-index: 100;" />
                 </div>
               </div>             
 
@@ -312,6 +312,40 @@
 
             </form>
 
+            <div id="edit_item_modal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title">Edit Item</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Item Description</label>
+                        <input type="text" name="m_item_description" id="m_item_description" class="form-control" style="z-index: 10000">
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Amount</label>
+                        <input type="text" name="m_item_amount" id="m_item_amount" class="form-control">
+                      </div>
+                    </div>
+
+                    <input type="hidden" value="" name="m_section_key" id="m_section_key">
+                    <input type="hidden" value="" name="m_item_key" id="m_item_key">
+                      
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="button" name="btnMEditItem" id="btnMEditItem" class="btn btn-primary">Save changes</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
 
           </div>
           <!-- top tiles -->
@@ -378,6 +412,31 @@
       $("#qty").val('');
       $("#section-id").val('');
       $("#desc").val('');
+    }
+
+    $("#btnMEditItem").click(function(){      
+
+      var description = $("#m_item_description").val();
+      var amount = $("#m_item_amount").val();
+      var section_id = $("#m_section_key").val();
+      var item_counter = $("#m_item_key").val();
+
+      $('#'+section_id +'-desc-' + item_counter).val(description);
+      $('#'+section_id +'-qty-' + item_counter).val(amount);
+
+      $("#edit_item_modal").modal('hide');
+    })
+
+    function edit_fcs_item(section_id, item_counter){
+      $("#edit_item_modal").modal('show');
+
+      var description = $('#'+section_id +'-desc-' + item_counter).val();
+      var amount = $('#'+section_id +'-qty-' + item_counter).val();
+
+      $("#m_item_description").val( description );
+      $("#m_item_amount").val( amount );
+      $("#m_section_key").val( section_id );
+      $("#m_item_key").val( item_counter );
     }
 
     $("#btnAdd").click(function(){
@@ -462,10 +521,10 @@
 
       var row = "";
       row = row + '<tr id =' + temp_counter + '>';
-      row = row + '<td><input type="text" id="" name="'+ section_id +'-desc-' + temp_counter + '" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
-      row = row + '<td width="10%"><input type="text" id="" name="'+ section_id +'-qty-' + temp_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';      
+      row = row + '<td><input type="text" name="'+ section_id +'-desc-' + temp_counter + '" id="'+ section_id +'-desc-' + temp_counter + '" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
+      row = row + '<td width="10%"><input type="text" name="'+ section_id +'-qty-' + temp_counter + '" id="'+ section_id +'-qty-' + temp_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';      
       row = row + '<td width="7%" style="margin-top: 23px;">';
-      //row = row + '<a href="" title="Edit"><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" title="Edit" onClick="edit_fcs_item(' + section_id + ',' + temp_counter +')"><i class="fas fa-edit"></i></a> |';
       row = row + '<a href="#" onClick="delete_fcs_item(' + section_id + ', ' + temp_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';

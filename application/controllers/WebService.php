@@ -32,6 +32,10 @@ class WebService extends CI_Controller {
 		echo $this->products->search_products($term);
 	}
 
+	public function get_all_products_as_string(){
+		echo $this->products->get_all_products_as_string();
+	}
+
 	public function get_client_flights($client_id){
 		echo $this->clients->json_get_client_flights($client_id);
 	}

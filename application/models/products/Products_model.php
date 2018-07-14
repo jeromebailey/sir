@@ -25,6 +25,14 @@ class Products_model extends CI_Model
 		}
 	}
 
+	public function get_all_products_as_string(){
+		$query = "SELECT GROUP_CONCAT(CONCAT(product_name, '(', product_id, ')') SEPARATOR '|') product_name
+					FROM products
+					ORDER BY product_name";
+
+		echo json_encode($this->sir->format_query_result_as_array($query));
+	}
+
 	public function get_next_product_id(){
 		$query = "SELECT MAX(product_id) product_id FROM products";
 

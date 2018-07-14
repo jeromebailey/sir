@@ -4,6 +4,13 @@
     <?include_once 'includes/head.inc'; ?>
     <link rel="stylesheet" href="<?=base_url('assets/css/jquery-ui.min.css');?>">
     <link rel="stylesheet" href="<?=base_url('assets/css/bootstrapValidator.css');?>">
+
+    <style type="text/css">
+      
+      .ui-front {
+    z-index: 9999999 !important;
+}
+    </style>
     
   </head>
 
@@ -178,6 +185,56 @@
             </form>
 
 
+
+    <div id="edit_item_modal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title">Edit Product</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Product Name</label>
+                        <input type="text" name="m_product_name" id="m_product_name" class="form-control" style="z-index: 10000">
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Amount</label>
+                        <input type="text" name="m_product_amount" id="m_product_amount" class="form-control">
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Product Name</label>
+                        <select id="m_product_unit" name="m_product_unit" class="form-control">
+                          <?if( !empty($uom) ){
+                              foreach ($uom as $key => $value) {?>
+                                <option value="<?=$value["unit_id"]?>"><?=$value["unit_abbreviation"];?></option>
+                              <?}
+                            } else {
+
+                            }?>
+                        </select>
+                      </div>
+                    </div>
+
+                    <input type="hidden" value="" name="m_product_key" id="m_product_key">
+                      
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="button" name="btnMEditItem" id="btnMEditItem" class="btn btn-primary">Save changes</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
           </div>
           <!-- top tiles -->
 
@@ -197,9 +254,23 @@
     
     <script type="text/javascript">
       var req_item_counter = 1;
+      var sir_products = "";
 
     $(document).ready(function(){
       $("#msg-holder").hide();
+
+      $.post( "<?=base_url('WebService/get_all_products_as_string/');?>")
+      .done(function( data ) {
+        
+        if( data == '[]' ){
+          //do nothing. no unit id is present
+        } else {
+            var obj = $.parseJSON(data);
+            //console.log( obj[0].product_name );
+            sir_products = obj[0].product_name.split('|');
+        }
+      });
+
         $( "#dob" ).datepicker({ 
           dateFormat: 'yy-mm-dd',
           changeYear: true,
@@ -324,14 +395,33 @@
         });
     });
 
+    $("#btnMEditItem").click(function(){      
+
+      var product_name = $("#m_product_name").val();
+      var amount = $("#m_product_amount").val();
+      var unit = $("#m_product_unit option:selected").text();
+      var item_counter = $("#m_product_key").val();
+      console.log(unit);
+
+      $("#requisition-product-name-" + item_counter).val(product_name);
+      $("#requisition-amount-" + item_counter).val(amount);
+      $("#requisition-unit-" + item_counter).val(unit);
+
+      $("#edit_item_modal").modal('hide');
+    })
+
     function edit_requisition_item(item_counter){
       $("#edit_item_modal").modal('show');
 
       var product_name = $("#requisition-product-name-" + item_counter).val();
       var amount = $("#requisition-amount-" + item_counter).val();
-      var product_name = $("#requisition-product-name-" + item_counter).val();
+      var unit = $("#requisition-unit-" + item_counter).val();
 
       $("#m_product_name").val( product_name );
+      $("#m_product_amount").val( amount );
+      $("#m_product_key").val( item_counter );
+      $("select#m_product_unit option")
+        .each(function() { this.selected = (this.text == unit); });
     }
 
     $("#product-name").autocomplete({
@@ -427,9 +517,11 @@
     });
 
     function addAnotherRowForRequisitionItem(product_name, amount, unit){
-      var row = "";
+      var row = new_product_field = "";
       row = row + '<tr id=' + req_item_counter + '>';
-      row = row + '<td><input type="text" id="requisition-product-name-' + req_item_counter + '" name="requisition-product-name-' + req_item_counter + '" autocomplete="off" value="' + product_name +'" class="form-control" readonly></td>';
+
+      new_product_field = '<td><input type="text" id="requisition-product-name-' + req_item_counter + '" name="requisition-product-name-' + req_item_counter + '" autocomplete="off" value="' + product_name +'" class="form-control" readonly></td>';
+      row = row + new_product_field;
       row = row + '<td><input type="text" id="requisition-amount-' + req_item_counter + '" name="requisition-amount-' + req_item_counter + '" required="required" autocomplete="off" value="' + amount +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="requisition-unit-' + req_item_counter + '" name="requisition-unit-' + req_item_counter + '" required="required" autocomplete="off" value="' + unit +'" class="form-control" readonly></td>';
       //row = row + '<td><select name="requisition-unit-id-' + req_item_counter + '" class="form-control" readonly disabled>';
@@ -443,7 +535,7 @@
     <?}*/?>
       //row = row + '</select></td>';
       row = row + '<td style="margin-top: 23px;">';
-      //row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
       row = row + '<a href="#" onClick="delete_requisition_item(' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';
@@ -452,6 +544,8 @@
 
       req_item_counter++;
       $("#no_of_items").val(req_item_counter);
+
+      //new_product_field.find('input').autocomplete(sir_products);
     }
 
     function delete_requisition_item( item_counter ){
