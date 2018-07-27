@@ -180,7 +180,7 @@ class Products_model extends CI_Model
                     l.`current_stock_level`, p.price
                     FROM products p
                     INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
-                    INNER JOIN $this->product_stock_levels_table l ON l.`product_id` = p.`product_id`
+                    LEFT JOIN $this->product_stock_levels_table l ON l.`product_id` = p.`product_id`
                     ORDER BY p.`product_name`";
 
         return $this->sir->format_query_result_as_array($query);
@@ -188,10 +188,11 @@ class Products_model extends CI_Model
 
 	public function get_inventory_by_category_with_product_item_total_cost( $category_id ){
 		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, c.`category_name`, p.`barcode`, p.`product_category_id`,
-					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost
+					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost, u.`unit_abbreviation`
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
-					INNER JOIN product_stock_levels l ON l.`product_id` = p.`product_id`
+					LEFT JOIN product_stock_levels l ON l.`product_id` = p.`product_id`
+					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`
 					WHERE c.`category_id` = $category_id
 					ORDER BY p.`product_name`";
 

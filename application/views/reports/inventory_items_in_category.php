@@ -64,6 +64,7 @@
                   <th>Product Name</th>
                   <th width="40%">Product Description</th>
                   <th>Price</th>
+                  <th>Unit</th>
                   <th>Level</th>
                 </tr>
               </thead>
@@ -86,6 +87,7 @@
                       <td><?=$value["product_name"];?></td>
                       <td></td>
                       <td><?='$'.$value["price"];?></td>
+                      <td><?=$value["unit_abbreviation"];?></td>
                       <td></td>
                     </tr>
                   <?
