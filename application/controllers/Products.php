@@ -12,7 +12,6 @@ class Products extends CI_Controller {
 		$this->load->model('users/Users_model', 'sir_users');
 		$this->load->model('products/Products_model', 'products');
 		$this->load->model('session/Session_model', 'sir_session');
-		$this->load->model('session/Session_model', 'sir_session');
 		$this->load->model('exceptions/AppExceptions_model', 'xxx');
 		$this->load->model('categories/Categories_model', 'categories');
 		$this->load->model('notifications/Notifications_model', 'notifications');

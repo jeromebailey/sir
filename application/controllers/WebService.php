@@ -14,7 +14,8 @@ class WebService extends CI_Controller {
 		$this->load->model('invoices/Invoice_model', 'invoice');
 		$this->load->model('products/Products_model', 'products');
 		$this->load->model('exceptions/AppExceptions_model', 'xxx');
-		$this->load->model('suppliers/Suppliers_model', 'suppliers');		
+		$this->load->model('suppliers/Suppliers_model', 'suppliers');	
+		$this->load->model('categories/Categories_model', 'categories');	
 		$this->load->model('requisitions/Requisitions_model', 'requisitions');
 		$this->load->model('flight_check_sheets/FlightCheckSheets_model', 'flight_check_sheet');
 
@@ -99,6 +100,10 @@ class WebService extends CI_Controller {
 
 				case 'products':
 					echo $this->products->delete_product($key);
+					break;
+
+				case 'categories':
+					echo $this->categories->delete_category($key);
 					break;
 				
 				default:

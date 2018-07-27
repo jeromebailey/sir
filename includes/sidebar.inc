@@ -121,6 +121,13 @@
                 <div class="menu_section">
                   <h3>Administrator Menu</h3>
                   <ul class="nav side-menu">
+                    <li><a><i class="fa fa-user"></i> Categories <span class="fa fa-chevron-down"></span></a>
+                      <ul class="nav child_menu">
+                        <li><a href="<?=base_url('Categories')?>">All Categories</a></li>
+                        <li><a href="<?=base_url('Categories/add_category')?>">Add Category</a></li>
+                      </ul>
+                    </li>
+
                     <li><a><i class="fa fa-user"></i> Clients <span class="fa fa-chevron-down"></span></a>
                       <ul class="nav child_menu">
                         <li><a href="<?=base_url('Clients')?>">All Clients</a></li>
