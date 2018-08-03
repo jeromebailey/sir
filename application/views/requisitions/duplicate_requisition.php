@@ -382,6 +382,43 @@
           }
           })
       },
+      select: function(event, ui){
+        //var obj = $.parseJSON(ui);
+        var index_of_open_bracket = ui.item.value.lastIndexOf("(");
+        var index_of_closing_bracket = ui.item.value.lastIndexOf(")");
+
+          //console.log(index_of_open_bracket);
+          //console.log(index_of_closing_bracket);
+
+          if( index_of_open_bracket != -1 && index_of_closing_bracket != -1 ){
+            var product_id = ui.item.value.substring(index_of_open_bracket+1, index_of_closing_bracket);
+            //console.log( "id: " + product_id );
+            $.post( "<?=base_url('WebService/find_product_by_product_id/" + product_id + "');?>")
+            .done(function( data ) {
+                //var a = $.parseJSON(data);
+                //console.log(data['unit_id']); //works
+                //var b = JSON.parse(data);
+                //console.log(b[0].product_id); works
+                //console.log( "data: " + data );
+
+                if( data == '[]' ){
+                  //do nothing. no unit id is present
+                } else {
+                    var obj = $.parseJSON(data);
+                    if( parseFloat(obj[0].current_stock_level) <= parseFloat(obj[0].minimum_stock_level) ){
+                      $("#msg-holder").addClass('alert-danger');
+                      $("#msg-holder").html("Sorry, item is below stock level and cannot be added.");
+                      $("#msg-holder").show();
+                      $("#btnAdd").attr("disabled", "disabled");
+                    } else {
+                      //console.log( obj[0].unit_id );
+                      $("#unit-id").val( obj[0].unit_id );
+                      $("#unit-id").prop('disabled', 'disabled');
+                    }                    
+                }              
+            });
+          } /*end of if statement*/
+      },
       messages: {
           noResults: "No results found",
           results: function (count) {

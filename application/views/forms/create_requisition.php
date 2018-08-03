@@ -464,12 +464,19 @@
                   //do nothing. no unit id is present
                 } else {
                     var obj = $.parseJSON(data);
-                    //console.log( obj[0].unit_id );
-                    $("#unit-id").val( obj[0].unit_id );
-                    $("#unit-id").prop('disabled', 'disabled');
+                    if( parseFloat(obj[0].current_stock_level) <= parseFloat(obj[0].minimum_stock_level) ){
+                      $("#msg-holder").addClass('alert-danger');
+                      $("#msg-holder").html("Sorry, item is below stock level and cannot be added.");
+                      $("#msg-holder").show();
+                      $("#btnAdd").attr("disabled", "disabled");
+                    } else {
+                      //console.log( obj[0].unit_id );
+                      $("#unit-id").val( obj[0].unit_id );
+                      $("#unit-id").prop('disabled', 'disabled');
+                    }                    
                 }              
             });
-          }
+          } /*end of if statement*/
       },
       messages: {
           noResults: "No results found",
