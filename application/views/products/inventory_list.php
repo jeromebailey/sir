@@ -22,6 +22,7 @@
             <table class="table table-striped table-hover table-bordered" id="data-table">
               <thead>
                 <tr>
+                  <th>Barcode</th>
                   <th>Product Name</th>
                   <th>Product Description</th>
                   <th>Category</th>
@@ -42,6 +43,7 @@
                     $product_id = $value["product_id"];
                     ?>
                     <tr>
+                      <td width="15%"><?=$value["barcode"];?></td>
                       <td><?=$value["product_name"];?></td>
                       <td><?=$value["description"];?></td>
                       <td><?=$value["category_name"];?></td>
