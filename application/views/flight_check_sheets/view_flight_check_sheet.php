@@ -75,6 +75,18 @@
 
               <div class="row">
                 <div class="col-md-6">
+                  <label for="requisition-date" class="text-uppercase"><i>Tail No</i>:</label>
+                  <?
+                  if( $flight_check_sheet["tail_no"] == "" || empty( trim( $flight_check_sheet["tail_no"] ) ) ){
+                    echo "N/A";
+                  } else {
+                    echo $flight_check_sheet["tail_no"];  
+                  }?>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
                   <label for="requisition-date" class="text-uppercase"><i>Check Sheet No.</i>:</label>
                   <?=$client_abbreviation . $flight_check_sheet["check_sheet_no"];?>
                 </div>

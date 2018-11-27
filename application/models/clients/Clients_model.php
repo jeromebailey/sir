@@ -22,10 +22,36 @@ class Clients_model extends CI_Model
 		return $inserted;
 	}*/
 
+	public function get_all_clients_without_ba(){
+		$query = $this->db->query("select * from $this->table_name where client_id <> 2 order by client_name asc");
+
+		return $query->result_array();
+	}
+
 	public function get_all_clients(){
 		$query = $this->db->query("select * from $this->table_name order by client_name asc");
 
 		return $query->result_array();
+	}
+
+	public function json_get_client_routes_types($client_id){
+		$query = "select fd.destination_id, fd.destination_abbreviation
+					from flight_destinations fd
+					inner join client_flight_destination_types b on b.destination_type_id = fd.destination_id
+					where b.client_id = $client_id
+					order by destination_abbreviation";
+
+		echo json_encode($this->sir->format_query_result_as_array($query));
+	}
+
+	public function get_client_routes_types($client_id){
+		$query = "select fd.destination_id, fd.destination_abbreviation
+					from flight_destinations fd
+					inner join client_flight_destination_types b on b.destination_type_id = fd.destination_id
+					where b.client_id = $client_id
+					order by destination_abbreviation";
+
+		return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function json_get_client_flights($client_id){
@@ -65,7 +91,7 @@ class Clients_model extends CI_Model
 	public function get_flight_check_headings(){
 		$query = "SELECT *
 				FROM flight_check_sheet_headings
-				order by heading";
+				order by heading_order";
 
 		return $this->sir->format_query_result_as_array($query);
 	}
@@ -122,6 +148,10 @@ class Clients_model extends CI_Model
 
 	public function insert_client_flight( $data ){
 		return $this->db->insert( "client_flights", $data );
+	}
+
+	public function insert_client_invoice_heading( $data ){
+		return $this->db->insert( "client_invoice_headings", $data );
 	}
 
 	public function update_client( $data, $client_id ){

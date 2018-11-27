@@ -26,7 +26,7 @@
             <?include_once 'includes/status_message.inc';?>
 
             <ol class="breadcrumb">
-              <li><a href="<?=base_url('PurchaseOrders');?>">Invoices</a></li>
+              <li><a href="<?=base_url('Invoices');?>">Invoices</a></li>
               <li class="active">View Invoice</li>
             </ol>
 
@@ -50,9 +50,9 @@
               <div class="col-md-2">
                 <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
               </div>
-              <div class="col-md-10">
-                <p class="text-uppercase text-center"><strong><?=$page_title;?></strong></p>
-                <?=$company_address_top;?>
+              <div class="col-md-10 text-center">
+                <strong><?=$page_title;?></strong>
+                <?//=$company_address_top;?>
               </div>
             </div>
 
@@ -68,8 +68,17 @@
                     <label for="po-no-id">Invoice No.:</label> <?=$invoice["invoice_no"];?>
                   
                     <br />
-                    <label for="requisition-date">Date:</label>
-                    <?=date('M d, Y', strtotime($invoice["invoice_date"]));?>
+                    <label for="requisition-date">Creation Date:</label>
+                    <?=date('M d, Y', strtotime($invoice["invoice_date"]));?><br />
+
+                    <label for="requisition-date">Flight Date:</label>
+                    <?=date('M d, Y', strtotime($invoice["flight_date"]));?><br />
+
+                    <label for="tail-no">Tail No:</label>
+                    <?=$invoice["tail_no"];?><br />
+
+                    <label for="requisition-date">Disbursement No.:</label>
+                    <?=$invoice["disbursement_no"];?>
                       
                 </div>
               </div>
@@ -80,7 +89,7 @@
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
                     <div class="" >
-                      <?=$invoice["client_name"];?> <br />
+                      <?=$invoice["client_name"] . " " . $invoice["destination_abbreviation"];?> <br />
                       <?=$client_address;?>
                     </div>
                 </div>
@@ -91,7 +100,7 @@
               <h3>Item / Part Requested</h3>
 
               <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12 col-xs-12 col-sm-12 col-lg-12">
                   <table class="table table-bordered table-striped table-condensed" id="tblRequestedItems">
                     <thead>
                       <tr>
@@ -101,29 +110,78 @@
                         <th width="10%">Extension</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    
                       
                       <?
-                      $items = json_decode( $invoice["invoice_details"] );
+                      foreach ($headings as $key => $value) {
+                        $column_name = strtolower($value["heading_title"]);
+                        if( $column_name == "invoice_details" ){
+                          $tbody_id = "main_section";
+                          $section_id = 0;
+                          $table_column = "invoice_details";
+                          $heading_title = "";
+                        } else {
+                          $tbody_id = $column_name . "_heading";
+                          $section_id = $value["heading_id"];
+                          $table_column = $column_name . "_details";
+                          $heading_title = strtoupper($value["heading_title"]);
+                        }
+                        //echo $tbody_id;
+                        $items = json_decode( $invoice[$table_column] );
+                      
                       //echo "<pre>";print_r($items);exit;
                       if( !empty($items) )
-                      {
-                        foreach($items as $key => $value)
+                      {?>
+                        <tbody id="<?=$tbody_id?>">
+                            <tr>
+                              <td colspan="4"><strong><?=$heading_title?></strong></td>
+                            </tr>
+                        <?foreach($items as $key => $value)
                         {
                           //echo "<pre>";print_r($value->qty);exit;?>
                           <tr>
-                            <td><?=$value->qty;?></td>
+                            <td class="right_align_number"><?=$value->qty;?></td>
                             <td><?=$value->desc;?></td>
-                            <td><?=number_format($value->price, 2, '.', ',');?></td>
-                            <td><?=number_format($value->extn, 2, '.', ',');?></td>
+                            <td class="right_align_number"><?=sprintf("%.2f", $value->price);?></td>
+                            <td class="right_align_number"><?=sprintf("%.2f", $value->extn);?></td>
                           </tr>
                         <?}
-                      }?>
+                      }
+                    }?>
                     </tbody>
                     <tr>
+                      <td colspan="2">Sub Total</td>
+                      <td><span id="currency-label">USD</span></td>
+                      <td class="right_align_number">$<?= sprintf("%.2f", $invoice['invoice_total_amount'])?></td>
+                    </tr>
+                    <tr>
                       <td colspan="2"></td>
-                      <td>Total</td>
-                      <td><?= '$' . number_format($invoice["invoice_total_amount"], 2, '.', ',');?></td>
+                      <td><span id="alternate-total">KYD</span></td>
+                      <td class="right_align_number">$<span name="alternate_total_value" id="alternate_total_value" ></span></td>
+                    </tr>
+
+                    <!-- service charge -->
+                    <tr>
+                      <td colspan="2">Service Charge</td>
+                      <td> <span id="service-charge-currency-label">USD</span></td>
+                      <td class="right_align_number">$<?=$invoice['service_charge_amount'];?></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td><span id="service-charge-alternate-total">KYD</span></td>
+                      <td class="right_align_number">$<span name="alternate_service_charge" id="alternate_service_charge" ></span></td>
+                    </tr>
+
+                    <!-- grand total -->
+                    <tr>
+                      <td colspan="2"><strong>Grand Total</strong></td>
+                      <td> <span id="grand-total-currency-label">USD</span></td>
+                      <td class="right_align_number">$<?=$invoice['grand_total_amount']?></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td><span id="grand-total-alternate-total">KYD</span></td>
+                      <td class="right_align_number">$<span name="grand_alternate_total_value" id="grand_alternate_total_value" ></span></td>
                     </tr>
                   </table>
                 </div>
@@ -172,6 +230,7 @@
     <script type="text/javascript">
       var req_item_counter = 1;
       var po_total_cost = 0;
+      var currency_id = <?=$invoice["currency_id"]?>;
 
     $(document).ready(function(){
       $("#msg-holder").hide();
@@ -180,9 +239,124 @@
           changeYear: true,
           yearRange: "-50:+0" 
         });
-        $('#add-user-frm').validator();      
+        $('#add-user-frm').validator();  
+
+        
+        var total = <?=$invoice["invoice_total_amount"]?>;
+        var service_charge = <?=$invoice["service_charge_amount"]?>;
+        var grand_total = <?=$invoice["grand_total_amount"]?>;
+
+        toggle_item_currency_labels(currency_id);
+
+        //set_alternate_total( currency_id, total );
+        calculate_alternate_sub_total_currency_value( total );
+        calculate_alternate_service_charge_currency_value(service_charge);
+        calculate_alternate_grand_total_currency_value(grand_total);
 
     });
+
+    function toggle_item_currency_labels(currency_id){
+      if( currency_id == 1 ){
+          $("#currency-label").text( "USD" );
+          $("#alternate-total").text("KYD");
+
+          $("#service-charge-currency-label").text( "USD" );
+          $("#service-charge-alternate-total").text("KYD");
+
+          $("#grand-total-currency-label").text( "USD" );
+          $("#grand-total-alternate-total").text("KYD");
+        } else {
+          $("#currency-label").text( "KYD" );
+          $("#alternate-total").text("USD");
+
+          $("#service-charge-currency-label").text( "KYD" );
+          $("#service-charge-alternate-total").text("USD");
+
+          $("#grand-total-currency-label").text( "KYD" );
+          $("#grand-total-alternate-total").text("USD");
+        }
+    }
+
+    function calculate_alternate_sub_total_currency_value( base_total ){
+      //var currency_id = $("#currency-id").val();
+
+      if( currency_id != '' && base_total != '' ){
+        $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + base_total + "' );?>")
+        .done(function( data ) {
+          console.log( data  );
+          var obj = $.parseJSON(data);
+          $("#alternate_total_value").text(obj);
+        });
+
+      } else {
+        console.log("empty");
+      }
+    }
+
+    function calculate_alternate_service_charge_currency_value( service_charge ){
+      if(service_charge != null && parseFloat(service_charge) != ""){
+        console.log("in");
+        console.log("sc: " + service_charge);
+        //var currency_id = parseInt($("#currency-id").val());
+        //console.log("currency id: " + isNaN( currency_id));
+        //console.log("sc id: " + isNaN( service_charge));
+        //var service_charge_2 = parseFloat( service_charge );
+        //console.log("sc 2: " + service_charge_2);
+        if( currency_id != '' && parseFloat(service_charge) != '' ){
+            $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + service_charge + "' );?>")
+          .done(function( data ) {
+            console.log( data  );
+            var obj = $.parseJSON(data);
+            $("#alternate_service_charge").text(obj);
+          });
+
+        } else {
+          console.log("empty");
+        }
+      } else {
+        $("#alternate_service_charge").text(0);
+      }
+      
+    }
+
+    function calculate_alternate_grand_total_currency_value( grand_base_total ){
+      //var currency_id = $("#currency-id").val();
+      
+      if( currency_id != '' && grand_base_total != '' ){
+        $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + grand_base_total + "' );?>")
+        .done(function( data ) {
+          console.log( data  );
+          var obj = $.parseJSON(data);
+          $("#grand_alternate_total_value").text(obj);
+        });
+
+      } else {
+        console.log("empty");
+      }
+    }
+
+    function set_alternate_total( currency_id, total ){
+
+        if( currency_id != '' && total != '' ){
+          $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + total + "' );?>")
+          .done(function( data ) {
+            console.log( data  );
+            var obj = $.parseJSON(data);
+            $("#alternate_total_value").text(obj);
+          });
+
+          if( currency_id == 1 ){
+            $("#currency-label").text( "USD" );
+            $("#alternate-total").text("KYD");
+          } else {
+            $("#currency-label").text( "KYD" );
+            $("#alternate-total").text("USD");
+          }
+
+        } else {
+          console.log("empty");
+        }
+    }
 
     $("#btnPrint").click(function(){
         if($("#approve_po_section").is(":visible")){

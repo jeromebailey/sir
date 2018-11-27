@@ -51,11 +51,13 @@
                   //echo "<pre>";print_r($clients);exit;
                   foreach ($requisitions as $key => $value) {
                     $requisition_id = $value["requisition_id"];
+                    $flight_type = ( $value["flight_type"] == 0 ) ? "Staff" : $value["flight_type"];
+                    $flight_no = ( $value["flight_no"] == 0 ) ? "Staff" : $value["flight_no"];
                     ?>
                     <tr>
                       <td><?=$value["client_name"];?></td>
-                      <td><?=$value["flight_type"];?></td>
-                      <td><?=$value["flight_no"];?></td>
+                      <td><?=$flight_type;?></td>
+                      <td><?=$flight_no;?></td>
                       <td><?=$value["created_by"];?></td>
                       <td><?= date("M d, Y", strtotime($value["requisition_date"]));?></td>
                       <td>

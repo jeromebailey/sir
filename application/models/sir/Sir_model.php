@@ -29,6 +29,20 @@ class Sir_model extends CI_Model
 		return $result->result_array();
 	}
 
+	public function get_next_basic_invoice_no()
+	{
+		$sql = "select next_invoice_no from next_basic_invoice_seq_no";
+		$result = $this->db->query($sql);
+		return $result->result_array();
+	}
+
+	public function get_next_ba_type_invoice_no()
+	{
+		$sql = "select next_invoice_no from next_ba_type_invoice_seq_no";
+		$result = $this->db->query($sql);
+		return $result->result_array();
+	}
+
 	public function get_next_quote_no()
 	{
 		$sql = "select next_quote_no from next_quote_seq_no";
@@ -201,5 +215,13 @@ class Sir_model extends CI_Model
 
 			return $padded_product_id;
 		}
+	}
+
+	public function get_last_insert_key_for_table( $table_name, $key_name ){
+		$query = "select max($key_name) 'last_inserted_id' from $table_name;";
+
+		$result = $this->format_query_result_as_array($query);
+
+		return $result[0]["last_inserted_id"];
 	}
 }

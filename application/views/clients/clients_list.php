@@ -101,6 +101,7 @@
         $("#msg-holder").hide();
           $('#data-table').DataTable({
             dom: 'Bfrtip',
+            "pageLength": 50,
             buttons: [
                 'copyHtml5', 'csvHtml5', 'excelHtml5', 'pdfHtml5', 'print'
             ]

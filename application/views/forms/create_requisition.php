@@ -52,12 +52,19 @@
             <form id="frm" class="form-horizontal form-label-left" method="post" action="<?=base_url('Forms/do_create_requisition')?>" data-toggle="validator" role="form"> 
 
               <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="creation-date">Creation Date</label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  <input type="text" name="creation-date" id="creation-date" class="form-control" readonly="readonly" value="<?=date('M d, Y');?>">
+                </div>
+              </div>   
+
+              <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Requisition Date<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" readonly="readonly" value="<?=date('M d, Y');?>">
+                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" value="<?=date('M d, Y');?>">
                 </div>
-              </div>             
+              </div>          
 
               <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-id">Client Name<span class="required">*</span>
@@ -271,8 +278,8 @@
         }
       });
 
-        $( "#dob" ).datepicker({ 
-          dateFormat: 'yy-mm-dd',
+        $( "#requisition-date" ).datepicker({ 
+          dateFormat: 'M dd, yy',
           changeYear: true,
           yearRange: "-50:+0" 
         });
@@ -337,26 +344,7 @@
           prep_fields_for_staff_requisition();
         } else {
           $("#flight-type-id").val( "" );
-          $.ajax({
-            url: "<?=base_url('WebService/get_client_flights/" + client_id +"');?>",
-            type: 'post',
-            data: {client_id:client_id},
-            dataType: 'json',
-            success:function(response){
-
-                var len = response.length;
-
-                $("#client-flight-id").empty();
-                $("#client-flight-id").append("<option value=''>Select Flight</option>");
-                for( var i = 0; i<len; i++){
-                    var id = response[i]['client_flight_id'];
-                    var name = response[i]['flight_no'];
-                    
-                    $("#client-flight-id").append("<option value='"+id+"'>"+name+"</option>");
-
-                }
-            }
-          });
+          get_client_flights(client_id);
         }        
     });
 
@@ -366,6 +354,28 @@
 
       $("#flight-type-id").val( "STAFF" );
       $("#client-flight-id").val( "STAFF" );
+    }
+
+    function get_client_flights( client_id ){
+      $.ajax({
+          url: "<?=base_url('WebService/get_client_flights/" + client_id +"');?>",
+          type: 'post',
+          data: {client_id:client_id},
+          dataType: 'json',
+          success:function(response){
+
+              var len = response.length;
+
+              $("#client-flight-id").empty();
+              $("#client-flight-id").append("<option value=''>Select Flight</option>");
+              for( var i = 0; i<len; i++){
+                  var id = response[i]['client_flight_id'];
+                  var name = response[i]['flight_no'];
+                  
+                  $("#client-flight-id").append("<option value='"+id+"'>"+name+"</option>");
+              }
+          }
+      });
     }
 
     $('#edit_item_modal').on('show.bs.modal', function (e) {

@@ -107,6 +107,7 @@ class FlightCheckSheets extends CI_Controller {
 		unset( $temp_array['date-and-time'] );
 		unset( $temp_array['client-id'] );
 		unset( $temp_array['flight-no'] );
+		unset( $temp_array['tail-no'] );
 		unset( $temp_array['check-sheet-no'] );
 		unset( $temp_array['cycle'] );
 		unset( $temp_array['section-id'] );
@@ -126,6 +127,7 @@ class FlightCheckSheets extends CI_Controller {
 		$client_id = $this->input->post("client-id");
 		$date_and_time = $this->input->post("date-and-time");
 		$flight_no = $this->input->post("flight-no");
+		$tail_no = $this->input->post("tail-no");
 		$check_sheet_no = $this->input->post("check-sheet-no");
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
@@ -240,8 +242,9 @@ class FlightCheckSheets extends CI_Controller {
 		$data = array(
 			'client_id' => $client_id,
 			'date_time' => date("Y-m-d H:i:s", strtotime($date_and_time)),
-			'flight_no' => $flight_no,
-			'check_sheet_no' => $check_sheet_no,
+			'flight_no' => trim($flight_no),
+			'tail_no' => trim($tail_no),
+			'check_sheet_no' => trim($check_sheet_no),
 			'cycle' => $cycle,
 			'breakfast_crew_meals' => json_encode($breakfast_crew_meals),
 			'breakfast_first_class_meals' => json_encode($breakfast_first_class),			
@@ -323,6 +326,7 @@ class FlightCheckSheets extends CI_Controller {
 		unset( $temp_array['date-and-time'] );
 		unset( $temp_array['client-id'] );
 		unset( $temp_array['flight-no'] );
+		unset( $temp_array['tail-no'] );
 		unset( $temp_array['check-sheet-no'] );
 		unset( $temp_array['cycle'] );
 		unset( $temp_array['section-id'] );
@@ -342,6 +346,7 @@ class FlightCheckSheets extends CI_Controller {
 		$client_id = $this->input->post("client-id");
 		$date_and_time = $this->input->post("date-and-time");
 		$flight_no = $this->input->post("flight-no");
+		$tail_no = $this->input->post("tail-no");
 		$check_sheet_no = $this->input->post("check-sheet-no");
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
@@ -456,8 +461,9 @@ class FlightCheckSheets extends CI_Controller {
 		$data = array(
 			'client_id' => $client_id,
 			'date_time' => date("Y-m-d H:i:s", strtotime($date_and_time)),
-			'flight_no' => $flight_no,
-			'check_sheet_no' => $check_sheet_no,
+			'flight_no' => trim($flight_no),
+			'tail_no' => trim($tail_no),
+			'check_sheet_no' => trim($check_sheet_no),
 			'cycle' => $cycle,
 			'breakfast_crew_meals' => json_encode($breakfast_crew_meals),
 			'breakfast_first_class_meals' => json_encode($breakfast_first_class),			

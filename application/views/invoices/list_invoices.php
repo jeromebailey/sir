@@ -19,7 +19,10 @@
         <div class="right_col" role="main">
 
           <div class="x_content">
-            <h3><?=$page_title;?></h3>
+            <h3><?=$page_title;?>
+            <a href="<?=base_url('Forms/create_invoice')?>" class="btn btn-sm btn-danger">
+              Create New Invoice <i class="fas fa-receipt" aria-hidden="true"></i></a>
+            </h3>
 
             <div class="row" >
               <div class="col-md-12 col-sm-12 col-xs-12 col-lg-12">
@@ -55,6 +58,10 @@
                       <td><?=$value["created_by"];?></td>
                         <td>
                         <a href="<?=base_url('Invoices/view_invoice/'.$invoice_id)?>" title="Details"><i class="fas fa-file-alt"></i></a> |
+
+                        <?if($this->sir->user_has_permission_to("duplicate_invoice")){?>
+                          <a href="<?=base_url('Invoices/duplicate_invoice/'.$invoice_id)?>" title="Duplicate"><i class="fas fa-copy"></i></a> |
+                        <?}?>
 
                         <?if($this->sir->user_has_permission_to("edit_invoice")){?>
                           <a href="<?=base_url('Invoices/edit_invoice/'.$invoice_id)?>" title="Edit"><i class="fas fa-edit"></i></a> |

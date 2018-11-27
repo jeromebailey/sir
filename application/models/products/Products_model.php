@@ -26,6 +26,7 @@ class Products_model extends CI_Model
 	}
 
 	public function get_all_products_as_string(){
+
 		$query = "SELECT GROUP_CONCAT(CONCAT(product_name, '(', product_id, ')') SEPARATOR '|') product_name
 					FROM products
 					ORDER BY product_name";
@@ -43,12 +44,15 @@ class Products_model extends CI_Model
 		return $product_id = $product_id_result[0]["product_id"] + 1;
 	}
 
-	public function get_all_products()
+	public function get_all_products($category_id = null)
 	{
+		$_where = ( $category_id == null || $category_id == "" ) ? "" : " where category_id = " . $category_id;
+
 		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, p.`price`, c.`category_name`, p.`barcode`, p.`product_category_id`
 				FROM products p
-				INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
-				ORDER BY p.`product_name`";
+				INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`"
+				. $_where .
+				" ORDER BY p.`product_name`";
 
 		return $this->sir->format_query_result_as_array($query);
 	}
@@ -175,20 +179,24 @@ class Products_model extends CI_Model
 		return $this->sir->format_query_result_as_array($query);
 	}
 
-	public function get_inventory_list(){
+	public function get_inventory_list($category_id = null){
+		
+		$_where = ( $category_id == null || $category_id == "" ) ? "" : " where category_id = " . $category_id;
+
         $query = "SELECT p.`product_id`, p.`product_name`, p.`description`, c.`category_name`, p.`barcode`, p.`product_category_id`,
                     l.`current_stock_level`, p.price
                     FROM products p
                     INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
-                    LEFT JOIN $this->product_stock_levels_table l ON l.`product_id` = p.`product_id`
-                    ORDER BY p.`product_name`";
+                    LEFT JOIN $this->product_stock_levels_table l ON l.`product_id` = p.`product_id`"
+                    . $_where .
+                    " ORDER BY p.`product_name`";
 
         return $this->sir->format_query_result_as_array($query);
 	}
 
 	public function get_inventory_by_category_with_product_item_total_cost( $category_id ){
 		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, c.`category_name`, p.`barcode`, p.`product_category_id`,
-					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost, u.`unit_abbreviation`
+					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost, u.`unit_abbreviation`, p.unit_id
 					FROM products p
 					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
 					LEFT JOIN product_stock_levels l ON l.`product_id` = p.`product_id`

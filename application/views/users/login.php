@@ -82,6 +82,9 @@
 					</div>
 					
 				</form>
+				<div style="position: fixed; bottom: 10px;padding-right:10px;" >
+					&copy; 2018 <a href="https://codedbyjb.com" target="_blank">Coded by JB</a>
+				</div>
 
 				<div class="login100-more" style="background-image: url(<?=base_url('assets/images/inventory-01.jpg');?>">
 				</div>

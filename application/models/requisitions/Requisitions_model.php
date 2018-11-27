@@ -42,8 +42,8 @@ class Requisitions_model extends CI_Model
 		(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by'
 					FROM requisitions r
 					INNER JOIN clients c ON c.`client_id` = r.`client_id`
-					INNER JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
-					INNER JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
+					LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
+					LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
 					ORDER BY r.`requisition_date` DESC;";
 
 		return $this->sir->format_query_result_as_array($query);
@@ -56,8 +56,8 @@ class Requisitions_model extends CI_Model
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by'
 					FROM requisitions r
 					INNER JOIN clients c ON c.`client_id` = r.`client_id`
-					INNER JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
-					INNER JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
+					LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
+					LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
 					WHERE r.`requisition_id` = $requisition_id";
 
 		return $this->sir->format_query_result_as_array($query);

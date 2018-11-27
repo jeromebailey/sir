@@ -22,12 +22,21 @@ class Products extends CI_Controller {
 	public function index()
 	{
 		$PageTitle = "ALL Products";
+		$category_id = $this->uri->segment(3);
+		$categories = $this->categories->get_all_categories();
 
-		$products = $this->products->get_all_products();
+		if(empty($category_id))
+		{
+			$products = $this->products->get_all_products(null);
+		} else {
+			$products = $this->products->get_all_products($category_id);
+		}
 
 		$data = array(
 			"page_title" => $PageTitle,
-			"products" => $products
+			"products" => $products,
+			"categories" => $categories,
+			"category_id" => $category_id
 			);
 
 		$this->load->view('products/list_all_products', $data);
@@ -223,12 +232,22 @@ class Products extends CI_Controller {
 
 	public function inventory_list(){
 	    $PageTitle = "Inventory List";
+	    
+	    $category_id = $this->uri->segment(3);
+		$categories = $this->categories->get_all_categories();
 
-	    $inventory = $this->products->get_inventory_list();
+		if(empty($category_id))
+		{
+			$inventory = $this->products->get_inventory_list();
+		} else {
+			$inventory = $this->products->get_inventory_list($category_id);
+		}
 
 	    $data = array(
 	        "page_title" => $PageTitle,
-	        "inventory" => $inventory
+	        "inventory" => $inventory,
+	        "categories" => $categories,
+			"category_id" => $category_id
 	    );
 
 	    $this->load->view('products/inventory_list', $data);

@@ -37,6 +37,13 @@
               <input type="hidden" name="requisition_id" value="<?=$requisition_id?>">
 
               <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="creation-date">Creation Date</label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  <input type="text" name="creation-date" id="creation-date" class="form-control" readonly="readonly" value="<?=date('M d, Y');?>">
+                </div>
+              </div>  
+
+              <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Requisition Date<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
@@ -208,6 +215,39 @@
 
             </form>
 
+            <div id="edit_item_modal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog">
+              <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title">Edit Item</h4>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Product Name</label>
+                            <input type="text" name="m_product_name" id="m_product_name" class="form-control" style="z-index: 10000">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Amount</label>
+                            <input type="text" name="m_item_amount" id="m_item_amount" class="form-control">
+                          </div>
+                        </div>
+
+                        <input type="hidden" value="" name="m_item_key" id="m_item_key">
+                          
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" name="btnMEditItem" id="btnMEditItem" class="btn btn-primary">Save changes</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
           </div>
           <!-- top tiles -->
 
@@ -357,13 +397,28 @@
 
     function edit_requisition_item(item_counter){
       $("#edit_item_modal").modal('show');
+      console.log( item_counter );
 
       var product_name = $("#requisition-product-name-" + item_counter).val();
       var amount = $("#requisition-amount-" + item_counter).val();
-      var product_name = $("#requisition-product-name-" + item_counter).val();
+      //var product_name = $("#requisition-product-name-" + item_counter).val();
 
       $("#m_product_name").val( product_name );
+      $("#m_item_amount").val( amount );
+      $("#m_item_key").val( item_counter );
     }
+
+    $("#btnMEditItem").click(function(){      
+
+      var product_name = $("#m_product_name").val();
+      var amount = $("#m_item_amount").val();
+      var item_counter = $("#m_item_key").val();
+
+      $("#requisition-product-name-" + item_counter).val(product_name);
+      $("#requisition-amount-" + item_counter).val(amount);
+
+      $("#edit_item_modal").modal('hide');
+    });
 
     $("#product-name").autocomplete({
       source: function (request, response) {

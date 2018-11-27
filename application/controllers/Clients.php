@@ -161,6 +161,40 @@ class Clients extends CI_Controller {
 		return redirect("Clients/add_client_flight");
 	}
 
+	public function add_client_invoice_heading(){
+		$PageTitle = "Add Client Invoice Heading";
+
+		$clients = $this->clients->get_all_clients();
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"clients" => $clients,
+			);
+
+		$this->load->view('clients/add_client_invoice_heading', $data);
+	}
+
+	public function do_add_client_invoice_heading(){
+		$client_id = $this->input->post("client-id");
+		$invoice_heading = $this->input->post("invoice-heading");
+
+		$data = array(
+			"client_id" => $client_id,
+			"invoice_heading" => $invoice_heading
+		);
+
+		try{
+			$this->clients->insert_client_invoice_heading( $data );
+			$this->logger->add_log(19, $this->session->userdata("user_id"), NULL, json_encode($data));
+			$this->sir_session->add_status_message("Client Invoice Heading was successfully added!", "success");
+		} catch( Exception $ex ){
+			$this->xxx->log_exception( $ex->getMessage() );
+			$this->sir_session->add_status_message("Client Invoice Heading was NOT added! Please try again!", "danger");
+		}
+
+		return redirect("Clients/add_client_invoice_heading");
+	}
+
 	public function view_client( $client_id ){
 		$PageTitle = "View Client";
 

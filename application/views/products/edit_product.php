@@ -265,7 +265,8 @@
               $("#msg-holder").show();
             }            
           })
-          .fail(function() {
+          .fail(function(response) {
+            console.log( response.responseText );
             $("#msg-holder").addClass('alert-danger');
             $("#msg-holder").html("Sorry, there was a problem generating the barcode for the product. Please try again.");
             $("#msg-holder").show();

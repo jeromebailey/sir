@@ -148,7 +148,6 @@ class Reports extends CI_Controller {
 
 	public function inventory_items_in_category(){
 		
-
 		$category_id = $this->uri->segment(3);
 		$categories = $this->categories->get_all_categories();
 		$todays_date = date("F d, Y");
@@ -179,6 +178,47 @@ class Reports extends CI_Controller {
 			);
 
 		$this->load->view('reports/inventory_items_in_category', $data);
+	}
+
+	public function pricing_inventory(){
+		$category_id = $this->uri->segment(3);
+		$categories = $this->categories->get_all_categories();
+		$todays_date = date("F d, Y");
+		$category_name = "" ;
+
+		if(empty($category_id))
+		{
+			$product_category_items_with_item_total_cost = null;
+			$category_id = null;
+			//$no_of_items_in_category = null;
+			//$total_product_cost_in_category = null;
+		} else {
+			$category_name = $this->sir->get_category_name($category_id);
+			$product_category_items_with_item_total_cost = $this->products->get_inventory_by_category_with_product_item_total_cost( $category_id );
+			//$no_of_items_in_category = $this->products->count_no_of_items_in_a_category( $category_id );
+			//$total_product_cost_in_category = $this->products->get_total_cost_in_a_category( $category_id );
+		}
+
+		$PageTitle =  $category_name . " Inventory Items for " . $todays_date; 
+		$uom = $this->sir->get_all_uom();
+
+		foreach ($uom as $key => $value) {
+			$my_array[$value["unit_id"]] = $value["unit_abbreviation"];
+		}
+
+		//echo "<pre>";print_r($my_array);exit;
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"product_category_items_with_item_total_cost" => $product_category_items_with_item_total_cost,
+			"categories" => $categories,
+			"uom" => $uom,
+			"my_uom" => $my_array,
+			"category_id" => $category_id
+			//"total_product_cost_in_category" => $total_product_cost_in_category[0]["total_cost"]
+			);
+
+		$this->load->view('reports/pricing_inventory', $data);
 	}
 
 }

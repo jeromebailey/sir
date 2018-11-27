@@ -190,14 +190,25 @@
                 <div class="x_content">
                   <div class="dashboard-widget-content">
                     <ul class="quick-actions">
-                      <li><i class="fas fa-money-bill-alt"></i><a href="<?=base_url('Forms/create_purchase_order');?>">Create Purchase Order</a>
-                      </li>
-                      <li><i class="fas fa-question"></i><a href="<?=base_url('Forms/create_requisition');?>">Product Requisition Form</a>
-                      </li>
-                      <li><i class="fas fa-plane"></i><a href="<?=base_url('Forms/create_flight_check_sheet');?>">Create Flight Check Sheet</a> </li>
+                      <?if($this->sir->user_has_permission_to("create_purchase_order")){?>
+                        <li><i class="fas fa-money-bill-alt"></i><a href="<?=base_url('Forms/create_purchase_order');?>">Create Purchase Order</a></li>
+                      <?}?>
+
+                      <?if($this->sir->user_has_permission_to("create_requisition")){?>
+                          <li><i class="fas fa-question"></i><a href="<?=base_url('Forms/create_requisition');?>">Product Requisition Form</a></li>
+                      <?}?>
+
+                      <?if($this->sir->user_has_permission_to("create_flight_check_sheet")){?>
+                        <li><i class="fas fa-plane"></i><a href="<?=base_url('Forms/create_flight_check_sheet');?>">Create Flight Check Sheet</a> </li>
+                      <?}?>                      
+                      
                       <li><i class="fab fa-product-hunt"></i><a href="<?=base_url('Products/');?>">Products List</a> </li>
                       <li><i class="fas fa-boxes"></i><a href="<?=base_url('Forms/create_flight_check_sheet');?>">Inventory List</a> </li>
-                      <li><i class="fas fa-list-alt"></i><a href="<?=base_url('Reports/');?>">Reports</a> </li>
+                      
+                      <?if($this->sir->user_has_permission_to("view_reports")){?>
+                        <li><i class="fas fa-list-alt"></i><a href="<?=base_url('Reports/');?>">Reports</a> </li>
+                      <?}?>
+                      
                     </ul>                    
                   </div>
                 </div>

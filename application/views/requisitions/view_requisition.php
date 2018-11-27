@@ -52,6 +52,13 @@
 
               <div class="row">
                 <div class="col-md-6 col-xs-12 col-sm-12 col-lg-12">
+                  <label for="requisition-date" class="text-uppercase"><i>Creation Date</i>:</label>
+                  <?=date('d-M-Y', strtotime($requisition["date_created"]));?>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 col-xs-12 col-sm-12 col-lg-12">
                   <label for="requisition-date" class="text-uppercase"><i>Requisition Date</i>:</label>
                   <?=date('d-M-Y', strtotime($requisition["requisition_date"]));?>
                 </div>
@@ -67,14 +74,26 @@
               <div class="row">
                 <div class="col-md-6">
                   <label for="requisition-date" class="text-uppercase"><i>Flight Type</i>:</label>
-                  <?=$requisition["flight_type"];?>
+                  <?
+                  if( $requisition["flight_type_id"] == 0 ){
+                    echo "Staff";
+                  } else {
+                    echo $requisition["flight_type"];
+                  }
+                  ?>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-md-6">
                   <label for="requisition-date"><i>Flight No.</i>:</label>
-                  <?=$requisition["flight_no"];?>
+                  <?
+                  if( $requisition["client_flight_id"] == 0 ){
+                    echo "Staff";
+                  } else {
+                    echo $requisition["flight_no"];
+                  }
+                  ?>
                 </div>
               </div>
 

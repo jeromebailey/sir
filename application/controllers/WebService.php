@@ -41,6 +41,10 @@ class WebService extends CI_Controller {
 		echo $this->clients->json_get_client_flights($client_id);
 	}
 
+	public function get_client_routes_types($client_id){
+		echo $this->clients->json_get_client_routes_types($client_id);
+	}
+
 	public function find_product_by_barcode($bar_code){
 	    //echo "<pre>";print_r( $this->products->search_product_by_barcode($bar_code) );exit;
 	    echo json_encode($this->products->search_product_by_barcode($bar_code));
@@ -67,7 +71,7 @@ class WebService extends CI_Controller {
 		echo $this->requisitions->dispatch_requisition_service( $requisition_id );
 	}
 
-	public function do_delete_item($controller_name, $key){
+	public function do_delete_item($controller_name, $key, $type = null){
 		if( !empty($controller_name) ){
 			switch ($controller_name) {
 				case 'requisitions':
@@ -91,7 +95,7 @@ class WebService extends CI_Controller {
 					break;
 
 				case 'invoices':
-					echo $this->invoice->delete_invoice($key);
+					echo $this->invoice->delete_invoice($key, $type);
 					break;
 
 				case 'quotes':

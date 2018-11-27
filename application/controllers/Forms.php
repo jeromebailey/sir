@@ -74,6 +74,7 @@ class Forms extends CI_Controller {
 	{
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
+		$requisition_date = $this->input->post("requisition-date");
 
 		if( $client_id == self::staff_requisition_key ){
 			$flight_type_id = 0;
@@ -116,15 +117,15 @@ class Forms extends CI_Controller {
 				}
 			} //end of for loop			
 
-			$details = json_encode($record);
-			
+			$details = json_encode($record);			
 
 			$data = array(
 				"client_id" => $client_id,
+				"date_created" => date("Y-m-d"),
 				"flight_type_id" => $flight_type_id,
 				"client_flight_id" => $client_flight_id,
 				"passenger_count" => $passenger_count,
-				"requisition_date" => date("Y-m-d"),
+				"requisition_date" => date("Y-m-d", strtotime($requisition_date)),
 				"details" => $details,
 				"store_keeper_employee_id" => $this->session->userdata("user_id"),
 				"dispatched" => 0
@@ -276,12 +277,13 @@ class Forms extends CI_Controller {
 		//$this->sir_session->clear_status_message();
 
 		$PageTitle = "Create Invoice";
-		$clients = $this->clients->get_all_clients();
+		$clients = $this->clients->get_all_clients_without_ba();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
 		$next_invoice_no = $this->sir->get_next_invoice_no();
 		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
 		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
+		$invoice_headings = $this->invoice->get_invoice_headings();
 
 		$data = array(
 			"page_title" => $PageTitle,
@@ -290,7 +292,8 @@ class Forms extends CI_Controller {
 			"bill_to_address" => $bill_to_address[0]['settings_value'],
 			"next_invoice_no" => $next_invoice_no[0]['next_invoice_no'],
 			"company_address" => $company_address[0]["settings_value"],
-			"company_name" => $company_name[0]["settings_value"]
+			"company_name" => $company_name[0]["settings_value"],
+			"invoice_headings" => $invoice_headings
 			);
 
 		$this->load->view('forms/create_invoice', $data);
@@ -300,69 +303,362 @@ class Forms extends CI_Controller {
 	{
 
 		//echo "<pre>";print_r($this->input->post());exit;
+		$temp_array = $_POST;
+
+		//remove items from array
+		unset( $temp_array['invoice_no'] );
+		unset( $temp_array['flight-date'] );
+		unset( $temp_array['tail-no'] );
+		unset( $temp_array['disbursement-no'] );
+		unset( $temp_array['client-id'] );
+		unset( $temp_array['client-routes-types'] );
+		unset( $temp_array['currency-id'] );
+		//unset( $temp_array['flight-quantity'] );
+		unset( $temp_array['heading_id'] );
+		unset( $temp_array['desc'] );
+		//unset( $temp_array['flt-qty-pctg'] );
+		unset( $temp_array['qty'] );
+		unset( $temp_array['price'] );
+		unset( $temp_array['extn'] );
+		unset( $temp_array['base_total'] );
+		unset( $temp_array['alternate_total_value'] );
+		unset( $temp_array['base_service_charge'] );
+		unset( $temp_array['alternate_service_charge'] );
+		unset( $temp_array['grand_base_total'] );
+		unset( $temp_array['grand_alternate_total_value'] );
+		unset( $temp_array['no_of_items'] );
+
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		//$placed_by = $this->input->post("placed-by");
-		//$approved_by = $this->input->post("approved-by");
-		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("total_cost");
+		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
+		$disbursement_no = $this->input->post("disbursement-no");
+		$tail_no = $this->input->post("tail-no");
+		$routes_type_id = $this->input->post("client-routes-types");
+		$total_cost = $this->input->post("base_total");
+		$base_currency = $this->input->post("currency-id");
+		$service_charge = $this->input->post("base_service_charge");
+		$grand_base_total = $this->input->post("grand_base_total");
 
-		if( $no_of_items > 0 )
-		{
-			$counter = 0;
-			$row = array();
-			$invoice_record = array();
-			for($i = 1; $i <= $no_of_items; $i++)
-			{
-				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+		$crew_items = $passenger_items = $main_invoice_items = array();
 
-				if( !empty($qty)  ){ //&& !empty($price)
-					$row["qty"] = $qty;
-					$row["desc"] = $desc;
-					$row["price"] = $price;
-					$row["extn"] = $extn;
+		$temp_row = array();
+		$record_counter = 1; //used to count record pairs: desc and qty
 
-					array_push($invoice_record, $row);
+		foreach ($temp_array as $key => $value) {
+			//echo "<pre>";print_r($key);
+			//echo "<pre>";print_r($value);exit;
 
-					unset($row);
-					$counter++;
-				}
-			}
+			if( $value != null ){ //only do operation if there is a value for a description or qty
+				$key_parts = explode("-", $key);
 
-			$invoice_details = json_encode($invoice_record);
-			
+				$section_id = $key_parts[0];
 
-			$data = array(
-				"invoice_no" => $invoice_no,
-				"client_id" => $client_id,
-				"invoice_date" => date("Y-m-d"),
-				"invoice_details" => $invoice_details,
-				"invoice_total_amount" => $total_cost,
-				"created_by_employee_id" => $this->session->userdata("user_id")
-			);
+				if( $record_counter == 1 ){
+					$temp_row["qty"] = $value;
+					$record_counter++;	
+				} else if( $record_counter == 2 ){
+					$temp_row["desc"] = $value;
+					$record_counter++;	
+				} else if($record_counter == 3){
+					$temp_row["price"] = $value;
+					$record_counter++;
+				} else if($record_counter == 4){
+					$temp_row["extn"] = $value;					
+
+					switch ($section_id) {
+						case 0:
+							array_push($main_invoice_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 1:
+							array_push($passenger_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 2:
+							array_push($crew_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;						
+						
+						default:
+							# code...
+							break;
+//echo "<pre>";print_r($temp_row);exit;
+						
+					} //end of case
+				}				
+			} //end of check for empty $value variable
+		}  //end of foreach loop
+
+		//$invoice_details = json_encode($invoice_record);			
+
+		$data = array(
+			"invoice_no" => $invoice_no,
+			"client_id" => $client_id,
+			"routes_type_id" => $routes_type_id,
+			"invoice_date" => date("Y-m-d"),
+			'tail_no' => trim($tail_no),
+			"flight_date" => $flight_date,
+			"disbursement_no" => $disbursement_no,
+			"invoice_details" => json_encode($main_invoice_items),
+			"crew_details" => json_encode($crew_items),
+			"passenger_details" => json_encode($passenger_items),
+			"invoice_total_amount" => $total_cost,
+			"currency_id" => $base_currency,
+			"service_charge_amount" => $service_charge,
+			"grand_total_amount" => $grand_base_total,
+			"created_by_employee_id" => $this->session->userdata("user_id")
+		);
+		//echo "<pre>";print_r($data);exit;
+		try{
+			$this->invoice->insert_invoice($data);
+			$this->invoice->increment_invoice_seq_no();
 
 			try{
-				$this->invoice->insert_invoice($data);
-				$this->invoice->increment_invoice_seq_no();
+				$this->logger->add_log(26, $this->session->userdata("user_id"), NULL, json_encode($data));
+			} catch(Exception $x){
+				$this->xxx->log_exception( $x->getMessage() );
+			}
+			
+			$this->sir_session->add_status_message("Your Invoice has been created successfully!", "success");
+		} catch( Exception $e ){
+			$this->xxx->log_exception( $e->getMessage() );
+			$this->sir_session->add_status_message("Sorry, your Invoice was not created successfully!", "danger");
+		}
+
+		redirect("/Forms/create_invoice");
+		
+	} //end of function
+
+	public function create_ba_type_invoice()
+	{
+		//manage session
+		//$this->sir_session->clear_status_message();
+
+		$PageTitle = "Create Invoice (BA Type)";
+		$clients = $this->clients->get_all_clients();
+		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
+		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
+		$next_invoice_no = $this->sir->get_next_ba_type_invoice_no();
+		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
+		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
+		$invoice_headings = $this->invoice->get_ba_invoice_headings();
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"clients" => $clients,
+			"ship_to_address" => $ship_to_address[0]['settings_value'],
+			"bill_to_address" => $bill_to_address[0]['settings_value'],
+			"next_invoice_no" => $next_invoice_no[0]['next_invoice_no'],
+			"company_address" => $company_address[0]["settings_value"],
+			"company_name" => $company_name[0]["settings_value"],
+			"invoice_headings" => $invoice_headings
+			);
+
+		$this->load->view('forms/create_ba_type_invoice', $data);
+	}
+
+	public function do_add_ba_type_invoice()
+	{
+
+		//echo "<pre>";print_r($this->input->post());exit;
+		$temp_array = $_POST;
+
+		//remove items from array
+		unset( $temp_array['invoice_no'] );
+		unset( $temp_array['flight-date'] );
+		unset( $temp_array['tail-no'] );
+		unset( $temp_array['disbursement-no'] );
+		unset( $temp_array['client-id'] );
+		unset( $temp_array['client-routes-types'] );
+		unset( $temp_array['currency-id'] );
+		unset( $temp_array['flight-quantity'] );
+		unset( $temp_array['heading_id'] );
+		unset( $temp_array['desc'] );
+		unset( $temp_array['flt-qty-pctg'] );
+		unset( $temp_array['qty'] );
+		unset( $temp_array['price'] );
+		unset( $temp_array['extn'] );
+		unset( $temp_array['base_total'] );
+		unset( $temp_array['alternate_total_value'] );
+		unset( $temp_array['base_service_charge'] );
+		unset( $temp_array['alternate_service_charge'] );
+		unset( $temp_array['grand_base_total'] );
+		unset( $temp_array['grand_alternate_total_value'] );
+		unset( $temp_array['no_of_items'] );
+
+		$items_string = "";
+		$client_id = $this->input->post("client-id");
+		$invoice_no = $this->input->post("invoice_no");
+		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
+		$disbursement_no = $this->input->post("disbursement-no");
+		$client_route_type_id = $this->input->post("client-routes-types");
+		$tail_no = $this->input->post("tail-no");
+		$no_of_items = $this->input->post("no_of_items");
+		$total_cost = $this->input->post("base_total");
+		$base_currency = $this->input->post("currency-id");
+		$base_service_charge = $this->input->post("base_service_charge");
+		$grand_base_total = $this->input->post("grand_base_total");
+		$flight_quantity = $this->input->post("flight-quantity");
+
+		$breakfast_items = $entree_items = $cabin_crew_items = $misc_items =
+		$wtp_items = $wt_items = $cw_items = $retro_items = $ii_items = $tech_crew_items = array();
+
+		$temp_row = array();
+		$record_counter = 1; //used to count record pairs: desc and qty
+
+		foreach ($temp_array as $key => $value) {
+			//echo "<pre>";print_r($key);
+			//echo "<pre>";print_r($value);exit;
+
+			if( $value != null ){ //only do operation if there is a value for a description or qty
+				$key_parts = explode("-", $key);
+
+				$section_id = $key_parts[0];
+
+				if( $record_counter == 1 ){
+					$temp_row["desc"] = $value;
+					$record_counter++;	
+				} else if( $record_counter == 2 ){
+					$temp_row["percentage"] = $value;
+					$record_counter++;	
+				} else if($record_counter == 3){
+					$temp_row["qty"] = $value;
+					$record_counter++;
+				} else if($record_counter == 4){
+					$temp_row["price"] = $value;
+					$record_counter++;
+				} else if( $record_counter == 5 ){
+					$temp_row["extn"] = $value;
+
+					switch ($section_id) {
+						case 3:
+							array_push($wtp_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 4:
+							array_push($wt_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 5:
+							array_push($cw_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 6:
+							array_push($retro_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 7:
+							array_push($breakfast_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 8:
+							array_push($entree_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 9:
+							array_push($ii_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 10:
+							array_push($tech_crew_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 11:
+							array_push($cabin_crew_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+
+						case 12:
+							array_push($misc_items, $temp_row);
+							unset($temp_row);
+						$record_counter = 1;
+							break;
+						
+						default:
+							# code...
+							break;
+//echo "<pre>";print_r($temp_row);exit;
+						
+					} //end of case
+				}				
+			} //end of check for empty $value variable
+		}  //end of foreach loop
+
+
+		$data = array(
+			"invoice_no" => $invoice_no,
+			"client_id" => $client_id,
+			"routes_type_id" => $client_route_type_id,
+			"invoice_date" => date("Y-m-d"),
+			'tail_no' => trim($tail_no),
+			"flight_date" => $flight_date,
+			"disbursement_no" => $disbursement_no,
+			"flt_qty" => $flight_quantity,
+			"cc_details" => json_encode($cabin_crew_items),
+			"cw_details" => json_encode($cw_items),
+			"entree_details" => json_encode($entree_items),
+			"ii_details" => json_encode($ii_items),
+			"retro_details" => json_encode($retro_items),
+			"wt_details" => json_encode($wt_items),
+			"wtp_details" => json_encode($wtp_items),
+			"misc_details" => json_encode($misc_items),
+			"bf_details" => json_encode($breakfast_items),
+			"tech_crew_details" => json_encode($tech_crew_items),
+			"invoice_total_amount" => sprintf("%0.2f", $total_cost),
+			"service_charge_amount" => sprintf("%0.2f", $base_service_charge),
+			"grand_total_amount" => sprintf("%0.2f", $grand_base_total),
+			"currency_id" => $base_currency,
+			"created_by_employee_id" => $this->session->userdata("user_id")
+		);
+
+		//echo "<pre>";print_r($data);exit;
+
+		try{
+			$this->invoice->insert_ba_type_invoice($data);			
+			try{
+				$this->invoice->increment_ba_type_invoice_seq_no();
 
 				try{
-					$this->logger->add_log(26, $this->session->userdata("user_id"), NULL, json_encode($data));
+					$this->logger->add_log(33, $this->session->userdata("user_id"), NULL, json_encode($data));
 				} catch(Exception $x){
 					$this->xxx->log_exception( $x->getMessage() );
 				}
-				
-				$this->sir_session->add_status_message("Your Invoice has been created successfully!", "success");
-			} catch( Exception $e ){
-				$this->xxx->log_exception( $e->getMessage() );
-				$this->sir_session->add_status_message("Sorry, your Invoice was not created successfully!", "danger");
-			}
 
-			redirect("/Forms/create_invoice");
+				$this->sir_session->add_status_message("Your Invoice has been created successfully!", "success");
+			}
+			catch( Exception $increment_ex ){
+				$this->xxx->log_exception( $increment_ex->getMessage() );
+			}			
+		} catch( Exception $e ){
+			$this->xxx->log_exception( $e->getMessage() );
+			$this->sir_session->add_status_message("Sorry, your Invoice was not created successfully!", "danger");
 		}
+
+		redirect("/Forms/create_ba_type_invoice");
+		
 	} //end of function
 
 	public function create_purchase_order()
@@ -511,6 +807,7 @@ class Forms extends CI_Controller {
 		unset( $temp_array['date-and-time'] );
 		unset( $temp_array['client-id'] );
 		unset( $temp_array['flight-no'] );
+		unset( $temp_array['tail-no'] );
 		unset( $temp_array['check-sheet-no'] );
 		unset( $temp_array['cycle'] );
 		unset( $temp_array['section-id'] );
@@ -529,6 +826,7 @@ class Forms extends CI_Controller {
 		$client_id = $this->input->post("client-id");
 		$date_and_time = $this->input->post("date-and-time");
 		$flight_no = $this->input->post("flight-no");
+		$tail_no = $this->input->post("tail-no");
 		$check_sheet_no = $this->input->post("check-sheet-no");
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
@@ -649,8 +947,9 @@ class Forms extends CI_Controller {
 		$data = array(
 			'client_id' => $client_id,
 			'date_time' => date("Y-m-d H:i:s", strtotime($date_and_time)),
-			'flight_no' => $flight_no,
-			'check_sheet_no' => $check_sheet_no,
+			'flight_no' => trim($flight_no),
+			'tail_no' => trim($tail_no),
+			'check_sheet_no' => trim($check_sheet_no),
 			'cycle' => $cycle,
 			'breakfast_crew_meals' => json_encode($breakfast_crew_meals),
 			'breakfast_first_class_meals' => json_encode($breakfast_first_class),
@@ -690,4 +989,104 @@ class Forms extends CI_Controller {
 
 		redirect("/Forms/create_flight_check_sheet");
 	}
+
+	public function create_basic_invoice()
+	{
+		//manage session
+		//$this->sir_session->clear_status_message();
+
+		$PageTitle = "Create Invoice";
+		$clients = $this->clients->get_all_clients();
+		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
+		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
+		$next_invoice_no = $this->sir->get_next_basic_invoice_no();
+		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
+		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"clients" => $clients,
+			"ship_to_address" => $ship_to_address[0]['settings_value'],
+			"bill_to_address" => $bill_to_address[0]['settings_value'],
+			"next_invoice_no" => $next_invoice_no[0]['next_invoice_no'],
+			"company_address" => $company_address[0]["settings_value"],
+			"company_name" => $company_name[0]["settings_value"]
+			);
+
+		$this->load->view('forms/create_basic_invoice', $data);
+	}
+
+	public function do_add_basic_invoice()
+	{
+
+		//echo "<pre>";print_r($this->input->post());exit;
+		$items_string = "";
+		$client_id = $this->input->post("client-id");
+		$invoice_no = $this->input->post("invoice_no");
+		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
+		$disbursement_no = $this->input->post("disbursement-no");
+		$tail_no = $this->input->post("tail-no");
+		$no_of_items = $this->input->post("no_of_items");
+		$total_cost = $this->input->post("base_total");
+		$base_currency = $this->input->post("currency-id");
+
+		if( $no_of_items > 0 )
+		{
+			$counter = 0;
+			$row = array();
+			$invoice_record = array();
+			for($i = 1; $i <= $no_of_items; $i++)
+			{
+				$qty = $this->input->post("qty-" . $i);
+				$desc = $this->input->post("desc-" . $i);
+				$price = $this->input->post("price-" . $i);
+				$extn = $this->input->post("extn-" . $i);
+
+				if( !empty($qty)  ){ //&& !empty($price)
+					$row["qty"] = $qty;
+					$row["desc"] = $desc;
+					$row["price"] = $price;
+					$row["extn"] = $extn;
+
+					array_push($invoice_record, $row);
+
+					unset($row);
+					$counter++;
+				}
+			}
+
+			$invoice_details = json_encode($invoice_record);			
+
+			$data = array(
+				"invoice_no" => $invoice_no,
+				"client_id" => $client_id,
+				"invoice_date" => date("Y-m-d"),
+				'tail_no' => trim($tail_no),
+				"flight_date" => $flight_date,
+				"disbursement_no" => $disbursement_no,
+				"invoice_details" => $invoice_details,
+				"invoice_total_amount" => $total_cost,
+				"currency_id" => $base_currency,
+				"created_by_employee_id" => $this->session->userdata("user_id")
+			);
+
+			try{
+				$this->invoice->insert_invoice($data);
+				$this->invoice->increment_basic_invoice_seq_no();
+
+				try{
+					$this->logger->add_log(26, $this->session->userdata("user_id"), NULL, json_encode($data));
+				} catch(Exception $x){
+					$this->xxx->log_exception( $x->getMessage() );
+				}
+				
+				$this->sir_session->add_status_message("Your Invoice has been created successfully!", "success");
+			} catch( Exception $e ){
+				$this->xxx->log_exception( $e->getMessage() );
+				$this->sir_session->add_status_message("Sorry, your Invoice was not created successfully!", "danger");
+			}
+
+			redirect("/Forms/create_basic_invoice");
+		}
+	} //end of function
 }

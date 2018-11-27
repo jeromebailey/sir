@@ -37,12 +37,19 @@
               <input type="hidden" name="requisition_id" value="<?=$requisition_id?>">
 
               <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="creation-date">Creation Date</label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  <input type="text" name="creation-date" id="creation-date" class="form-control" readonly="readonly" value="<?=date('M d, Y', strtotime($requisition["date_created"]));?>">
+                </div>
+              </div>  
+
+              <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Requisition Date<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" readonly="readonly" value="<?=date('M d, Y', strtotime($requisition["requisition_date"]));?>">
+                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" value="<?=date('M d, Y', strtotime($requisition["requisition_date"]));?>">
                 </div>
-              </div>             
+              </div>           
 
               <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-id">Client Name<span class="required">*</span>
@@ -73,16 +80,23 @@
                   <select id="flight-type-id" name="flight-type-id" class="form-control" required="required">
                     <option value="">Select Flight Type</option>
                     <?
-                    if( !empty($flight_types) ){
-                      foreach ($flight_types as $key => $value) {
-                        if( $value["flight_type_id"] == $requisition["flight_type_id"] ){?>
-                            <option value="<?=$value["flight_type_id"]?>" selected><?=$value["flight_type"]?></option>
-                          <?} else {?>
-                            <option value="<?=$value["flight_type_id"]?>"><?=$value["flight_type"]?></option>
-                          <?}                        
-                      }
-                    } else {
+                    if( $requisition["flight_type_id"] == 0 ){
+                      foreach ($flight_types as $key => $value) {?>
+                        <option value="<?=$value["flight_type_id"]?>"><?=$value["flight_type"]?></option>
+                        <?}?>
+                        <option value="0" selected="selected">Staff</option>
+                    <?} else {
+                      if( !empty($flight_types) ){
+                        foreach ($flight_types as $key => $value) {
+                          if( $value["flight_type_id"] == $requisition["flight_type_id"] ){?>
+                              <option value="<?=$value["flight_type_id"]?>" selected><?=$value["flight_type"]?></option>
+                            <?} else {?>
+                              <option value="<?=$value["flight_type_id"]?>"><?=$value["flight_type"]?></option>
+                            <?}                        
+                        }
+                      } else {
 
+                      }
                     }?>                
                   </select>
                 </div>
@@ -95,16 +109,23 @@
                   <select id="client-flight-id" name="client-flight-id" class="form-control" required="required">
                     <option value="">Select Flight</option>
                     <?
-                    if( !empty($client_flights) ){
-                      foreach ($client_flights as $key => $value) {
-                        if( $value["client_flight_id"] == $requisition["client_flight_id"] ){?>
-                            <option value="<?=$value["client_flight_id"]?>" selected><?=$value["flight_no"]?></option>
-                          <?} else {?>
-                            <option value="<?=$value["client_flight_id"]?>"><?=$value["flight_no"]?></option>
-                          <?}                        
-                      }
-                    } else {
+                    if( $requisition["client_flight_id"] == 0 ){
+                      foreach ($client_flights as $key => $value) {?>
+                          <option value="<?=$value["client_flight_id"]?>"><?=$value["flight_no"]?></option>
+                        <?}?>
+                        <option value="0" selected="selected">Staff</option>
+                    <?} else {
+                      if( !empty($client_flights) ){
+                        foreach ($client_flights as $key => $value) {
+                          if( $value["client_flight_id"] == $requisition["client_flight_id"] ){?>
+                              <option value="<?=$value["client_flight_id"]?>" selected><?=$value["flight_no"]?></option>
+                            <?} else {?>
+                              <option value="<?=$value["client_flight_id"]?>"><?=$value["flight_no"]?></option>
+                            <?}                        
+                        }
+                      } else {
 
+                      }
                     }?>
                   </select>
                 </div>
@@ -172,10 +193,11 @@
                         $items = json_decode( $requisition["details"] );
                         foreach ($items as $key => $value) {?>
                           <tr id="<?=$counter?>">
-                            <td><input type="text" name="requisition-product-name-<?=$counter?>" value = "<?=$value->product_name?>" class = "form-control" readonly /></td>
-                            <td><input type="text" name="requisition-amount-<?=$counter?>" value = "<?=$value->amount?>" class = "form-control" readonly /></td>
-                            <td><input type="text" name="requisition-unit-<?=$counter?>" value = "<?=$value->unit?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-product-name-<?=$counter?>" id = "requisition-product-name-<?=$counter?>" value = "<?=$value->product_name?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-amount-<?=$counter?>" id = "requisition-amount-<?=$counter?>" value = "<?=$value->amount?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-unit-<?=$counter?>" id = "requisition-unit-<?=$counter?>" value = "<?=$value->unit?>" class = "form-control" readonly /></td>
                             <td>
+                              <a href="#" onClick="edit_requisition_item(<?=$counter?>)" title="Edit"><i class="fas fa-edit"></i></a>
                               <a href="#" onClick="delete_requisition_item(<?=$counter?>)" title="Delete"><i class="fas fa-trash-alt"></i></a>
                             </td>
                           </tr>
@@ -208,6 +230,54 @@
 
             </form>
 
+            <div id="edit_item_modal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog">
+              <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title">Edit Item</h4>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Product Name</label>
+                            <input type="text" name="m_product_name" id="m_product_name" class="form-control" style="z-index: 10000">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Amount</label>
+                            <input type="text" name="m_item_amount" id="m_item_amount" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Product Name</label>
+                            <select id="m_product_unit" name="m_product_unit" class="form-control">
+                              <?if( !empty($uom) ){
+                                  foreach ($uom as $key => $value) {?>
+                                    <option value="<?=$value["unit_id"]?>"><?=$value["unit_abbreviation"];?></option>
+                                  <?}
+                                } else {
+
+                                }?>
+                            </select>
+                          </div>
+                        </div>
+
+                        <input type="hidden" value="" name="m_item_key" id="m_item_key">
+                          
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" name="btnMEditItem" id="btnMEditItem" class="btn btn-primary">Save changes</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
 
           </div>
           <!-- top tiles -->
@@ -234,6 +304,12 @@
       $("#msg-holder").hide();
         $( "#dob" ).datepicker({ 
           dateFormat: 'yy-mm-dd',
+          changeYear: true,
+          yearRange: "-50:+0" 
+        });
+
+        $( "#requisition-date" ).datepicker({ 
+          dateFormat: 'M dd, yy',
           changeYear: true,
           yearRange: "-50:+0" 
         });
@@ -305,8 +381,21 @@
     $("#client-id").change(function(){
         var client_id = $(this).val();
 
-        get_client_flights( client_id );        
+        if( client_id == 6 ){
+          prep_fields_for_staff_requisition();
+        } else {
+          $("#flight-type-id").val( "" );
+          get_client_flights( client_id );        
+        }        
     });
+
+    function prep_fields_for_staff_requisition(){
+      $("#flight-type-id").append("<option value='STAFF'>Staff</option>");
+      $("#client-flight-id").append("<option value='STAFF'>Staff</option>");
+
+      $("#flight-type-id").val( "STAFF" );
+      $("#client-flight-id").val( "STAFF" );
+    }
 
     function get_client_flights( client_id ){
       $.ajax({
@@ -359,13 +448,34 @@
 
     function edit_requisition_item(item_counter){
       $("#edit_item_modal").modal('show');
+      console.log( item_counter );
 
       var product_name = $("#requisition-product-name-" + item_counter).val();
       var amount = $("#requisition-amount-" + item_counter).val();
-      var product_name = $("#requisition-product-name-" + item_counter).val();
+      var unit = $("#requisition-unit-" + item_counter).val();
+      //var product_name = $("#requisition-product-name-" + item_counter).val();
 
       $("#m_product_name").val( product_name );
+      $("#m_item_amount").val( amount );
+      $("select#m_product_unit option")
+        .each(function() { this.selected = (this.text == unit); });
+
+      $("#m_item_key").val( item_counter );
     }
+
+    $("#btnMEditItem").click(function(){      
+
+      var product_name = $("#m_product_name").val();
+      var amount = $("#m_item_amount").val();
+      var item_counter = $("#m_item_key").val();
+      var unit = $("#m_product_unit option:selected").text();
+
+      $("#requisition-product-name-" + item_counter).val(product_name);
+      $("#requisition-amount-" + item_counter).val(amount);
+      $("#requisition-unit-" + item_counter).val(unit);
+
+      $("#edit_item_modal").modal('hide');
+    });
 
     $("#product-name").autocomplete({
       source: function (request, response) {
@@ -479,7 +589,7 @@
     <?}*/?>
       //row = row + '</select></td>';
       row = row + '<td style="margin-top: 23px;">';
-      //row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
       row = row + '<a href="#" onClick="delete_requisition_item(' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';

@@ -72,7 +72,9 @@
     <?include_once 'includes/data-table-scripts.inc';?>
     <script type="text/javascript">
       $(document).ready(function() {
-          $('#data-table').DataTable();
+          $('#data-table').DataTable({
+            "pageLength": 50
+          });
       } );
     </script>
   </body>

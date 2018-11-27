@@ -127,7 +127,8 @@ class Users extends CI_Controller {
 			'department_id' => $this->input->post('department_id'),
 			'job_title_id' => $this->input->post('job-title-id'),
 			'user_password' => $this->input->post('user-password'),
-			'is_an_admin' => ($this->input->post('is-an-admin') == "on") ? 1 : 0
+			'is_an_admin' => ($this->input->post('is-an-admin') == "on") ? 1 : 0,
+			'status_id' => 1
 			);
 
 		//echo "<pre>";print_r($data);exit;

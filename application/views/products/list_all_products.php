@@ -26,6 +26,27 @@
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-4">
+                <label>Category</label>
+                <select id="product-category" name="product-category" required="required" class="form-control" onchange="set_url(this.value)" >
+                  <option value="">Select Product Category</option>
+                  <?if( !empty($categories) ){
+                      foreach ($categories as $key => $value) {
+                        if($category_id == $value["category_id"]){?>
+                          <option value="<?=$value["category_id"]?>" selected><?=$value["category_name"];?></option>
+                        <?} else {?>
+                          <option value="<?=$value["category_id"]?>"><?=$value["category_name"];?></option>
+                        <?}                        
+                      }
+                    } else {
+
+                    }?>
+                </select>
+              </div>
+            </div>
+            <br />
+
             <table class="table table-striped table-hover table-bordered" id="data-table">
               <thead>
                 <tr>
@@ -114,6 +135,14 @@
             }
         }
       } // end of function
+
+      function set_url( id ){
+        var url = "<?=base_url('Products/index/')?>";
+
+        url += id;
+
+        window.location.href = url;
+      }
     </script>
 
   </body>

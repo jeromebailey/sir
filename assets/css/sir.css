@@ -5,3 +5,7 @@
 .align_text_with_label_no_input{
 	margin-top: 8px;
 }
+
+.right_align_number {
+	text-align: right;
+}

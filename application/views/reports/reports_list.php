@@ -31,7 +31,8 @@
                             <li><a href="<?=base_url('Reports/count_low_stock_levels_per_category');?>">Count Low Stock Level Items Per Category</a></li>
                             <li><a href="<?=base_url('Reports/low_stock_levels_per_category');?>">Show Stock Level Items Per Category</a></li>
                             <li><a href="<?=base_url('Reports/inventory_total_per_category');?>">Total Value Per Category In Inventory</a></li>
-                            <li><a href="<?=base_url('Reports/inventory_items_in_category');?>">Total Inventory Items In Inventory</a></li>
+                            <li><a href="<?=base_url('Reports/inventory_items_in_category');?>">Total Inventory Items In Category</a></li>
+                            <li><a href="<?=base_url('Reports/pricing_inventory');?>">Pricing Inventory</a></li>
                           </ol>
                       </div>
                 </div>

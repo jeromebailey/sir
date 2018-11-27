@@ -111,6 +111,7 @@ class Requisitions extends CI_Controller {
 		$client_flight_id = $this->input->post("client-flight-id");
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
+		$requisition_date = $this->input->post("requisition-date");
 
 		if( $no_of_items > 0 )
 		{
@@ -144,10 +145,11 @@ class Requisitions extends CI_Controller {
 
 			$data = array(
 				"client_id" => $client_id,
+				"date_created" => date("Y-m-d"),
 				"flight_type_id" => $flight_type_id,
 				"client_flight_id" => $client_flight_id,
 				"passenger_count" => $passenger_count,
-				"requisition_date" => date("Y-m-d"),
+				"requisition_date" => date("Y-m-d", strtotime($requisition_date)),
 				"details" => $details,
 				"store_keeper_employee_id" => $this->session->userdata("user_id"),
 				"dispatched" => 0
@@ -240,6 +242,7 @@ class Requisitions extends CI_Controller {
 		$client_flight_id = $this->input->post("client-flight-id");
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
+		$requisition_date = $this->input->post("requisition-date");
 
 		$old_data = $this->requisitions->get_requisition_by_id($requisition_id);
 
@@ -280,6 +283,7 @@ class Requisitions extends CI_Controller {
 
 			$data = array(
 				"client_id" => $client_id,
+				"requisition_date" => date("Y-m-d", strtotime($requisition_date)),
 				"flight_type_id" => $flight_type_id,
 				"client_flight_id" => $client_flight_id,
 				"passenger_count" => $passenger_count,

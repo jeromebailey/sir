@@ -37,7 +37,15 @@
                         <?}?>
 
                         <?if($this->sir->user_has_permission_to("create_invoice")){?>
-                          <li><a href="<?=base_url('Forms/create_invoice');?>">Create Invoice</a></li>
+                          <li><a href="<?=base_url('Forms/create_basic_invoice');?>">Create Basic Invoice (No Service Charge)</a></li>
+                        <?}?>
+
+                        <?if($this->sir->user_has_permission_to("create_invoice")){?>
+                          <li><a href="<?=base_url('Forms/create_invoice');?>">Create Invoice (with Service Charge)</a></li>
+                        <?}?>
+
+                        <?if($this->sir->user_has_permission_to("create_ba_invoice")){?>
+                          <li><a href="<?=base_url('Forms/create_ba_type_invoice');?>">Create Invoice (BA Type)</a></li>
                         <?}?>
 
                         <?if($this->sir->user_has_permission_to("create_purchase_order")){?>
@@ -61,7 +69,16 @@
                   <?}?>
 
                   <?if($this->sir->user_has_permission_to("view_invoices")){?>
-                    <li><a href="<?=base_url('Invoices/')?>"><i class="fas fa-receipt"></i> Invoices </a></li>
+                    <li><a><i class="fas fa-receipt"></i> Invoices <span class="fa fa-chevron-down"></span></a>
+                      <ul class="nav child_menu">
+
+                        <li><a href="<?=base_url('Invoices/list_basic_invoices')?>"><i class="fas fa-receipt"></i> Basic Invoices </a></li>                                               
+                        <li><a href="<?=base_url('Invoices/')?>"><i class="fas fa-receipt"></i> Invoices with Service Charge </a></li>
+
+                        <li><a href="<?=base_url('Invoices/list_ba_type_invoices')?>"><i class="fas fa-receipt"></i> BA Type Invoices </a></li>
+                        
+                      </ul>
+                    </li>
                   <?}?>
 
                   <?if($this->sir->user_has_permission_to("view_quotes")){?>
@@ -133,8 +150,11 @@
                         <li><a href="<?=base_url('Clients')?>">All Clients</a></li>
                         <li><a href="<?=base_url('Clients/add_client')?>">Add Client</a></li>
                         <li><a href="<?=base_url('Clients/add_client_flight')?>">Add Client Flight</a></li>
+                        <li><a href="<?=base_url('Clients/add_client_invoice_heading')?>">Add Client Invoice Heading</a></li>
                       </ul>
                     </li>
+
+                    <li><a href="<?=base_url('Invoice/list_invoice_headings')?>"><i class="fas fa-receipt"></i> Manage Invoice Headings </a></li>
                     
                     <li><a><i class="fas fa-link"></i> Permissions <span class="fa fa-chevron-down"></span></a>
                       <ul class="nav child_menu">

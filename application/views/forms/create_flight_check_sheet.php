@@ -82,6 +82,13 @@
               </div>
 
               <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="tail-no">Tail No: </label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <input type="text" class="form-control" autocomplete="off" placeholder="7T-WHM" name="tail-no" id="tail-no" >
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Check Sheet No: <span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
@@ -97,7 +104,7 @@
                 <div class="col-md-6 col-sm-6 col-xs-12">
                   <select id="cycle" name="cycle" class="form-control" required="required">
                     <option value="">Select Cycle</option>
-                    <?for($a = 1; $a <= 4; $a++) {?>
+                    <?for($a = 1; $a <= 5; $a++) {?>
                         <option value="<?=$a;?>"><?=$a;?></option>
                     <?}?>
                   </select>
@@ -370,6 +377,17 @@
     $(document).ready(function(){
       $("#msg-holder").hide();
 
+      hide_flight_check_sheet_headings();
+
+        $( "#date-and-time" ).datepicker({ 
+          dateFormat: 'yy-mm-dd',
+          changeYear: true
+        }).datepicker("setDate", new Date());
+        $('#frm').validator();      
+
+    });
+
+    function hide_flight_check_sheet_headings(){
       $("#bcm").hide();
       $("#bfcm").hide();
       $("#becon").hide();
@@ -380,14 +398,7 @@
       $("#dcm").hide();
       $("#dfcm").hide();
       $("#spml").hide();
-
-        $( "#date-and-time" ).datepicker({ 
-          dateFormat: 'yy-mm-dd',
-          changeYear: true
-        }).datepicker("setDate", new Date());
-        $('#frm').validator();      
-
-    });
+    }
 
     $("#client-id").change(function(){
       var client_id = $("#client-id").val();
