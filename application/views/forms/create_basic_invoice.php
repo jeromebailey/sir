@@ -208,6 +208,55 @@
 
             </form>
 
+            <div id="edit_item_modal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog">
+              <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title">Edit Item</h4>
+                      </div>
+                      <div class="modal-body">                        
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Item Description</label>
+                            <input type="text" name="m_item_description" id="m_item_description" class="form-control" style="z-index: 10000">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-3">
+                            <label>Qty</label>
+                            <input type="number" name="m_item_qty" id="m_item_qty" class="form-control" >
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-3">
+                            <label>Price</label>
+                            <input type="number" name="m_item_price" id="m_item_price" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-3">
+                            <label>Extn</label>
+                            <input type="text" name="m_item_extn" id="m_item_extn" class="form-control" readonly="readonly" >
+                          </div>
+                        </div>
+
+                        <input type="hidden" value="" name="m_item_counter" id="m_item_counter">
+                        <input type="hidden" value="" name="m_grand_base_total" id="m_base_total">
+                          
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" name="btnMEditItem" id="btnMEditItem" class="btn btn-primary">Save changes</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
 
           </div>
           <!-- top tiles -->
@@ -278,29 +327,6 @@
       }
     });
 
-    $("#territory").change(function(){
-        var territory_id = $(this).val();
-        $("#supplier-address").html('');
-
-        $.ajax({
-            url: "<?=base_url('WebService/get_suppliers_by_territory_id/" + territory_id +"');?>",
-            type: 'post',
-            dataType: 'json',
-            success:function(response){
-                var len = response.length;
-                $("#supplier-id").empty();
-                $("#supplier-id").append("<option value=''>Select Supplier</option>");
-                for( var i = 0; i<len; i++){
-                    var id = response[i]['supplier_id'];
-                    var name = response[i]['supplier_name'];
-                    
-                    $("#supplier-id").append("<option value='"+id+"'>"+name+"</option>");
-
-                }
-            }
-        });
-    });
-
     $("#price").keyup(function(){
       var qty = $("#qty").val();
       var price = $("#price").val();
@@ -364,16 +390,133 @@
       }
     });
 
+    $("#m_item_qty").keyup(function(){
+      if( $(this).val() != null && $(this).val() != "" ){
+        
+        var price = extn = old_extn = "";
+        var difference_in_extns = operation = base_total = "";
+
+        base_total = parseFloat( $("#base_total").val() );
+
+        var item_counter = $("#m_item_counter").val();
+
+        old_extn = $("#extn-" + parseInt(item_counter) ).val();
+        console.log("old extn: " + old_extn);
+
+        var qty = parseInt($(this).val());
+        
+        price = $("#m_item_price").val();
+        extn = parseFloat(price) * qty;
+
+        if( parseFloat(old_extn) != extn ){
+          if( parseFloat(old_extn) < extn ){
+            difference_in_extns = parseFloat(extn - old_extn);
+            operation = "addition";
+
+            base_total += difference_in_extns;
+          } else {
+            difference_in_extns = parseFloat(old_extn - extn);
+            operation = "subtraction";
+
+            base_total -= difference_in_extns;
+          }
+        }
+
+        console.log("opt: " + operation );
+
+        $("#m_base_total").val(base_total);
+        $("#m_item_extn").val( extn );
+      }
+    });
+
+    $("#m_item_price").keyup(function(){
+      if( $(this).val() != null && $(this).val() != "" ){
+        
+        var price = extn = old_extn = "";
+        var difference_in_extns = operation = base_total = "";
+
+        base_total = parseFloat( $("#base_total").val() );
+
+        var item_counter = $("#m_item_counter").val();
+
+        old_extn = $("#extn-" + parseInt(item_counter) ).val();
+        console.log("old extn: " + old_extn);
+
+        var price = extn = qty = "";
+        var price = parseFloat($(this).val());
+        
+        qty = parseInt($("#m_item_qty").val());
+        extn = parseFloat(price) * qty;
+
+        $("#m_item_extn").val( extn );
+
+        if( parseFloat(old_extn) != extn ){
+          if( parseFloat(old_extn) < extn ){
+            difference_in_extns = parseFloat(extn - old_extn);
+            operation = "addition";
+
+            base_total += difference_in_extns;
+          } else {
+            difference_in_extns = parseFloat(old_extn - extn);
+            operation = "subtraction";
+
+            base_total -= difference_in_extns;
+          }
+        }
+
+        console.log("opt: " + operation );
+
+        $("#m_base_total").val(base_total);
+      }
+    });
+
+    $("#btnMEditItem").click(function()
+    {
+      var description = $("#m_item_description").val();
+      var qty = $("#m_item_qty").val();
+      var price = $("#m_item_price").val();
+      var extn = $("#m_item_extn").val();
+      var item_counter = $("#m_item_counter").val();
+      var m_base_total = parseFloat($("#m_base_total").val());
+
+      $("#desc-" + parseInt(item_counter)).val(description);
+      $("#qty-" + parseInt(item_counter)).val(qty);
+      $("#price-" + parseInt(item_counter)).val(price);
+      $("#extn-" + parseInt(item_counter)).val(extn);
+      $("#base_total").val(m_base_total);
+
+      calculate_alternate_sub_total_currency_value(m_base_total);
+
+      $("#edit_item_modal").modal('hide');
+    });
+
+    function edit_invoice_item(item_counter){
+      $("#edit_item_modal").modal('show');
+
+      var description = amount = qty = extn = "";
+
+      description = $("#desc-" + item_counter).val();
+      amount = $("#price-" + item_counter).val();
+      qty = $("#qty-" + item_counter).val();
+      extn = $("#extn-" + item_counter).val();      
+
+      $("#m_item_description").val( description );
+      $("#m_item_price").val( amount );
+      $("#m_item_qty").val( qty );
+      $("#m_item_extn").val( extn );
+      $("#m_item_counter").val( item_counter );      
+    }
+
     function addAnotherRowForRequisitionItem(qty, desc, price, extn){
       var row = "";
       row = row + '<tr id=' + req_item_counter + '>';
-      row = row + '<td><input type="text" id="" name="qty-' + req_item_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';
-      row = row + '<td><input type="text" id="" name="desc-' + req_item_counter + '" required="required" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="qty-' + req_item_counter + '" name="qty-' + req_item_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="desc-' + req_item_counter + '" name="desc-' + req_item_counter + '" required="required" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="price-' + req_item_counter + '" name="price-' + req_item_counter + '" required="required" autocomplete="off" value="' + price +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="extn-' + req_item_counter + '" name="extn-' + req_item_counter + '" required="required" autocomplete="off" value="' + extn +'" class="form-control" readonly></td>';
       
       row = row + '<td style="margin-top: 23px;">';
-      //row = row + '<a href="" title="Edit"><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" onClick="edit_invoice_item(' + req_item_counter + ')" title="Edit"><i class="fas fa-edit"></i></a> | ';
       row = row + '<a href="#" onClick="delete_po_item(' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';
@@ -422,6 +565,22 @@
         console.log( "counter: " + req_item_counter );
       }
     }  
+
+    function calculate_alternate_sub_total_currency_value( base_total ){
+      var currency_id = $("#currency-id").val();
+
+      if( currency_id != '' && base_total != '' ){
+        $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + base_total + "' );?>")
+        .done(function( data ) {
+          console.log( data  );
+          var obj = $.parseJSON(data);
+          $("#alternate_total_value").val(obj);
+        });
+
+      } else {
+        console.log("empty");
+      }
+    }
 
     </script>
   </body>

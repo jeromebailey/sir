@@ -138,7 +138,7 @@ class Requisitions extends CI_Controller {
 			$counter = 0;
 			$row = array();
 			$record = array();
-			$changed_product_prices = array();
+			$changed_product_prices = $old_new_product_prices = array();
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
@@ -150,7 +150,7 @@ class Requisitions extends CI_Controller {
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
-					$product_id = $this->products->get_product_id_from_product_name(trim($product_name_id));
+					$product_id = $this->products->get_product_id_from_product_name_id(trim($product_name_id));
 					
 					if( empty($product_id) ){
 						//echo "nothing";exit;
@@ -174,11 +174,12 @@ class Requisitions extends CI_Controller {
 						unset($row);
 						$counter++;
 					} else {
-						$product_details = $this->products->get_product_by_product_id( $product_id[0]["product_id"] );
+						$product_details = $this->products->get_product_by_product_id( $product_id );
 
 						//echo "<pre>";print_r($product_details);exit;
 						$selected_product_price = $product_details[0]["price"];
 
+						$row["product_id"] = $product_id;
 						$row["product_name"] = addslashes($product_name);
 						$row["amount"] = $amount;
 						$row["unit"] = $unit;
@@ -189,10 +190,18 @@ class Requisitions extends CI_Controller {
 						if( !empty($selected_product_price) ){
 							if( $selected_product_price != $price ){
 								$price_change_product = array(
-									"product_id" => $product_id[0]["product_id"],
+									"product_id" => $product_id,
 									"price" => $price
 								);
+
+								$product_old_new_price = array(
+									"product_id" => $product_id,
+									"old_price" => $selected_product_price,
+									"new_price" => $price,
+									"date_changed" => date("Y-m-d h:i:s")
+								);
 								array_push( $changed_product_prices, $price_change_product );
+								array_push( $old_new_product_prices, $product_old_new_price );
 							}
 						}
 
@@ -227,6 +236,7 @@ class Requisitions extends CI_Controller {
 
 				if( !empty( $changed_product_prices ) ){
 					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+					$this->products->log_product_price_changes( $old_new_product_prices );
 				}
 
 				$new_requisition_id = $this->db->insert_id();
@@ -343,6 +353,7 @@ class Requisitions extends CI_Controller {
 			$row = array();
 			$record = array();
 			$changed_product_prices = array();
+			$old_new_product_prices = array();
 			//$low_stock_level_products = array();
 			//$products_reach_low_stock_level = false;
 			//$total_requisition_cost = 0;
@@ -357,7 +368,9 @@ class Requisitions extends CI_Controller {
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
-					$product_id = $this->products->get_product_id_from_product_name(trim($product_name_id));
+					$product_id = $this->products->get_product_id_from_product_name_id(trim($product_name_id));
+					//echo "<pre>";print_r($product_id_result);exit;
+					//echo $product_id = $product_id_result[0]["product_id"];exit;
 					
 					if( empty($product_id) ){
 						//echo "nothing";exit;
@@ -381,12 +394,13 @@ class Requisitions extends CI_Controller {
 						unset($row);
 						$counter++;
 					} else {
-						$product_details = $this->products->get_product_by_product_id( $product_id[0]["product_id"] );
+						$product_details = $this->products->get_product_by_product_id( $product_id );
 
 						//echo "<pre>";print_r($product_details);exit;
 						$selected_product_price = $product_details[0]["price"];
 
 						$row["product_name"] = addslashes($product_name);
+						$row["product_id"] = $product_id;
 						$row["amount"] = $amount;
 						$row["unit"] = $unit;
 						$row["price"] = $price;
@@ -396,10 +410,18 @@ class Requisitions extends CI_Controller {
 						if( !empty($selected_product_price) ){
 							if( $selected_product_price != $price ){
 								$price_change_product = array(
-									"product_id" => $product_id[0]["product_id"],
+									"product_id" => $product_id,
 									"price" => $price
 								);
+
+								$product_old_new_price = array(
+									"product_id" => $product_id,
+									"old_price" => $selected_product_price,
+									"new_price" => $price,
+									"date_changed" => date("Y-m-d h:i:s")
+								);
 								array_push( $changed_product_prices, $price_change_product );
+								array_push( $old_new_product_prices, $product_old_new_price );
 							}
 						}
 
@@ -429,6 +451,7 @@ class Requisitions extends CI_Controller {
 
 				if( !empty( $changed_product_prices ) ){
 					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+					$this->products->log_product_price_changes( $old_new_product_prices );
 				}
 
 				try{

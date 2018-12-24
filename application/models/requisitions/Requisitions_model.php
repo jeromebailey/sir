@@ -80,7 +80,7 @@ class Requisitions_model extends CI_Model
 					LEFT JOIN requisition_other_client_name ro on ro.requisition_id = r.requisition_id
 					LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
 					LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
-					ORDER BY r.`requisition_date` DESC;";
+					ORDER BY r.`date_created` DESC;";
 
 		return $this->sir->format_query_result_as_array($query);
 	}

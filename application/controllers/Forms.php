@@ -108,7 +108,7 @@ class Forms extends CI_Controller {
 			$record = array();
 			$low_stock_level_products = array();
 			$products_reach_low_stock_level = false;
-			$changed_product_prices = array();
+			$changed_product_prices = $old_new_product_prices = array();
 
 			$no_of_requisition_for_today = 0;
 
@@ -122,8 +122,8 @@ class Forms extends CI_Controller {
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
-					$product_id_result = $this->products->get_product_id_from_product_name(trim($product_name));
-					$product_id = $product_id_result[0]["product_id"];
+					$product_id = $this->products->get_product_id_from_product_name_id(trim($product_name_id));
+					//$product_id = $product_id_result[0]["product_id"];
 
 					$category_id = $this->products->get_category_id_from_product_id( $product_id );
 					$category_id = $category_id[0]["product_category_id"];
@@ -146,7 +146,7 @@ class Forms extends CI_Controller {
 						$this->sir->insert_daily_category_requisition($insert_data);
 					}
 
-					if( empty($product_id_result) ){
+					if( empty($product_id) ){
 						//echo "nothing";exit;
 						$selected_product_price = 0;
 
@@ -188,7 +188,15 @@ class Forms extends CI_Controller {
 									"product_id" => $product_id,
 									"price" => $price
 								);
+
+								$product_old_new_price = array(
+									"product_id" => $product_id,
+									"old_price" => $selected_product_price,
+									"new_price" => $price,
+									"date_changed" => date("Y-m-d h:i:s")
+								);
 								array_push( $changed_product_prices, $price_change_product );
+								array_push( $old_new_product_prices, $product_old_new_price );
 							}
 						}
 
@@ -216,13 +224,14 @@ class Forms extends CI_Controller {
 			);
 
 			//echo "<pre>";print_r($data);
-			//echo "<pre>";print_r($changed_product_prices);exit;
+			//echo "<pre>";print_r($old_new_product_prices);exit;
 
 			try{
 				$this->requisitions->insert_requisition($data);
 
 				if( !empty( $changed_product_prices ) ){
 					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+					$this->products->log_product_price_changes( $old_new_product_prices );
 				}
 
 				if( $client_id == self::other_requisition_client_id ) //check if requisition was for other client 

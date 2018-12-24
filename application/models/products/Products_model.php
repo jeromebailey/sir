@@ -1,7 +1,7 @@
 <?
 class Products_model extends CI_Model
 {
-	var $table_name, $product_stock_levels_table, $minimum_product_stock_levels_table;
+	var $table_name, $product_stock_levels_table, $minimum_product_stock_levels_table, $product_price_changes_table;
 
 	function __construct()
 	{
@@ -13,6 +13,11 @@ class Products_model extends CI_Model
 		$this->table_name = "products";
 		$this->product_stock_levels_table = "product_stock_levels";
 		$this->minimum_product_stock_levels_table = "minimum_product_stock_levels";
+		$this->product_price_changes_table = "product_price_changes";
+	}
+
+	public function log_product_price_changes( $old_new_product_prices ){
+		return $this->db->insert_batch( $this->product_price_changes_table, $old_new_product_prices );
 	}
 
 	public function get_category_id_from_product_id( $product_id ){
@@ -494,7 +499,7 @@ class Products_model extends CI_Model
 			$last_occurrence_of_open_bracket = strrpos($product_name_id, "(");
 			$last_occurrence_of_close_bracket = strrpos($product_name_id, ")");
 
-			return substr($product_name_id, $last_occurrence_of_open_bracket, $last_occurrence_of_close_bracket);
+			return substr(trim($product_name_id), $last_occurrence_of_open_bracket+1, $last_occurrence_of_close_bracket-($last_occurrence_of_open_bracket+1));
 		} //end of if
 	} //end of function
 

@@ -344,10 +344,9 @@
     <script src="<?=base_url('assets/js/jquery-ui.min.js');?>"></script>
     
     <script type="text/javascript">
-      var req_item_counter = 1;
       var invoice_sub_total_cost = 0;
-
-      var crew_heading_counter = passenger_heading_counter = total_items_added = 1;
+      var req_item_counter = total_items_added = 1;
+      var crew_heading_counter = passenger_heading_counter = 2;
 
     $(document).ready(function(){
       $("#msg-holder").hide();
@@ -671,7 +670,10 @@
       var temp_counter = 0;
       var heading_id_to_use = ( heading_id == "" ) ? 0 : heading_id;
 
-      switch(parseInt(heading_id)) {
+      switch(parseInt(heading_id_to_use)) {
+          case 0:
+              temp_counter = req_item_counter;
+              break;
           case 1:
               temp_counter = passenger_heading_counter;
               break;
@@ -680,23 +682,30 @@
               break;          
       }
 
-      row = row + '<tr id=' + req_item_counter + '>';
-      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-qty-' + req_item_counter + '"  name="'+ heading_id_to_use +'-qty-' + req_item_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';
-      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-desc-' + req_item_counter + '" name="'+ heading_id_to_use +'-desc-' + req_item_counter + '" required="required" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
-      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-price-' + req_item_counter + '" name="'+ heading_id_to_use +'-price-' + req_item_counter + '" required="required" autocomplete="off" value="' + price +'" class="form-control" readonly></td>';
-      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-extn-' + req_item_counter + '" name="'+ heading_id_to_use +'-extn-' + req_item_counter + '" required="required" autocomplete="off" value="' + extn +'" class="form-control" readonly></td>';
+      row = row + '<tr id=' + temp_counter + '>';
+      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-qty-' + temp_counter + '"  name="'+ heading_id_to_use +'-qty-' + temp_counter + '" autocomplete="off" value="' + qty +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-desc-' + temp_counter + '" name="'+ heading_id_to_use +'-desc-' + temp_counter + '" required="required" autocomplete="off" value="' + desc +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-price-' + temp_counter + '" name="'+ heading_id_to_use +'-price-' + temp_counter + '" required="required" autocomplete="off" value="' + price +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="'+ heading_id_to_use +'-extn-' + temp_counter + '" name="'+ heading_id_to_use +'-extn-' + temp_counter + '" required="required" autocomplete="off" value="' + extn +'" class="form-control" readonly></td>';
       
       row = row + '<td style="margin-top: 23px;">';
-      row = row + '<a href="#" onClick="edit_invoice_item(' + heading_id_to_use + ', ' + req_item_counter + ')" title="Edit"><i class="fas fa-edit"></i></a> | ';
-      row = row + '<a href="#" onClick="delete_invoice_item(' + heading_id_to_use + ', ' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
+      row = row + '<a href="#" onClick="edit_invoice_item(' + heading_id_to_use + ', ' + temp_counter + ')" title="Edit"><i class="fas fa-edit"></i></a> | ';
+      row = row + '<a href="#" onClick="delete_invoice_item(' + heading_id_to_use + ', ' + temp_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';
 
       console.log( "h id: " + heading_id );
 
-      if( heading_id != null && heading_id != "" ){
-        console.log("in with headings");
-        switch(parseInt(heading_id)) {
+      //if( heading_id != null && heading_id != "" ){
+        //console.log("in with headings");
+        switch(parseInt(heading_id_to_use)) {
+          case 0:
+              if(!$("#main_section").is(":visible")){
+                $("#main_section").show();
+              }
+              $("#tblRequestedItems #main_section").append(row);
+              req_item_counter++;
+              break;
           case 1:
               if(!$("#passenger_heading").is(":visible")){
                 $("#passenger_heading").show();
@@ -712,14 +721,14 @@
               crew_heading_counter++;
               break;
         }
-      } else {
+      /*} else {
         console.log("in without headings");
         if(!$("#main_section").is(":visible")){
           $("#main_section").show();
         }
         $("#tblRequestedItems #main_section").append(row);
         req_item_counter++;
-      }
+      }*/
       console.log( "total before adding: " + $("#base_total").val() );
       console.log( "extn before adding: " + extn );
       invoice_sub_total_cost += parseFloat(extn);
@@ -735,7 +744,7 @@
 
       total_items_added++;
 
-      $("#no_of_items").val(req_item_counter);
+      $("#no_of_items").val(total_items_added);
     }  
 
     function calculate_alternate_sub_total_currency_value( base_total ){
@@ -794,34 +803,73 @@
     }
 
     function delete_invoice_item( heading_id, item_counter ){
-      console.log( "counter: " + req_item_counter );
+      
       var do_delete_row = confirm("Are you sure you want to delete this item?");
 
       if( do_delete_row == true ){
         //get price of item to be deleted
+        //if( heading_id != null && heading_id != "" ){
+
+        var extn = parseFloat( $("#" + heading_id + "-extn-" + item_counter).val());
+        console.log( "extn from item to be deleted: " + extn );
+        var base_total_before_deletion = parseFloat($("#base_total").val());        
+        var service_charge = parseFloat($("#base_service_charge").val());
+        var grand_total_before_deletion = parseFloat($("#grand_base_total").val());
+
+        console.log("base total b4 d: " + base_total_before_deletion);
+        console.log("sc b4 d: " + service_charge);
+        console.log("grand base total b4 d: " + grand_total_before_deletion);
+
+        var base_total_after_deletion = base_total_before_deletion - extn;
+        var grand_total_after_deletion = base_total_after_deletion + service_charge;
+
+        console.log("base total after d: " + base_total_after_deletion);
+        console.log("grand base total after d: " + grand_total_after_deletion);
+
+        var index_to_delete_from_table = parseInt(item_counter)-1;
 
         switch(parseInt(heading_id)) {
+          case 0:
+          //console.log($("#tblRequestedItems #main_section tr").length);
+          //console.log( "counter for item to be deleted: " + item_counter );
+            var tbody_length = $("#tblRequestedItems #main_section tr").length;
+            index_to_delete_from_table = (tbody_length == 1) ? -1 : index_to_delete_from_table;
+          
+              document.getElementById("main_section").deleteRow(parseInt(index_to_delete_from_table));
+              req_item_counter--;
+              break;
           case 1:
-              document.getElementById("wtp").deleteRow(item_counter);
-              wtp_counter--;
+              var tbody_length = $("#tblRequestedItems #passenger_heading tr").length;
+              index_to_delete_from_table = (tbody_length == 1) ? -1 : index_to_delete_from_table;
+
+              document.getElementById("passenger_heading").deleteRow(index_to_delete_from_table);
+              passenger_heading_counter--;
               break;
           case 2:
-              document.getElementById("wt").deleteRow(item_counter);
-              wt_counter--;
+              var tbody_length = $("#tblRequestedItems #crew_heading tr").length;
+              index_to_delete_from_table = (tbody_length == 1) ? -1 : index_to_delete_from_table;
+
+              document.getElementById("crew_heading").deleteRow(index_to_delete_from_table);
+              crew_heading_counter--;
               break;
         }
+        /*} else {
+          document.getElementById("main_section").deleteRow(item_counter);
+          req_item_counter--;
+        }*/
 
-        var extn = parseFloat( $("#extn-" + item_counter).val());
-        console.log( extn );
-        invoice_sub_total_cost = invoice_sub_total_cost - extn;
-        console.log( invoice_sub_total_cost );
+        //invoice_sub_total_cost = invoice_sub_total_cost - extn;
+        //console.log( invoice_sub_total_cost );
 
-        $("#base_total").val(invoice_sub_total_cost);
-        $("#alternate_total_value").val(invoice_sub_total_cost);
+        $("#base_total").val(base_total_after_deletion);
+        $("#grand_base_total").val(grand_total_after_deletion);
 
-        document.getElementById("tblRequestedItems").deleteRow(item_counter);
-        req_item_counter--;
-        console.log( "counter: " + req_item_counter );
+        calculate_alternate_sub_total_currency_value(base_total_after_deletion);
+        calculate_alternate_grand_total_currency_value(grand_total_after_deletion);
+
+        //document.getElementById("tblRequestedItems").deleteRow(item_counter);
+        //req_item_counter--;
+        //console.log( "counter: " + req_item_counter );
       }
     }  
 
