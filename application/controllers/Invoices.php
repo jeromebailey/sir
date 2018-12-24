@@ -192,7 +192,8 @@ class Invoices extends CI_Controller {
 		$service_charge = $this->input->post("base_service_charge");
 		$grand_base_total = $this->input->post("grand_base_total");
 		$routes_type_id = $this->input->post("client-routes-types");
-		$calculated_total_cost = 0;		
+		$calculated_total_cost = 0;
+		$calculated_total = $calculated_grand_total = 0;
 
 		$crew_items = $passenger_items = $main_invoice_items = array();
 
@@ -220,7 +221,8 @@ class Invoices extends CI_Controller {
 					$temp_row["price"] = $value;
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["extn"] = $value;					
+					$temp_row["extn"] = $value;	
+					$calculated_total += $value;				
 
 					switch ($section_id) {
 						case 0:
@@ -257,6 +259,17 @@ class Invoices extends CI_Controller {
 			$total_cost = str_replace(",", "", $total_cost);
 		}*/
 
+		//check if totals exist and are correct
+		if( sprintf("%0.2f", $calculated_total) != sprintf("%0.2f", str_replace(",", "", $total_cost)) ){
+			$total_cost = $calculated_total;
+		}
+
+		$calculated_grand_total = $calculated_total + $service_charge;
+
+		if( sprintf("%0.2f", $calculated_grand_total ) != sprintf("%0.2f", str_replace(",", "", $grand_base_total)) ){
+			$grand_base_total = $calculated_grand_total;
+		}
+
 		$data = array(
 			"client_id" => $client_id,
 			"routes_type_id" => $routes_type_id,
@@ -266,10 +279,10 @@ class Invoices extends CI_Controller {
 			"invoice_details" => json_encode($main_invoice_items),
 			"crew_details" => json_encode($crew_items),
 			"passenger_details" => json_encode($passenger_items),
-			"invoice_total_amount" => str_replace(",", "", $total_cost),
+			"invoice_total_amount" => sprintf("%0.2f", str_replace(",", "", $total_cost)),
 			"currency_id" => $base_currency,
-			"service_charge_amount" => str_replace(",", "", $service_charge),
-			"grand_total_amount" => str_replace(",", "", $grand_base_total)
+			"service_charge_amount" => sprintf("%0.2f", str_replace(",", "", $service_charge)),
+			"grand_total_amount" => sprintf("%0.2f", str_replace(",", "", $grand_base_total))
 		);
 
 		//echo "<pre>";print_r($data);exit;
@@ -307,7 +320,7 @@ class Invoices extends CI_Controller {
 			$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
 			$clients = $this->clients->get_all_clients();
 			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
-			$next_invoice_no = $this->sir->get_next_invoice_no();
+			$next_invoice_no = $this->sir->get_next_basic_invoice_no();
 
 			//$client_id = $invoice[0]["client_id"];
 			//$client = $this->client->get_client_by_id( $client_id );
@@ -407,7 +420,7 @@ class Invoices extends CI_Controller {
 			try{
 				$this->invoice->insert_invoice($data);
 				$last_inserted_id = $this->sir->get_last_insert_key_for_table( "invoices", "invoice_id" );
-				$this->invoice->increment_invoice_seq_no();
+				$this->invoice->increment_basic_invoice_seq_no();
 
 				$old_invoice_data = $this->invoice->get_invoice_by_id($invoice_id);
 
@@ -758,7 +771,7 @@ class Invoices extends CI_Controller {
 			$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
 			$clients = $this->clients->get_all_clients();
 			$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
-			$next_invoice_no = $this->sir->get_next_ba_type_invoice_no();
+			$next_invoice_no = $this->sir->get_next_basic_invoice_no();
 			$headings = $this->invoice->get_ba_invoice_headings();
 			$client_routes = $this->clients->get_client_routes_types($client_id);
 
@@ -980,7 +993,7 @@ class Invoices extends CI_Controller {
 		try{
 			$this->invoice->insert_ba_type_invoice($data);
 			$last_inserted_id = $this->sir->get_last_insert_key_for_table( "ba_type_invoices", "invoice_id" );
-			$this->invoice->increment_ba_type_invoice_seq_no();
+			$this->invoice->increment_basic_invoice_seq_no();
 
 			try{
 				$this->logger->add_log(32, $this->session->userdata("user_id"), json_encode($old_invoice_data), json_encode($data));

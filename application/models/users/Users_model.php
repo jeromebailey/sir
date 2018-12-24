@@ -281,15 +281,16 @@ class Users_model extends CI_Model
 		//$decrypted_user_id = $this->encryption->decrypt($encrypted_user_id);
 		$decrypted_user_id = base64_decode(urldecode($encrypted_user_id));
 
-		$query = "SELECT su.`user_id`, su.`first_name`, su.`last_name`, su.`email_address`, aps.`status_`,
-					g.`gender`, d.`department_name`, su.`gender_id`, su.`department_id`, su.`gender_id`, su.`status_id`
+		$query = "SELECT su.`user_id`, su.`first_name`, su.`last_name`, su.`email_address`, aps.`status_`, su.dob,
+					g.`gender`, d.`department_name`, su.`gender_id`, su.`department_id`, su.`gender_id`, su.`status_id`, j.job_title, su.is_an_admin
 					FROM sir_users su
 					LEFT JOIN genders g ON g.`gender_id` = su.`gender_id`
+					LEFT JOIN job_titles j ON j.job_title_id = su.`job_title_id`
 					INNER JOIN app_statuses aps ON aps.`status_id` = su.`status_id`
 					LEFT JOIN departments d ON d.`department_id` = su.`department_id`
 					WHERE su.`user_id` = $decrypted_user_id";
 
-		$result = $this->db->query($query)->result_array();
+		return $this->db->query($query)->result_array();
 	}
 
 	public function get_user_permissions($user_id){

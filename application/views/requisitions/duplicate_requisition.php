@@ -47,7 +47,7 @@
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="requisition-date">Requisition Date<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" value="<?=date('M d, Y');?>" style="position: relative; z-index: 100000;">
+                  <input type="text" name="requisition-date" id="requisition-date" class="form-control" value="<?=date('M d, Y');?>" >
                 </div>
               </div>             
 
@@ -58,20 +58,61 @@
                   <select id="client-id" name="client-id" class="form-control" required="required">
                       <option value="">Select Client</option>
                       <?
-                      if( !empty($clients) ){
-                        foreach ($clients as $key => $value) {
-                          if( $value["client_id"] == $requisition["client_id"] ){?>
-                            <option value="<?=$value["client_id"]?>" selected><?=$value["client_name"]?></option>
-                          <?} else {?>
-                            <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
-                          <?}                          
+                      if( $requisition["client_id"] > 0 && $requisition["client_id"] < 8000 ){
+                        if( !empty($clients) ){
+                          foreach ($clients as $key => $value) {
+                            if( $value["client_id"] == $requisition["client_id"] ){?>
+                              <option value="<?=$value["client_id"]?>" selected><?=$value["client_name"]?></option>
+                            <?} else {?>
+                              <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
+                            <?}                          
+                          }?>
+                          <option value="sanitation">Sanitation</option>
+                          <option value="other">Other</option>
+                        <?} else {
+
                         }
                       } else {
+                        foreach ($clients as $key => $value) {?>                            
+                              <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
+                          <?}
+                          if( $requisition["client_id"] == 8000 ){?>
+                            <option value="sanitation" selected="selected">Sanitation</option>
+                            <option value="other">Other</option>
+                          <?} else {?>
+                            <option value="sanitation">Sanitation</option>
+                            <option value="other">Other</option>
+                          <?}
 
+                          if( $requisition["client_id"] == 9000 ){?>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other" selected="selected">Other</option>
+                          <?} else {?>
+                            <option value="sanitation">Sanitation</option>
+                            <option value="other">Other</option>
+                          <?}                          
                       }?>
                     </select>
                 </div>
               </div>
+
+              <?if( $requisition["client_id"] == 9000 ){ //other client name was entered ?>
+                <div class="form-group" id="other-client-div" style="display: block">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-id">Other Client Name<span class="required">*</span>
+                    </label>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                      <input type="text" name="other-client" id="other-client" class="form-control" value="<?=$requisition['other_client_name']?>" autocomplete="off">
+                    </div>
+                  </div>
+              <?} else {?>
+                <div class="form-group" id="other-client-div" style="display: none" >
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-id">Other Client Name<span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                    <input type="text" name="other-client" id="other-client" class="form-control" autocomplete="off">
+                  </div>
+                </div>
+              <?}?>
 
               <div class="form-group">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="flight-type-id">Flight Type<span class="required">*</span>
@@ -80,16 +121,49 @@
                   <select id="flight-type-id" name="flight-type-id" class="form-control" required="required">
                     <option value="">Select Flight Type</option>
                     <?
-                    if( !empty($flight_types) ){
+                    if( $requisition["flight_type_id"] > 0 && $requisition["client_id"] < 8000 ){
                       foreach ($flight_types as $key => $value) {
-                        if( $value["flight_type_id"] == $requisition["flight_type_id"] ){?>
-                            <option value="<?=$value["flight_type_id"]?>" selected><?=$value["flight_type"]?></option>
-                          <?} else {?>
+                          if( $value["flight_type_id"] == $requisition["flight_type_id"] ){?>
+                              <option value="<?=$value["flight_type_id"]?>" selected><?=$value["flight_type"]?></option>
+                            <?} else {?>
+                              <option value="<?=$value["flight_type_id"]?>"><?=$value["flight_type"]?></option>
+                            <?}                        
+                        }?>
+                        <option value="0" >Staff</option>
+                        <option value="sanitation" >Sanitation</option>
+                        <option value="other" >other</option>
+                    <?} else {
+                      if( !empty($flight_types) ){
+                        foreach ($flight_types as $key => $value) {?>
                             <option value="<?=$value["flight_type_id"]?>"><?=$value["flight_type"]?></option>
-                          <?}                        
-                      }
-                    } else {
+                        <?}
 
+                        switch ($requisition["flight_type_id"]) {
+                          case 0:?>
+                            <option value="0" selected="selected">Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 8000:?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" selected="selected">Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 9000:?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other" selected="selected">Other</option>
+                            <?break;
+                          
+                          default:
+                            # code...
+                            break;
+                        }
+                      } else {
+
+                      }
                     }?>                
                   </select>
                 </div>
@@ -102,16 +176,72 @@
                   <select id="client-flight-id" name="client-flight-id" class="form-control" required="required">
                     <option value="">Select Flight</option>
                     <?
-                    if( !empty($client_flights) ){
+                    if( $requisition["client_flight_id"] > 0 && $requisition["client_flight_id"] < 8000 ){
                       foreach ($client_flights as $key => $value) {
                         if( $value["client_flight_id"] == $requisition["client_flight_id"] ){?>
                             <option value="<?=$value["client_flight_id"]?>" selected><?=$value["flight_no"]?></option>
                           <?} else {?>
                             <option value="<?=$value["client_flight_id"]?>"><?=$value["flight_no"]?></option>
                           <?}                        
-                      }
-                    } else {
+                        }?>
+                        <option value="0" >Staff</option>
+                        <option value="sanitation" >Sanitation</option>
+                        <option value="other" >other</option>
+                    <?} else {
+                      if( !empty($client_flights) ){
+                        
+                        foreach ($client_flights as $key => $value) {?>
+                            <option value="<?=$value["client_flight_id"]?>"><?=$value["flight_no"]?></option>
+                        <?}
 
+                        switch ($requisition["client_flight_id"]) {
+                          case 0:?>
+                            <option value="0" selected="selected">Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 8000: echo "here";?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" selected="selected">Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 9000:?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other" selected="selected">Other</option>
+                            <?break;
+                          
+                          default:
+                            # code...
+                            break;
+                        }
+                      } else {
+                        switch ($requisition["client_flight_id"]) {
+                          case 0:?>
+                            <option value="0" selected="selected">Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 8000: echo "here";?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" selected="selected">Sanitation</option>
+                            <option value="other">Other</option>
+                            <?break;
+
+                          case 9000:?>
+                            <option value="0" >Staff</option>
+                            <option value="sanitation" >Sanitation</option>
+                            <option value="other" selected="selected">Other</option>
+                            <?break;
+                          
+                          default:
+                            # code...
+                            break;
+                        }
+                      }
                     }?>
                   </select>
                 </div>
@@ -129,6 +259,11 @@
                 <div class="col-md-4 col-md-offset-1">
                   <label class="" for="product-id">Product Name</label>
                   <input type="text" id="product-name" name="product-name" autocomplete="off" class="form-control" placeholder="Carrots">
+                </div>
+
+                <div class="col-md-2">
+                  <label class="" for="product-price">Price</label>
+                  <input type="text" id="product-price" name="product-price" autocomplete="off" class="form-control" placeholder="2.50" >
                 </div>
 
                 <div class="col-md-2">
@@ -166,10 +301,11 @@
                   <table class="table table-bordered" id="tblRequestedItems">
                     <thead>
                       <tr>
-                        <th width="70%">Product Name</th>
-                        <th>Amount</th>
-                        <th>Unit</th>
-                        <th>Options</th>
+                        <th>Product Name</th>
+                        <th width="8%">Price</th>
+                        <th width="8%">Amount</th>
+                        <th width="8%">Unit</th>
+                        <th width="10%">Options</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -179,10 +315,13 @@
                         $items = json_decode( $requisition["details"] );
                         foreach ($items as $key => $value) {?>
                           <tr id="<?=$counter?>">
-                            <td><input type="text" name="requisition-product-name-<?=$counter?>" value = "<?=$value->product_name?>" class = "form-control" readonly /></td>
-                            <td><input type="text" name="requisition-amount-<?=$counter?>" value = "<?=$value->amount?>" class = "form-control" readonly /></td>
-                            <td><input type="text" name="requisition-unit-<?=$counter?>" value = "<?=$value->unit?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-product-name-<?=$counter?>" id="requisition-product-name-<?=$counter?>" value = "<?=$value->product_name?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-price-<?=$counter?>" id = "requisition-price-<?=$counter?>" value = "<?=$value->price?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-amount-<?=$counter?>" id="requisition-amount-<?=$counter?>" value = "<?=$value->amount?>" class = "form-control" readonly /></td>
+                            <td><input type="text" name="requisition-unit-<?=$counter?>" id="requisition-unit-<?=$counter?>" value = "<?=$value->unit?>" class = "form-control" readonly /></td>
+                            
                             <td>
+                              <a href="#" onClick="edit_requisition_item(<?=$counter?>)" title="Edit"><i class="fas fa-edit"></i></a>
                               <a href="#" onClick="delete_requisition_item(<?=$counter?>)" title="Delete"><i class="fas fa-trash-alt"></i></a>
                             </td>
                           </tr>
@@ -232,8 +371,30 @@
 
                         <div class="row">
                           <div class="col-md-12">
+                            <label>Price</label>
+                            <input type="text" name="m_product_price" id="m_product_price" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
                             <label>Amount</label>
                             <input type="text" name="m_item_amount" id="m_item_amount" class="form-control">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <label>Unit</label>
+                            <select id="m_product_unit" name="m_product_unit" class="form-control">
+                              <?if( !empty($uom) ){
+                                  foreach ($uom as $key => $value) {?>
+                                    <option value="<?=$value["unit_id"]?>"><?=$value["unit_abbreviation"];?></option>
+                                  <?}
+                                } else {
+
+                                }?>
+                            </select>
                           </div>
                         </div>
 
@@ -343,8 +504,45 @@
     $("#client-id").change(function(){
         var client_id = $(this).val();
 
-        get_client_flights( client_id );        
+        if( client_id == 6 ){
+          $("#other-client-div").hide();
+          prep_fields_for_staff_requisition();
+        } else if( client_id == "other" ){
+          $("#other-client-div").show();
+          prep_fields_for_other_requisition();
+        } else if( client_id == "sanitation" ){
+          $("#other-client-div").hide();
+          prep_fields_for_sanitation_requisition();
+        } else {
+          $("#other-client-div").hide();
+          $("#flight-type-id").val( "" );
+          get_client_flights(client_id);
+        }        
     });
+
+    function prep_fields_for_staff_requisition(){
+      $("#flight-type-id").append("<option value='STAFF'>Staff</option>");
+      $("#client-flight-id").append("<option value='STAFF'>Staff</option>");
+
+      $("#flight-type-id").val( "STAFF" );
+      $("#client-flight-id").val( "STAFF" );
+    }
+
+    function prep_fields_for_other_requisition(){
+      $("#flight-type-id").append("<option value='OTHER'>OTHER</option>");
+      $("#client-flight-id").append("<option value='OTHER'>OTHER</option>");
+
+      $("#flight-type-id").val( "OTHER" );
+      $("#client-flight-id").val( "OTHER" );
+    }
+
+    function prep_fields_for_sanitation_requisition(){
+      $("#flight-type-id").append("<option value='SANITATION'>SANITATION</option>");
+      $("#client-flight-id").append("<option value='SANITATION'>SANITATION</option>");
+
+      $("#flight-type-id").val( "SANITATION" );
+      $("#client-flight-id").val( "SANITATION" );
+    }
 
     function get_client_flights( client_id ){
       $.ajax({
@@ -400,22 +598,32 @@
       console.log( item_counter );
 
       var product_name = $("#requisition-product-name-" + item_counter).val();
+      var price = $("#requisition-price-" + item_counter).val();
       var amount = $("#requisition-amount-" + item_counter).val();
+      var unit = $("#requisition-unit-" + item_counter).val();
       //var product_name = $("#requisition-product-name-" + item_counter).val();
 
       $("#m_product_name").val( product_name );
+      $("#m_product_price").val( price );
       $("#m_item_amount").val( amount );
+      $("select#m_product_unit option")
+        .each(function() { this.selected = (this.text == unit); });
+
       $("#m_item_key").val( item_counter );
     }
 
     $("#btnMEditItem").click(function(){      
 
       var product_name = $("#m_product_name").val();
+      var price = $("#m_product_price").val();
       var amount = $("#m_item_amount").val();
       var item_counter = $("#m_item_key").val();
+      var unit = $("#m_product_unit option:selected").text();
 
       $("#requisition-product-name-" + item_counter).val(product_name);
+      $("#requisition-price-" + item_counter).val(price);
       $("#requisition-amount-" + item_counter).val(amount);
+      $("#requisition-unit-" + item_counter).val(unit);
 
       $("#edit_item_modal").modal('hide');
     });
@@ -468,6 +676,7 @@
                     } else {
                       //console.log( obj[0].unit_id );
                       $("#unit-id").val( obj[0].unit_id );
+                      $("#product-price").val( obj[0].price );
                       $("#unit-id").prop('disabled', 'disabled');
                     }                    
                 }              
@@ -486,16 +695,22 @@
       $("#product-name").val('');
       $("#product-amount").val('');
       $("#unit-id").val(6);
+      $("#product-price").val('');
     }
 
     $("#btnAdd").click(function(){
       var product_name = $("#product-name").val();
       var product_r_amount = $("#product-amount").val();
+      var product_r_price = $("#product-price").val();
       var unit = $("#unit-id option:selected").text(); //$("#unit-id").val();
       var errors = '';
 
       if( product_name == '' ){
         errors += 'Product name must be entered. <br/>'
+      }
+
+      if( product_r_price == '' ){
+        errors += 'Product price must be entered. <br/>'
       }
 
       if( product_r_amount == '' ){
@@ -507,18 +722,34 @@
         $("#msg-holder").html(errors);
         $("#msg-holder").show();
       } else {
-        $("#msg-holder").html('');
-        $("#msg-holder").hide();
+        if( product_name_exists_in_inventory( product_name ) ){
+          $("#msg-holder").html('');
+          $("#msg-holder").hide();
 
-        addAnotherRowForRequisitionItem(product_name, product_r_amount, unit);
-        clearProductFieldInputs();
+          addAnotherRowForRequisitionItem(product_name, product_r_price, product_r_amount, unit);
+          clearProductFieldInputs();
+        } else {
+          $("#msg-holder").addClass('alert-danger');
+          $("#msg-holder").html("Product cannot be added because it does not exist in the inventory.");
+          $("#msg-holder").show();
+        }
       }
     });
 
-    function addAnotherRowForRequisitionItem(product_name, amount, unit){
+    function product_name_exists_in_inventory( product_name ){
+      if( product_name != null && product_name != "" ){
+        if( product_name.indexOf("(") > -1 && product_name.indexOf(")") > -1 ) //check if the product name has the product id
+          return true;
+        else
+          return false;
+      }
+    }
+
+    function addAnotherRowForRequisitionItem(product_name, price, amount, unit){
       var row = "";
       row = row + '<tr id=' + req_item_counter + '>';
       row = row + '<td><input type="text" id="requisition-product-name-' + req_item_counter + '" name="requisition-product-name-' + req_item_counter + '" autocomplete="off" value="' + product_name +'" class="form-control" readonly></td>';
+      row = row + '<td><input type="text" id="requisition-price-' + req_item_counter + '" name="requisition-price-' + req_item_counter + '" required="required" autocomplete="off" value="' + price +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="requisition-amount-' + req_item_counter + '" name="requisition-amount-' + req_item_counter + '" required="required" autocomplete="off" value="' + amount +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="requisition-unit-' + req_item_counter + '" name="requisition-unit-' + req_item_counter + '" required="required" autocomplete="off" value="' + unit +'" class="form-control" readonly></td>';
       //row = row + '<td><select name="requisition-unit-id-' + req_item_counter + '" class="form-control" readonly disabled>';
@@ -532,7 +763,7 @@
     <?}*/?>
       //row = row + '</select></td>';
       row = row + '<td style="margin-top: 23px;">';
-      //row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
       row = row + '<a href="#" onClick="delete_requisition_item(' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';

@@ -44,7 +44,7 @@
                           <li><a href="<?=base_url('Forms/create_invoice');?>">Create Invoice (with Service Charge)</a></li>
                         <?}?>
 
-                        <?if($this->sir->user_has_permission_to("create_ba_invoice")){?>
+                        <?if($this->sir->user_has_permission_to("create_invoice")){?>
                           <li><a href="<?=base_url('Forms/create_ba_type_invoice');?>">Create Invoice (BA Type)</a></li>
                         <?}?>
 

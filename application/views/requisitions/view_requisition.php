@@ -71,15 +71,43 @@
                 </div>
               </div>
 
+              <?if( $requisition["client_id"] == 9000 ){?>
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="requisition-date" class="text-uppercase"><i>Other Client Name</i>:</label>
+                    <?=$requisition["other_client_name"];?>
+                  </div>
+                </div>
+              <?}?>
+
               <div class="row">
                 <div class="col-md-6">
                   <label for="requisition-date" class="text-uppercase"><i>Flight Type</i>:</label>
                   <?
-                  if( $requisition["flight_type_id"] == 0 ){
-                    echo "Staff";
-                  } else {
-                    echo $requisition["flight_type"];
-                  }
+
+                  if( $requisition["flight_type_id"] != 0 && $requisition["flight_type_id"] < 8000 ){
+                      $flight_type = $requisition["flight_type"];
+                    } else {
+                      switch ($requisition["flight_type_id"]) {
+                        case 0:
+                          $flight_type = "Staff";
+                          break;
+
+                        case 8000:
+                            $flight_type = "Sanitation";
+                          break;
+
+                        case 9000:
+                            $flight_type = "Other";
+                          break;
+                        
+                        default:
+                          # code...
+                          break;
+                      }
+                    }
+
+                    echo $flight_type;
                   ?>
                 </div>
               </div>
@@ -88,11 +116,31 @@
                 <div class="col-md-6">
                   <label for="requisition-date"><i>Flight No.</i>:</label>
                   <?
-                  if( $requisition["client_flight_id"] == 0 ){
-                    echo "Staff";
-                  } else {
-                    echo $requisition["flight_no"];
-                  }
+
+                  if( $requisition["client_flight_id"] != 0 && $requisition["client_flight_id"] < 8000 ){
+                      $flight_type = $requisition["flight_type"];
+                      $flight_no = $requisition["flight_no"];
+                    } else {
+                      switch ($requisition["client_flight_id"]) {
+                        case 0:
+                          $flight_no = "Staff";
+                          break;
+
+                        case 8000:
+                            $flight_no = "Sanitation";
+                          break;
+
+                        case 9000:
+                            $flight_no = "Other";
+                          break;
+                        
+                        default:
+                          # code...
+                          break;
+                      }
+                    }
+
+                    echo $flight_no;
                   ?>
                 </div>
               </div>
@@ -111,9 +159,12 @@
                   <table class="table table-bordered table-striped table-condensed" id="tblRequestedItems">
                     <thead>
                       <tr>
-                        <th width="8%">Product Name</th>
+                        <th>Product Name</th>
+                        <th width="10%">Price</th>
                         <th width="10%">Amount</th>
                         <th width="10%">Unit</th>
+                        <th width="10%">Item Total</th>
+                        
                       </tr>
                     </thead>
                     <tbody>
@@ -124,14 +175,23 @@
                       {
                         foreach($items as $key => $value)
                         {
+                          $price = ( !isset($value->price) ) ? 0 : $value->price;
+                          $amount = $value->amount;
+                          $item_total = $price*$amount;
                           //echo "<pre>";print_r($value->qty);exit;?>
                           <tr>
                             <td><?=$value->product_name;?></td>
+                            <td width="10%"><?=$price;?></td>
                             <td width="10%"><?=$value->amount;?></td>
                             <td width="10%"><?=$value->unit;?></td>
+                            <td width="10%"><?=$item_total;?></td>
                           </tr>
-                        <?}
-                      }?>
+                        <?}?>
+                        <tr>
+                          <td colspan="4"><strong>Requisition Total</strong></td>
+                          <td><strong>$<?=$requisition["total_cost"];?></strong></td>
+                        </tr>
+                      <?}?>
                     </tbody>
 
                   </table>

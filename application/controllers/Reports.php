@@ -221,4 +221,41 @@ class Reports extends CI_Controller {
 		$this->load->view('reports/pricing_inventory', $data);
 	}
 
+	public function total_requisition_by_date_range(){
+		$PageTitle = "Total Requisition by Date Range";
+
+		$start_date = date("Y-m-d");
+		$end_date = date("Y-m-d");
+
+		$requisition_results = $this->requisitions->search_requisitions_by_date_range(null, null);
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"requisition_results" => $requisition_results
+		);
+
+		$this->load->view('reports/total_requisition_by_date_range', $data);
+	}
+
+	public function do_search_total_requisition_by_date_range(){
+
+		$PageTitle = "Total Requisition by Date Range";
+		$start_date = date("Y-m-d", strtotime($this->input->post("start-date")));
+		$end_date = date("Y-m-d", strtotime($this->input->post("end-date")));
+
+		$requisition_results = $this->requisitions->search_requisitions_by_date_range($start_date, $end_date);
+		//echo "<pre>";print_r($requisition_results);exit;
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"requisition_results" => $requisition_results
+		);
+
+		$this->load->view('reports/total_requisition_by_date_range', $data);
+	}	
+
 }

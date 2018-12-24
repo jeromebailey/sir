@@ -251,13 +251,13 @@ class Users extends CI_Controller {
 		$encrypted_id = $this->uri->segment('3');
 
 		$user_details = $this->sir_users->get_user_profile_details_by_encrypted_id($encrypted_id);
-
+//echo "<pre>";print_r($user_details);exit;
 		if( !isset($encrypted_id) ){
 
 		} else {
 			$data = array(
 			"page_title" => $PageTitle,
-			"profile" => $user_details
+			"user_details" => $user_details
 			);
 
 			$this->load->view('users/user_profile', $data);

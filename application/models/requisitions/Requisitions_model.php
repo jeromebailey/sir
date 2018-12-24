@@ -1,12 +1,42 @@
 <?
 class Requisitions_model extends CI_Model
 {
-	var $requisitions;
+	var $requisitions, $other_client_name_table;
 
 	function __construct()
 	{
 		parent::__construct();
 		$this->table_name = "requisitions";
+		$this->other_client_name_table = "requisition_other_client_name";
+	}
+
+	public function search_requisitions_by_date_range($start_date, $end_date){
+		if( $start_date == null && $end_date == null ){
+			return null;
+		} else {
+			$query = "SELECT r.*, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`,
+			(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`store_keeper_employee_id` ) 'created_by',
+			(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by',
+			(case 
+	                    	when r.client_id = 8000 then 'Sanitation'
+	                        when r.client_id = 9000 then 'Other'
+	                        else c.`client_name`
+	                    END) as client_name, ro.other_client_name
+						FROM requisitions r
+						LEFT JOIN clients c ON c.`client_id` = r.`client_id`
+						LEFT JOIN requisition_other_client_name ro on ro.requisition_id = r.requisition_id
+						LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
+						LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
+						where r.requisition_date between '$start_date' and '$end_date'
+						ORDER BY r.`requisition_date` DESC;";
+
+			return $this->sir->format_query_result_as_array($query);
+		}
+		
+	}
+
+	public function insert_other_requisition_client_name($data){
+		return $this->db->insert($this->other_client_name_table, $data);
 	}
 
 	public function delete_requisition($key){
@@ -37,11 +67,17 @@ class Requisitions_model extends CI_Model
 	}
 
 	public function get_all_requisitions(){
-		$query = "SELECT r.*, c.`client_name`, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`,
+		$query = "SELECT r.*, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`,
 		(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`store_keeper_employee_id` ) 'created_by',
-		(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by'
+		(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by',
+		(case 
+                    	when r.client_id = 8000 then 'Sanitation'
+                        when r.client_id = 9000 then 'Other'
+                        else c.`client_name`
+                    END) as client_name, ro.other_client_name
 					FROM requisitions r
-					INNER JOIN clients c ON c.`client_id` = r.`client_id`
+					LEFT JOIN clients c ON c.`client_id` = r.`client_id`
+					LEFT JOIN requisition_other_client_name ro on ro.requisition_id = r.requisition_id
 					LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
 					LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
 					ORDER BY r.`requisition_date` DESC;";
@@ -51,11 +87,17 @@ class Requisitions_model extends CI_Model
 
 	public function get_requisition_by_id( $requisition_id )
 	{
-		$query = "SELECT r.*, c.`client_name`, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`, r.flight_type_id,
+		$query = "SELECT r.*, c.`abbreviation`, ft.`flight_type`, cf.`flight_no`, r.flight_type_id,
 					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`store_keeper_employee_id` ) 'created_by',
-					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by'
+					(SELECT CONCAT(u.first_name, ' ', u.last_name) FROM sir_users u WHERE u.user_id = r.`dispatched_by_employee_id` ) 'dispatched_by',
+					(case 
+                    	when r.client_id = 8000 then 'Sanitation'
+                        when r.client_id = 9000 then 'Other'
+                        else c.`client_name`
+                    END) as client_name, ro.other_client_name
 					FROM requisitions r
-					INNER JOIN clients c ON c.`client_id` = r.`client_id`
+					LEFT JOIN clients c ON c.`client_id` = r.`client_id`
+					LEFT JOIN requisition_other_client_name ro on ro.requisition_id = r.requisition_id
 					LEFT JOIN flight_types ft ON ft.`flight_type_id` = r.`flight_type_id`
 					LEFT JOIN client_flights cf ON cf.`client_flight_id` = r.`client_flight_id`
 					WHERE r.`requisition_id` = $requisition_id";
@@ -72,6 +114,37 @@ class Requisitions_model extends CI_Model
 		);
 
 		return $this->db->update($this->table_name, $data, "requisition_id = " . $requisition_id);
+	}
+
+	/**
+	 * takes items in json format. uses the product id to deplete the item amount in the inventory
+	 * @param string $items All the items to be requisitioned
+	 * @return void
+	 */
+
+	public function deplete_inventory($items){
+
+		if( !empty( $items ) ){
+			foreach($items as $key => $value)
+			{
+				$product_id = $value->product_id;
+				$product_name = $value->product_name;
+				$amount = $value->amount;
+				$price = $value->price;
+
+				$total_requisition_cost += $this->products->calculate_requisition_cost_for_product($product_name, $amount);
+
+				//calculate and update product stock level
+				if( $this->products->_minimum_stock_level_reached_after_being_dispatched($product_name, $amount) ){
+					$products_reach_low_stock_level = true;
+					$low_stock["product_name"] = $product_name;
+
+					array_push($low_stock_level_products, $low_stock);
+					unset( $low_stock );
+				}
+			} //end of loop
+		}
+		return false;
 	}
 
 	public function _count_items()
@@ -93,6 +166,12 @@ class Requisitions_model extends CI_Model
 
 		return $this->sir->format_query_result_as_array($query);
 	}
+
+	/**
+	 * Sets the daily and monthly total Requisition cost.
+	 * @param double $total_requisition_cost
+	 * @return void
+	 */
 
 	public function set_requisition_cost($total_requisition_cost){
 		if( !empty($total_requisition_cost) ){
@@ -239,14 +318,18 @@ class Requisitions_model extends CI_Model
 
 				foreach($items as $key => $value)
 				{
+					$product_id = $value->product_id;
 					$product_name = $value->product_name;
 					$amount = $value->amount;
+					$price = $value->price;
 
-					$total_requisition_cost += $this->products->calculate_requisition_cost_for_product($product_name, $amount);
+					$item_cost = $amount * $price;
+
+					$total_requisition_cost += $item_cost; //$this->products->calculate_requisition_cost_for_product($product_name, $amount);
 
 					//calculate and update product stock level
-					if( $this->products->minimum_stock_level_reached_after_being_dispatched($product_name, $amount) ){
-						$$products_reach_low_stock_level = true;
+					if( $this->products->_minimum_stock_level_reached_after_being_dispatched($product_id, $amount) ){
+						$products_reach_low_stock_level = true;
 						$low_stock["product_name"] = $product_name;
 
 						array_push($low_stock_level_products, $low_stock);
@@ -288,5 +371,85 @@ class Requisitions_model extends CI_Model
 		}	
 
 		echo $dispatched;
+	}
+
+	/**
+	 * Gets the requisition by the requisition id and then dispatches it.
+	 * @param int $requisition_id
+	 * @return void
+	 */
+
+	public function dispatch_requisition($requisition_id){
+
+		$dispatched = 0;
+
+		try{
+			$requisition = $this->get_requisition_by_id( $requisition_id );
+
+			try{
+				$this->set_requisition_as_dispatched($requisition_id); //should be the last thing i do
+
+				$items = json_decode($requisition[0]["details"]);
+//echo "<pre>";print_r($items);exit;
+				//depletes the items in the inventory
+				//$this->deplete_inventory($items);
+
+				$low_stock_level_products = array();
+				$products_reach_low_stock_level = false;
+				$total_requisition_cost = 0;
+
+				foreach($items as $key => $value)
+				{
+					$product_id = $value->product_id;
+					$product_name = $value->product_name;
+					$amount = $value->amount;
+					$price = $value->price;
+
+					$item_cost = $price * $amount;
+
+					$total_requisition_cost += $item_cost; //$this->products->calculate_requisition_cost_for_product($product_name, $amount);
+
+					//calculate and update product stock level
+					if( $this->products->_minimum_stock_level_reached_after_being_dispatched($product_id, $amount) ){
+						$products_reach_low_stock_level = true;
+						$low_stock["product_name"] = $product_name;
+
+						array_push($low_stock_level_products, $low_stock);
+						unset( $low_stock );
+					}
+				} //end of loop
+
+				try{
+					$this->set_requisition_cost($total_requisition_cost);
+				} catch(Exception $r_x){
+					$this->xxx->log_exception( $r_x->getMessage() );
+				}
+
+				$dispatched = 1;
+	
+				//check if products have reached or gone below their individual low stock levels
+				if( $products_reach_low_stock_level == true ){
+					$admins = $this->users->get_user_info_to_send_notification_to_by_permission_group( 2 );
+	
+					try{
+						$this->notifications->insert_user_notification_from_array($admins, 5); //set notification
+					} catch(Exception $x){
+						$this->xxx->log_exception( $x->getMessage() );
+					}
+	
+					try{
+						$this->notifications->send_notification_for_low_stock_level_after_requisition($admins, $low_stock_level_products); //send notification by email
+					} catch(Exception $except){
+						$this->xxx->log_exception( $except->getMessage() );	
+					}				
+				}
+			} catch(Exception $xp){
+				$this->xxx->log_exception( $xp->getMessage() );
+				$dispatched = 0;
+			}
+		} catch( Exception $ex ){
+			$this->xxx->log_exception( $ex->getMessage() );
+			$dispatched = 0;
+		}
 	}
 }

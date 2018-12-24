@@ -15,6 +15,16 @@ class Products_model extends CI_Model
 		$this->minimum_product_stock_levels_table = "minimum_product_stock_levels";
 	}
 
+	public function get_category_id_from_product_id( $product_id ){
+		$query = "select product_category_id from products where product_id = $product_id";
+
+		return $this->sir->format_query_result_as_array($query);
+	}
+
+	public function update_product_prices_for_requisition_items( $changed_product_prices ){
+		return $this->db->update_batch( $this->table_name, $changed_product_prices, "product_id" );
+	}
+
 	public function delete_product( $key ){
 		if( !empty($key) ){
 			if( $this->db->delete( $this->table_name, array('product_id' => $key) ) ){
@@ -411,10 +421,47 @@ class Products_model extends CI_Model
 		return $this->db->query($query);
 	}
 
+	/**
+	 * Depletes the inventory item by the amount passed. Returns a boolean value to indicate if 
+	 * the product has reached its minimum stock level
+	 * @param int $product_name
+	 * @param double $amount
+	 * @return bool
+	 */
+
 	public function minimum_stock_level_reached_after_being_dispatched($product_name, $amount)
 	{
 		$product_id = $this->get_product_id_from_product_name($product_name);
 		$product_id = $product_id[0]["product_id"];
+
+		$minimum_stock_level = $this->get_minimum_maximum_stock_level_by_product_id($product_id);
+		$min_level = $minimum_stock_level[0]["minimum_stock_level"];
+
+		$product_level_info = $this->get_stock_level_by_product_id($product_id);
+		$current_stock_level = $product_level_info[0]["current_stock_level"];
+
+		$stock_level_after_requisition = $current_stock_level - $amount;
+		
+		$this->update_stock_level_by_product_id($product_id, $stock_level_after_requisition);		
+
+		if( $stock_level_after_requisition < $min_level ){
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Depletes the inventory item by the amount passed. Returns a boolean value to indicate if 
+	 * the product has reached its minimum stock level
+	 * @param int $product_id
+	 * @param double $amount
+	 * @return bool
+	 */
+
+	public function _minimum_stock_level_reached_after_being_dispatched($product_id, $amount)
+	{
+		//$product_id = $this->get_product_id_from_product_name($product_name);
+		//$product_id = $product_id[0]["product_id"];
 
 		$minimum_stock_level = $this->get_minimum_maximum_stock_level_by_product_id($product_id);
 		$min_level = $minimum_stock_level[0]["minimum_stock_level"];
@@ -616,8 +663,9 @@ class Products_model extends CI_Model
 				return false;
 			}
 		} else {
+			$updated_stock_level = $product_stock_level[0]["current_stock_level"] + $new_stock_level;
 			$update_stock_level_data = array(
-				"current_stock_level" => $new_stock_level
+				"current_stock_level" => $updated_stock_level
 			);
 
 			if(Products_model::update_single_product_stock_level( $product_id, $update_stock_level_data )){

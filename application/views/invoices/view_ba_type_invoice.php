@@ -50,18 +50,26 @@
               <div class="col-md-2">
                 <img src="<?=base_url('assets/images/logo-gcg-220-120.jpg');?>" height="50" width="100">
               </div>
-              <div class="col-md-10 text-center">
-                <strong><?=$page_title;?></strong>
-                <?//=$company_address_top;?>
+              <div class="col-md-8 text-center">
+                <strong><?=$page_title;?></strong><br/>
+                <?=$company_address_top;?>
               </div>
             </div>
 
             <br />
 
               <div class="row">
-                <div class="col-md-4">
+                <!--<div class="col-md-4">
                   <label for="supplier-id"><?=$company_name;?></label><br />
                   <?=$company_address;?>
+                </div>-->
+
+                <div class="col-md-4">
+                  <label for="">Bill To:</label>
+                    <div class="" >
+                      <?=$invoice["client_name"] . " " . $invoice["destination_abbreviation"];?> <br />
+                      <?=$client_address;?>
+                    </div>
                 </div>
 
                 <div class="col-md-4 col-md-offset-3 pull-right">                  
@@ -85,7 +93,7 @@
 
               <br />
 
-              <div class="row">
+              <!--<div class="row">
                 <div class="col-md-4">
                   <label for="">Bill To:</label>
                     <div class="" >
@@ -93,11 +101,7 @@
                       <?=$client_address;?>
                     </div>
                 </div>
-              </div>
-
-              <br/>
-
-              <h3>Item / Part Requested</h3>
+              </div>-->
 
               <div class="row">
                 <div class="col-md-3 col-md-offset-8" >
@@ -112,11 +116,11 @@
                   <table class="table table-bordered table-striped table-condensed" id="tblRequestedItems">
                     <thead>
                       <tr>
-                        <th>Description</th>
-                        <th width="8%">%</th>
-                        <th width="8%">Qty</th>
-                        <th width="8%">Price</th>
-                        <th width="13%">Extension</th>
+                        <th><h4>Description</h4></th>
+                        <th width="8%"><h4>%</h4></th>
+                        <th width="8%"><h4>Qty</h4></th>
+                        <th width="8%"><h4>Price</h4></th>
+                        <th width="13%"><h4>Extension</h4></th>
                       </tr>
                     </thead>                    
 

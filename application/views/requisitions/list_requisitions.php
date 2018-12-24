@@ -51,8 +51,35 @@
                   //echo "<pre>";print_r($clients);exit;
                   foreach ($requisitions as $key => $value) {
                     $requisition_id = $value["requisition_id"];
-                    $flight_type = ( $value["flight_type"] == 0 ) ? "Staff" : $value["flight_type"];
-                    $flight_no = ( $value["flight_no"] == 0 ) ? "Staff" : $value["flight_no"];
+
+                    if( $value["flight_type_id"] != 0 && $value["flight_type_id"] < 8000 ){
+                      $flight_type = $value["flight_type"];
+                      $flight_no = $value["flight_no"];
+                    } else {
+                      switch ($value["flight_type_id"]) {
+                        case 0:
+                          $flight_type = "Staff";
+                          $flight_no = "Staff";
+                          break;
+
+                        case 8000:
+                            $flight_type = "Sanitation";
+                            $flight_no = "Sanitation";
+                          break;
+
+                        case 9000:
+                            $flight_type = "Other";
+                            $flight_no = "Other";
+                          break;
+                        
+                        default:
+                          # code...
+                          break;
+                      }
+                    }
+                    
+                    //$flight_type = ( $value["flight_type_id"] == 0 ) ? "Staff" : $value["flight_type"];
+                    //$flight_no = ( $value["flight_no"] == 0 ) ? "Staff" : $value["flight_no"];
                     ?>
                     <tr>
                       <td><?=$value["client_name"];?></td>

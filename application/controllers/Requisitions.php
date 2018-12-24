@@ -3,6 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Requisitions extends CI_Controller {
 
+	const staff_requisition_key = 6, other_requisition_key = "other", sanitation_requisition_key = "sanitation";
+	const other_requisition_client_id = 9000, sanitation_requisition_client_id = 8000;
+
 	function __construct(){
 		parent::__construct();
 
@@ -33,7 +36,7 @@ class Requisitions extends CI_Controller {
 		$this->sir_session->clear_status_message();
 		$PageTitle = "ALL Requisitions";
 		$requisitions = $this->requisitions->get_all_requisitions();
-
+		//echo "<pre>";print_r($requisitions);exit;
 		$data = array(
 			"page_title" => $PageTitle,
 			'requisitions' => $requisitions
@@ -107,41 +110,102 @@ class Requisitions extends CI_Controller {
 	public function do_duplicate_requisition(){
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
-		$flight_type_id = $this->input->post("flight-type-id");
-		$client_flight_id = $this->input->post("client-flight-id");
+		
+		if( $client_id == self::staff_requisition_key ){
+			$flight_type_id = 0;
+			$client_flight_id = 0;
+		} else if( $client_id == self::sanitation_requisition_key ){
+			$client_id = self::sanitation_requisition_client_id;
+			$flight_type_id = self::sanitation_requisition_client_id;
+			$client_flight_id = self::sanitation_requisition_client_id;
+		} else if( $client_id == self::other_requisition_key ){
+			$client_id = self::other_requisition_client_id;
+			$flight_type_id = self::other_requisition_client_id;
+			$client_flight_id = self::other_requisition_client_id;
+			$other_client_name = $this->input->post("other-client");
+		} else {
+			$flight_type_id = $this->input->post("flight-type-id");
+			$client_flight_id = $this->input->post("client-flight-id");
+		}
+
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
 		$requisition_date = $this->input->post("requisition-date");
+		$total_requisition_cost = 0;
 
 		if( $no_of_items > 0 )
 		{
 			$counter = 0;
 			$row = array();
 			$record = array();
+			$changed_product_prices = array();
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = $this->input->post("requisition-product-name-" . $i);
+				$product_name_id = addslashes( $this->input->post("requisition-product-name-" . $i) );
 				$amount = $this->input->post("requisition-amount-" . $i);
 				$unit = $this->input->post("requisition-unit-" . $i);
+				$price = $this->input->post("requisition-price-" . $i);
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+					$product_id = $this->products->get_product_id_from_product_name(trim($product_name_id));
+					
+					if( empty($product_id) ){
+						//echo "nothing";exit;
+						$selected_product_price = 0;
 
-					$row["product_name"] = $product_name;
-					$row["amount"] = $amount;
-					$row["unit"] = $unit;					
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
 
-					array_push($record, $row);
+						$total_requisition_cost += $price*$amount;
+							
+						/*$price_change_product = array(
+							"product_id" => $product_id[0]["product_id"],
+							"price" => $price
+						);
+						array_push( $changed_product_prices, $price_change_product );*/
 
-					unset($row);
-					$counter++;
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					} else {
+						$product_details = $this->products->get_product_by_product_id( $product_id[0]["product_id"] );
+
+						//echo "<pre>";print_r($product_details);exit;
+						$selected_product_price = $product_details[0]["price"];
+
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
+
+						$total_requisition_cost += $price*$amount;
+
+						if( !empty($selected_product_price) ){
+							if( $selected_product_price != $price ){
+								$price_change_product = array(
+									"product_id" => $product_id[0]["product_id"],
+									"price" => $price
+								);
+								array_push( $changed_product_prices, $price_change_product );
+							}
+						}
+
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					}
 				}
 			} //end of for loop			
 
 			$details = json_encode($record);
-			//echo "<pre>";print_r($po_record);exit;
+			
 
 			$data = array(
 				"client_id" => $client_id,
@@ -151,12 +215,19 @@ class Requisitions extends CI_Controller {
 				"passenger_count" => $passenger_count,
 				"requisition_date" => date("Y-m-d", strtotime($requisition_date)),
 				"details" => $details,
+				"total_cost" => $total_requisition_cost,
 				"store_keeper_employee_id" => $this->session->userdata("user_id"),
 				"dispatched" => 0
 			);
 
+			//echo "<pre>";print_r($data);exit;
+
 			try{
 				$this->requisitions->insert_requisition($data);
+
+				if( !empty( $changed_product_prices ) ){
+					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+				}
 
 				$new_requisition_id = $this->db->insert_id();
 
@@ -192,7 +263,7 @@ class Requisitions extends CI_Controller {
 				$this->sir_session->add_status_message("Sorry, your Requisition was not created successfully!", "danger");
 			}
 
-			redirect("/Requisitions/edit_requisition/" . $new_requisition_id);
+			redirect("/Requisitions/edit_duplicate_requisition/" . $new_requisition_id);
 		}
 	}
 
@@ -238,8 +309,24 @@ class Requisitions extends CI_Controller {
 		$requisition_id = $this->input->post("requisition_id");
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
-		$flight_type_id = $this->input->post("flight-type-id");
-		$client_flight_id = $this->input->post("client-flight-id");
+
+		if( $client_id == self::staff_requisition_key ){
+			$flight_type_id = 0;
+			$client_flight_id = 0;
+		} else if( $client_id == self::sanitation_requisition_key ){
+			$client_id = self::sanitation_requisition_client_id;
+			$flight_type_id = self::sanitation_requisition_client_id;
+			$client_flight_id = self::sanitation_requisition_client_id;
+		} else if( $client_id == self::other_requisition_key ){
+			$client_id = self::other_requisition_client_id;
+			$flight_type_id = self::other_requisition_client_id;
+			$client_flight_id = self::other_requisition_client_id;
+			$other_client_name = $this->input->post("other-client");
+		} else {
+			$flight_type_id = $this->input->post("flight-type-id");
+			$client_flight_id = $this->input->post("client-flight-id");
+		}
+
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
 		$requisition_date = $this->input->post("requisition-date");
@@ -248,33 +335,79 @@ class Requisitions extends CI_Controller {
 
 		//echo "<pre>";print_r($this->input->post());exit;
 
+		$total_requisition_cost = 0;
+
 		if( $no_of_items > 0 )
 		{
 			$counter = 0;
 			$row = array();
 			$record = array();
+			$changed_product_prices = array();
 			//$low_stock_level_products = array();
 			//$products_reach_low_stock_level = false;
 			//$total_requisition_cost = 0;
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = $this->input->post("requisition-product-name-" . $i);
+				$product_name_id = addslashes($this->input->post("requisition-product-name-" . $i));
 				$amount = $this->input->post("requisition-amount-" . $i);
 				$unit = $this->input->post("requisition-unit-" . $i);
+				$price = $this->input->post("requisition-price-" . $i);
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+					$product_id = $this->products->get_product_id_from_product_name(trim($product_name_id));
+					
+					if( empty($product_id) ){
+						//echo "nothing";exit;
+						$selected_product_price = 0;
 
-					$row["product_name"] = $product_name;
-					$row["amount"] = $amount;
-					$row["unit"] = $unit;					
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
 
-					array_push($record, $row);
+						$total_requisition_cost += $price*$amount;
+							
+						/*$price_change_product = array(
+							"product_id" => $product_id[0]["product_id"],
+							"price" => $price
+						);
+						array_push( $changed_product_prices, $price_change_product );*/
 
-					unset($row);
-					$counter++;
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					} else {
+						$product_details = $this->products->get_product_by_product_id( $product_id[0]["product_id"] );
+
+						//echo "<pre>";print_r($product_details);exit;
+						$selected_product_price = $product_details[0]["price"];
+
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
+
+						$total_requisition_cost += $price*$amount;
+
+						if( !empty($selected_product_price) ){
+							if( $selected_product_price != $price ){
+								$price_change_product = array(
+									"product_id" => $product_id[0]["product_id"],
+									"price" => $price
+								);
+								array_push( $changed_product_prices, $price_change_product );
+							}
+						}
+
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					}
 				}
 			} //end of for loop			
 
@@ -287,11 +420,16 @@ class Requisitions extends CI_Controller {
 				"flight_type_id" => $flight_type_id,
 				"client_flight_id" => $client_flight_id,
 				"passenger_count" => $passenger_count,
-				"details" => $details
+				"details" => $details,
+				"total_cost" => $total_requisition_cost
 			);
 //echo "<pre>";print_r($data);exit;
 			try{
 				$this->requisitions->update_requisition( $requisition_id, $data);
+
+				if( !empty( $changed_product_prices ) ){
+					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+				}
 
 				try{
 					$this->logger->add_log(30, $this->session->userdata("user_id"), json_encode($old_data), json_encode($data));
@@ -313,12 +451,23 @@ class Requisitions extends CI_Controller {
 		$requisition_id = $this->input->post("requisition_id");
 
 		try{
+			$this->requisitions->dispatch_requisition($requisition_id);
+			$this->sir_session->add_status_message("Your Requisition has been dispatched!", "success");
+		} catch( Exception $ex ){
+			$this->xxx->log_exception( $ex->getMessage() );
+			$this->sir_session->add_status_message("Sorry, there was an error dispatching your Requisition!", "danger");
+		}
+
+		/*try{
 			$requisition = $this->requisitions->get_requisition_by_id( $requisition_id );
 
 			try{
 				$this->requisitions->set_requisition_as_dispatched($requisition_id);
 
 				$items = json_decode($requisition[0]["details"]);
+
+				//deplete the inventory
+				$this->requisitions->deplete_inventory($items);
 
 				$low_stock_level_products = array();
 				$products_reach_low_stock_level = false;
@@ -371,7 +520,7 @@ class Requisitions extends CI_Controller {
 		} catch( Exception $ex ){
 			$this->xxx->log_exception( $ex->getMessage() );
 			$this->sir_session->add_status_message("Sorry, there was an error dispatching your Requisition!", "danger");
-		}	
+		}	*/
 		redirect("/Requisitions/view_requisition/" . $requisition_id);
 	}	
 }

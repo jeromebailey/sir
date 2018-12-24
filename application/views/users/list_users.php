@@ -59,7 +59,7 @@
                       <td><?=$value["department_name"];?></td>
                       <td><?=$value["status_"];?></td>
                       <td>
-                        <a href="" title="Details"><i class="fas fa-file-alt"></i></a> |
+                        <a href="<?=base_url('Users/view_user_profile/'.$encrypted_user_id)?>" title="Details"><i class="fas fa-file-alt"></i></a> |
                         <a href="<?=base_url('Users/edit_user/'.$encrypted_user_id)?>" title="Edit"><i class="fas fa-edit"></i></a> |
                         <a href="#" onclick="deleteUser('<?=$encrypted_user_id;?>')" title="Delete"><i class="fas fa-trash-alt"></i></a>
                       </td>

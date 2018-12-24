@@ -144,12 +144,20 @@
 
                   <input type="hidden" name="product_id" id="product_id" value="<?=$product['product_id'];?>">
 
-                <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">New Stock Level <span class="required">*</span>
-                    </label>
-                    <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="text" id="new-stock-level" name="new-stock-level" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12" value="">
-                    </div>
+                  <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">Current Stock Level <span class="required">*</span>
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" id="current-stock-level" name="current-stock-level" disabled = "disabled" autocomplete="off" class="form-control col-md-7 col-xs-12" value="<?=$product["current_stock_level"]?>">
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bar-code">New Stock Level <span class="required">*</span>
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" id="new-stock-level" name="new-stock-level" required="required" autocomplete="off" class="form-control col-md-7 col-xs-12" value="">
+                      </div>
                   </div>
 
                   <div class="form-group">

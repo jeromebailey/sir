@@ -3,7 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Forms extends CI_Controller {
 
-	const staff_requisition_key = 6;
+	const staff_requisition_key = 6, other_requisition_key = "other", sanitation_requisition_key = "sanitation";
+	const other_requisition_client_id = 9000, sanitation_requisition_client_id = 8000;
+	var $todays_date;
 
 	function __construct(){
 		parent::__construct();
@@ -32,6 +34,8 @@ class Forms extends CI_Controller {
 		$this->load->library('encryption');
 
 		$this->sir->manage_session();
+
+		$this->todays_date = date("Y-m-d");
 
 	}
 
@@ -79,6 +83,15 @@ class Forms extends CI_Controller {
 		if( $client_id == self::staff_requisition_key ){
 			$flight_type_id = 0;
 			$client_flight_id = 0;
+		} else if( $client_id == self::sanitation_requisition_key ){
+			$client_id = self::sanitation_requisition_client_id;
+			$flight_type_id = self::sanitation_requisition_client_id;
+			$client_flight_id = self::sanitation_requisition_client_id;
+		} else if( $client_id == self::other_requisition_key ){
+			$client_id = self::other_requisition_client_id;
+			$flight_type_id = self::other_requisition_client_id;
+			$client_flight_id = self::other_requisition_client_id;
+			$other_client_name = $this->input->post("other-client");
 		} else {
 			$flight_type_id = $this->input->post("flight-type-id");
 			$client_flight_id = $this->input->post("client-flight-id");
@@ -86,6 +99,7 @@ class Forms extends CI_Controller {
 		
 		$passenger_count = $this->input->post("passenger-count");
 		$no_of_items = $this->input->post("no_of_items");
+		$total_requisition_cost = 0;
 
 		if( $no_of_items > 0 )
 		{
@@ -94,26 +108,95 @@ class Forms extends CI_Controller {
 			$record = array();
 			$low_stock_level_products = array();
 			$products_reach_low_stock_level = false;
-			$total_requisition_cost = 0;
+			$changed_product_prices = array();
+
+			$no_of_requisition_for_today = 0;
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = $this->input->post("requisition-product-name-" . $i);
+				$product_name_id = addslashes($this->input->post("requisition-product-name-" . $i));
 				$amount = $this->input->post("requisition-amount-" . $i);
 				$unit = $this->input->post("requisition-unit-" . $i);
+				$price = $this->input->post("requisition-price-" . $i);
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
 					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+					$product_id_result = $this->products->get_product_id_from_product_name(trim($product_name));
+					$product_id = $product_id_result[0]["product_id"];
 
-					$row["product_name"] = $product_name;
-					$row["amount"] = $amount;
-					$row["unit"] = $unit;					
+					$category_id = $this->products->get_category_id_from_product_id( $product_id );
+					$category_id = $category_id[0]["product_category_id"];
 
-					array_push($record, $row);
+					if( $this->sir->daily_category_requisition_exist($category_id, $this->todays_date) ){ //check if daily requisition exist for the category
+						$no_of_requisition_for_today_result = $this->sir->get_no_of_requisitions_for_category( $category_id, $this->todays_date ); //get the amount of requisitions for the category
 
-					unset($row);
-					$counter++;
+						$no_of_requisition_for_today = $no_of_requisition_for_today_result[0]["no_of_requisitions"] + 1;
+						
+						$this->sir->update_daily_category_requisition($category_id, $no_of_requisition_for_today, $this->todays_date);
+					} else {
+						$no_of_requisition_for_today+=1;
+
+						$insert_data = array(
+							"category_id" => $category_id,
+							"no_of_requisitions" => $no_of_requisition_for_today,
+							"day" => $this->todays_date
+						);
+
+						$this->sir->insert_daily_category_requisition($insert_data);
+					}
+
+					if( empty($product_id_result) ){
+						//echo "nothing";exit;
+						$selected_product_price = 0;
+
+						$row["product_id"] = $product_id;
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
+
+						//$total_requisition_cost += $price*$amount;
+							
+						/*$price_change_product = array(
+							"product_id" => $product_id[0]["product_id"],
+							"price" => $price
+						);
+						array_push( $changed_product_prices, $price_change_product );*/
+
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					} else {
+						$product_details = $this->products->get_product_by_product_id( $product_id );
+
+						//echo "<pre>";print_r($product_details);exit;
+						$selected_product_price = $product_details[0]["price"];
+
+						$row["product_id"] = $product_id;
+						$row["product_name"] = addslashes($product_name);
+						$row["amount"] = $amount;
+						$row["unit"] = $unit;
+						$row["price"] = $price;
+
+						$total_requisition_cost += $price*$amount;
+
+						if( !empty($selected_product_price) ){
+							if( $selected_product_price != $price ){
+								$price_change_product = array(
+									"product_id" => $product_id,
+									"price" => $price
+								);
+								array_push( $changed_product_prices, $price_change_product );
+							}
+						}
+
+						array_push($record, $row);
+
+						unset($row);
+						$counter++;
+					} //end of else
 				}
 			} //end of for loop			
 
@@ -127,14 +210,34 @@ class Forms extends CI_Controller {
 				"passenger_count" => $passenger_count,
 				"requisition_date" => date("Y-m-d", strtotime($requisition_date)),
 				"details" => $details,
+				"total_cost" => $total_requisition_cost,
 				"store_keeper_employee_id" => $this->session->userdata("user_id"),
 				"dispatched" => 0
 			);
 
-			//echo "<pre>";print_r($data);exit;
+			//echo "<pre>";print_r($data);
+			//echo "<pre>";print_r($changed_product_prices);exit;
 
 			try{
 				$this->requisitions->insert_requisition($data);
+
+				if( !empty( $changed_product_prices ) ){
+					$this->products->update_product_prices_for_requisition_items( $changed_product_prices );
+				}
+
+				if( $client_id == self::other_requisition_client_id ) //check if requisition was for other client 
+				{
+					$other_client_name_data = array(
+						"requisition_id" => $this->db->insert_id(),
+						"other_client_name" => $other_client_name
+					);
+
+					try{
+						$this->requisitions->insert_other_requisition_client_name( $other_client_name_data );
+					} catch( Exception $other_exception ){
+						$this->xxx->log_exception( $other_exception->getMessage() );
+					}					
+				}
 
 				try{
 					$this->logger->add_log(1, $this->session->userdata("user_id"), NULL, json_encode($data));
@@ -222,7 +325,7 @@ class Forms extends CI_Controller {
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
 				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
+				$desc = addslashes($this->input->post("desc-" . $i));
 				$price = $this->input->post("price-" . $i);
 				$extn = $this->input->post("extn-" . $i);
 
@@ -280,7 +383,7 @@ class Forms extends CI_Controller {
 		$clients = $this->clients->get_all_clients_without_ba();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
-		$next_invoice_no = $this->sir->get_next_invoice_no();
+		$next_invoice_no = $this->sir->get_next_basic_invoice_no();
 		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
 		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
 		$invoice_headings = $this->invoice->get_invoice_headings();
@@ -335,15 +438,16 @@ class Forms extends CI_Controller {
 		$disbursement_no = $this->input->post("disbursement-no");
 		$tail_no = $this->input->post("tail-no");
 		$routes_type_id = $this->input->post("client-routes-types");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
-		$service_charge = $this->input->post("base_service_charge");
-		$grand_base_total = $this->input->post("grand_base_total");
+		$service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
+		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
 
 		$crew_items = $passenger_items = $main_invoice_items = array();
 
 		$temp_row = array();
 		$record_counter = 1; //used to count record pairs: desc and qty
+		$calculated_total = $calculated_grand_total = 0;
 
 		foreach ($temp_array as $key => $value) {
 			//echo "<pre>";print_r($key);
@@ -358,13 +462,14 @@ class Forms extends CI_Controller {
 					$temp_row["qty"] = $value;
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["desc"] = $value;
+					$temp_row["desc"] = addslashes($value);
 					$record_counter++;	
 				} else if($record_counter == 3){
 					$temp_row["price"] = $value;
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["extn"] = $value;					
+					$temp_row["extn"] = $value;
+					$calculated_total += $value;					
 
 					switch ($section_id) {
 						case 0:
@@ -395,7 +500,19 @@ class Forms extends CI_Controller {
 			} //end of check for empty $value variable
 		}  //end of foreach loop
 
-		//$invoice_details = json_encode($invoice_record);			
+		//$invoice_details = json_encode($invoice_record);
+		
+		//check if totals exist and are correct
+		$calculated_total = $this->sir->format_dollar_value_for_db($calculated_total);
+		if( $calculated_total != $total_cost ){
+			$total_cost = $calculated_total;
+		}
+
+		$calculated_grand_total = $calculated_total + $service_charge;
+
+		if( $calculated_grand_total != $grand_base_total ){
+			$grand_base_total = $calculated_grand_total;
+		}
 
 		$data = array(
 			"invoice_no" => $invoice_no,
@@ -417,7 +534,7 @@ class Forms extends CI_Controller {
 		//echo "<pre>";print_r($data);exit;
 		try{
 			$this->invoice->insert_invoice($data);
-			$this->invoice->increment_invoice_seq_no();
+			$this->invoice->increment_basic_invoice_seq_no();
 
 			try{
 				$this->logger->add_log(26, $this->session->userdata("user_id"), NULL, json_encode($data));
@@ -444,7 +561,7 @@ class Forms extends CI_Controller {
 		$clients = $this->clients->get_all_clients();
 		$bill_to_address = $this->sir->get_settings_by_slug('bill_to');
 		$ship_to_address = $this->sir->get_settings_by_slug('ship_to');
-		$next_invoice_no = $this->sir->get_next_ba_type_invoice_no();
+		$next_invoice_no = $this->sir->get_next_basic_invoice_no();
 		$company_address = $this->sir->get_settings_by_slug('invoice_address_layout');
 		$company_name = $this->sir->get_settings_by_slug('company_name_invoice');
 		$invoice_headings = $this->invoice->get_ba_invoice_headings();
@@ -500,10 +617,10 @@ class Forms extends CI_Controller {
 		$client_route_type_id = $this->input->post("client-routes-types");
 		$tail_no = $this->input->post("tail-no");
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
-		$base_service_charge = $this->input->post("base_service_charge");
-		$grand_base_total = $this->input->post("grand_base_total");
+		$base_service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
+		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
 		$flight_quantity = $this->input->post("flight-quantity");
 
 		$breakfast_items = $entree_items = $cabin_crew_items = $misc_items =
@@ -511,6 +628,7 @@ class Forms extends CI_Controller {
 
 		$temp_row = array();
 		$record_counter = 1; //used to count record pairs: desc and qty
+		$calculated_total = $calculated_grand_total = 0;
 
 		foreach ($temp_array as $key => $value) {
 			//echo "<pre>";print_r($key);
@@ -522,7 +640,7 @@ class Forms extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["desc"] = $value;
+					$temp_row["desc"] = addslashes($value);
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
 					$temp_row["percentage"] = $value;
@@ -535,6 +653,7 @@ class Forms extends CI_Controller {
 					$record_counter++;
 				} else if( $record_counter == 5 ){
 					$temp_row["extn"] = $value;
+					$calculated_total += $value;
 
 					switch ($section_id) {
 						case 3:
@@ -607,6 +726,16 @@ class Forms extends CI_Controller {
 			} //end of check for empty $value variable
 		}  //end of foreach loop
 
+		//check if totals exist and are correct
+		if( $calculated_total != $total_cost ){
+			$total_cost = $calculated_total;
+		}
+
+		$calculated_grand_total = $calculated_total + $base_service_charge;
+
+		if( $calculated_grand_total != $grand_base_total ){
+			$grand_base_total = $calculated_grand_total;
+		}
 
 		$data = array(
 			"invoice_no" => $invoice_no,
@@ -627,9 +756,9 @@ class Forms extends CI_Controller {
 			"misc_details" => json_encode($misc_items),
 			"bf_details" => json_encode($breakfast_items),
 			"tech_crew_details" => json_encode($tech_crew_items),
-			"invoice_total_amount" => sprintf("%0.2f", $total_cost),
-			"service_charge_amount" => sprintf("%0.2f", $base_service_charge),
-			"grand_total_amount" => sprintf("%0.2f", $grand_base_total),
+			"invoice_total_amount" => $total_cost,
+			"service_charge_amount" => $base_service_charge,
+			"grand_total_amount" => $grand_base_total,
 			"currency_id" => $base_currency,
 			"created_by_employee_id" => $this->session->userdata("user_id")
 		);
@@ -639,7 +768,7 @@ class Forms extends CI_Controller {
 		try{
 			$this->invoice->insert_ba_type_invoice($data);			
 			try{
-				$this->invoice->increment_ba_type_invoice_seq_no();
+				$this->invoice->increment_basic_invoice_seq_no();
 
 				try{
 					$this->logger->add_log(33, $this->session->userdata("user_id"), NULL, json_encode($data));
@@ -708,8 +837,8 @@ class Forms extends CI_Controller {
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
 				$qty = $this->input->post("qty-" . $i);
-				$part_no = $this->input->post("part-no-" . $i);
-				$desc = $this->input->post("desc-" . $i);
+				$part_no = addslashes($this->input->post("part-no-" . $i));
+				$desc = addslashes($this->input->post("desc-" . $i));
 				$price = $this->input->post("price-" . $i);
 				$extn = $this->input->post("extn-" . $i);
 
@@ -826,7 +955,7 @@ class Forms extends CI_Controller {
 		$client_id = $this->input->post("client-id");
 		$date_and_time = $this->input->post("date-and-time");
 		$flight_no = $this->input->post("flight-no");
-		$tail_no = $this->input->post("tail-no");
+		$tail_no = addslashes($this->input->post("tail-no"));
 		$check_sheet_no = $this->input->post("check-sheet-no");
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
@@ -849,7 +978,7 @@ class Forms extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["description"] = $value;
+					$temp_row["description"] = addslashes($value);
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
 					$temp_row["qty"] = $value;
@@ -1025,10 +1154,11 @@ class Forms extends CI_Controller {
 		$invoice_no = $this->input->post("invoice_no");
 		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
 		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$tail_no = addslashes($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
+		$calculated_total = 0;
 
 		if( $no_of_items > 0 )
 		{
@@ -1038,15 +1168,16 @@ class Forms extends CI_Controller {
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
 				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
+				$desc = addslashes($this->input->post("desc-" . $i));
 				$price = $this->input->post("price-" . $i);
 				$extn = $this->input->post("extn-" . $i);
 
 				if( !empty($qty)  ){ //&& !empty($price)
 					$row["qty"] = $qty;
-					$row["desc"] = $desc;
+					$row["desc"] = addslashes($desc);
 					$row["price"] = $price;
 					$row["extn"] = $extn;
+					$calculated_total += $extn;
 
 					array_push($invoice_record, $row);
 
@@ -1055,7 +1186,13 @@ class Forms extends CI_Controller {
 				}
 			}
 
-			$invoice_details = json_encode($invoice_record);			
+			$invoice_details = json_encode($invoice_record);
+			
+			$calculated_total = $this->sir->format_dollar_value_for_db($calculated_total);
+
+			if( $calculated_total != $total_cost ){
+				$total_cost = $calculated_total;
+			}
 
 			$data = array(
 				"invoice_no" => $invoice_no,

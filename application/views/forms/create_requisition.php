@@ -76,11 +76,21 @@
                     if( !empty($clients) ){
                       foreach ($clients as $key => $value) {?>
                         <option value="<?=$value["client_id"]?>"><?=$value["client_name"]?></option>
-                      <?}
-                    } else {
+                      <?}?>
+                        <option value="sanitation">Sanitation</option>
+                        <option value="other">Other</option>
+                    <?} else {
 
                     }?>
                   </select>
+                </div>
+              </div>
+
+              <div class="form-group" id="other-client-div">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-id">Other Client Name<span class="required">*</span>
+                </label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  <input type="text" name="other-client" id="other-client" class="form-control" autocomplete="off">
                 </div>
               </div>
 
@@ -121,9 +131,14 @@
               </div>
 
               <div class="row">
-                <div class="col-md-4 col-md-offset-1">
+                <div class="col-md-4">
                   <label class="" for="product-id">Product Name</label>
                   <input type="text" id="product-name" name="product-name" autocomplete="off" class="form-control" placeholder="Carrots">
+                </div>
+
+                <div class="col-md-2">
+                  <label class="" for="product-price">Price</label>
+                  <input type="text" id="product-price" name="product-price" autocomplete="off" class="form-control" placeholder="2.50" >
                 </div>
 
                 <div class="col-md-2">
@@ -157,14 +172,15 @@
               <h3>Items Requested</h3>
 
               <div class="row">
-                <div class="col-md-10 col-md-offset-1">
+                <div class="col-md-12">
                   <table class="table table-bordered" id="tblRequestedItems">
                     <thead>
                       <tr>
                         <th>Product Name</th>
-                        <th>Amount</th>
-                        <th>Unit</th>
-                        <th>Options</th>
+                        <th width="8%">Price</th>
+                        <th width="8%">Amount</th>
+                        <th width="8%">Unit</th>
+                        <th width="10%">Options</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -205,6 +221,13 @@
                       <div class="col-md-12">
                         <label>Product Name</label>
                         <input type="text" name="m_product_name" id="m_product_name" class="form-control" style="z-index: 10000">
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label>Price</label>
+                        <input type="text" name="m_product_price" id="m_product_price" class="form-control">
                       </div>
                     </div>
 
@@ -278,6 +301,8 @@
         }
       });
 
+      $("#other-client-div").hide();
+
         $( "#requisition-date" ).datepicker({ 
           dateFormat: 'M dd, yy',
           changeYear: true,
@@ -341,8 +366,16 @@
         var client_id = $(this).val();
 
         if( client_id == 6 ){
+          $("#other-client-div").hide();
           prep_fields_for_staff_requisition();
+        } else if( client_id == "other" ){
+          $("#other-client-div").show();
+          prep_fields_for_other_requisition();
+        } else if( client_id == "sanitation" ){
+          $("#other-client-div").hide();
+          prep_fields_for_sanitation_requisition();
         } else {
+          $("#other-client-div").hide();
           $("#flight-type-id").val( "" );
           get_client_flights(client_id);
         }        
@@ -354,6 +387,22 @@
 
       $("#flight-type-id").val( "STAFF" );
       $("#client-flight-id").val( "STAFF" );
+    }
+
+    function prep_fields_for_other_requisition(){
+      $("#flight-type-id").append("<option value='OTHER'>OTHER</option>");
+      $("#client-flight-id").append("<option value='OTHER'>OTHER</option>");
+
+      $("#flight-type-id").val( "OTHER" );
+      $("#client-flight-id").val( "OTHER" );
+    }
+
+    function prep_fields_for_sanitation_requisition(){
+      $("#flight-type-id").append("<option value='SANITATION'>SANITATION</option>");
+      $("#client-flight-id").append("<option value='SANITATION'>SANITATION</option>");
+
+      $("#flight-type-id").val( "SANITATION" );
+      $("#client-flight-id").val( "SANITATION" );
     }
 
     function get_client_flights( client_id ){
@@ -408,12 +457,14 @@
     $("#btnMEditItem").click(function(){      
 
       var product_name = $("#m_product_name").val();
+      var price = $("#m_product_price").val();
       var amount = $("#m_product_amount").val();
       var unit = $("#m_product_unit option:selected").text();
       var item_counter = $("#m_product_key").val();
       console.log(unit);
 
       $("#requisition-product-name-" + item_counter).val(product_name);
+      $("#requisition-price-" + item_counter).val(price);
       $("#requisition-amount-" + item_counter).val(amount);
       $("#requisition-unit-" + item_counter).val(unit);
 
@@ -424,10 +475,12 @@
       $("#edit_item_modal").modal('show');
 
       var product_name = $("#requisition-product-name-" + item_counter).val();
+      var price = $("#requisition-price-" + item_counter).val();
       var amount = $("#requisition-amount-" + item_counter).val();
       var unit = $("#requisition-unit-" + item_counter).val();
 
       $("#m_product_name").val( product_name );
+      $("#m_product_price").val( price );
       $("#m_product_amount").val( amount );
       $("#m_product_key").val( item_counter );
       $("select#m_product_unit option")
@@ -482,6 +535,7 @@
                     } else {
                       //console.log( obj[0].unit_id );
                       $("#unit-id").val( obj[0].unit_id );
+                      $("#product-price").val( obj[0].price );
                       $("#unit-id").prop('disabled', 'disabled');
                     }                    
                 }              
@@ -504,16 +558,22 @@
       $("#product-name").val('');
       $("#product-amount").val('');
       $("#unit-id").val(6);
+      $("#product-price").val('');
     }
 
     $("#btnAdd").click(function(){
       var product_name = $("#product-name").val();
       var product_r_amount = $("#product-amount").val();
+      var product_r_price = $("#product-price").val();
       var unit = $("#unit-id option:selected").text(); //$("#unit-id").val();
       var errors = '';
 
       if( product_name == '' ){
         errors += 'Product name must be entered. <br/>'
+      }
+
+      if( product_r_price == '' ){
+        errors += 'Product price must be entered. <br/>'
       }
 
       if( product_r_amount == '' ){
@@ -525,20 +585,37 @@
         $("#msg-holder").html(errors);
         $("#msg-holder").show();
       } else {
-        $("#msg-holder").html('');
-        $("#msg-holder").hide();
 
-        addAnotherRowForRequisitionItem(product_name, product_r_amount, unit);
-        clearProductFieldInputs();
+        if( product_name_exists_in_inventory( product_name ) ){
+          $("#msg-holder").html('');
+          $("#msg-holder").hide();
+
+          addAnotherRowForRequisitionItem(product_name, product_r_price, product_r_amount, unit);
+          clearProductFieldInputs();
+        } else {
+          $("#msg-holder").addClass('alert-danger');
+          $("#msg-holder").html("Product cannot be added because it does not exist in the inventory.");
+          $("#msg-holder").show();
+        }        
       }
     });
 
-    function addAnotherRowForRequisitionItem(product_name, amount, unit){
+    function product_name_exists_in_inventory( product_name ){
+      if( product_name != null && product_name != "" ){
+        if( product_name.indexOf("(") > -1 && product_name.indexOf(")") > -1 ) //check if the product name has the product id
+          return true;
+        else
+          return false;
+      }
+    }
+
+    function addAnotherRowForRequisitionItem(product_name, price, amount, unit){
       var row = new_product_field = "";
       row = row + '<tr id=' + req_item_counter + '>';
 
       new_product_field = '<td><input type="text" id="requisition-product-name-' + req_item_counter + '" name="requisition-product-name-' + req_item_counter + '" autocomplete="off" value="' + product_name +'" class="form-control" readonly></td>';
       row = row + new_product_field;
+      row = row + '<td><input type="text" id="requisition-price-' + req_item_counter + '" name="requisition-price-' + req_item_counter + '" required="required" autocomplete="off" value="' + price +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="requisition-amount-' + req_item_counter + '" name="requisition-amount-' + req_item_counter + '" required="required" autocomplete="off" value="' + amount +'" class="form-control" readonly></td>';
       row = row + '<td><input type="text" id="requisition-unit-' + req_item_counter + '" name="requisition-unit-' + req_item_counter + '" required="required" autocomplete="off" value="' + unit +'" class="form-control" readonly></td>';
       //row = row + '<td><select name="requisition-unit-id-' + req_item_counter + '" class="form-control" readonly disabled>';
@@ -552,7 +629,7 @@
     <?}*/?>
       //row = row + '</select></td>';
       row = row + '<td style="margin-top: 23px;">';
-      row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> |';
+      row = row + '<a href="#" title="Edit" onClick="edit_requisition_item(' + req_item_counter + ')" ><i class="fas fa-edit"></i></a> | ';
       row = row + '<a href="#" onClick="delete_requisition_item(' + req_item_counter + ')" title="Delete"><i class="fas fa-trash-alt"></i></a>';
       row = row + '</td>';      
       row = row + '</tr>';

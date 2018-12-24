@@ -7,6 +7,47 @@ class Sir_model extends CI_Model
 		parent::__construct();
 	}
 
+	public function format_dollar_value_for_db( $value ){
+		if(!empty($value)){
+			return sprintf("%0.2f", str_replace(",", "", $value));
+		}
+		return null;
+	}
+
+	public function get_no_of_requisitions_for_category( $category_id, $day ){
+		$query = "select * from daily_category_requisitions where category_id = $category_id and day = '$day'";
+
+		return Sir_model::format_query_result_as_array( $query );
+	}
+
+	public function daily_category_requisition_exist($category_id, $date){
+		$query = "select * from daily_category_requisitions where category_id = $category_id and day = '$date'";
+
+		$result = Sir_model::format_query_result_as_array( $query );
+
+		if( empty($result) )
+			return false;
+		else
+			return true;
+	}
+
+	public function insert_daily_category_requisition($data){
+		return $this->db->insert( "daily_category_requisitions", $data );
+	}
+
+	public function update_daily_category_requisition($category_id, $no_of_requisitions, $day){
+		$query = "update daily_category_requisitions set no_of_requisitions = $no_of_requisitions
+					where day = '$day' and category_id = $category_id";
+
+		return $this->db->query( $query );
+	}
+
+	public function get_last_daily_requisition_for_category( $category_id ){
+		$query = "select * from daily_category_requisitions where category_id = $category_id";
+
+		return Sir_model::format_query_result_as_array( $query );
+	}
+
 	public function get_gcg_locations(){
 		$query = "SELECT *
 					FROM gcg_locations
