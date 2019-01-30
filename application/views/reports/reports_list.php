@@ -34,6 +34,8 @@
                             <li><a href="<?=base_url('Reports/inventory_items_in_category');?>">Total Inventory Items In Category</a></li>
                             <li><a href="<?=base_url('Reports/pricing_inventory');?>">Pricing Inventory</a></li>
                             <li><a href="<?=base_url('Reports/total_requisition_by_date_range');?>">Total Requisition by Date Range</a></li>
+                            <li><a href="<?=base_url('Reports/requisition_category_log');?>">Requisition Category Item Log</a></li>
+                            <li><a href="<?=base_url('Reports/inventory_category_log');?>">Inventory Category Log</a></li>
                           </ol>
                       </div>
                 </div>

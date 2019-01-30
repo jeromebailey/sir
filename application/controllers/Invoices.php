@@ -183,14 +183,14 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
-		$service_charge = $this->input->post("base_service_charge");
-		$grand_base_total = $this->input->post("grand_base_total");
+		$service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
+		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
 		$routes_type_id = $this->input->post("client-routes-types");
 		$calculated_total_cost = 0;
 		$calculated_total = $calculated_grand_total = 0;
@@ -212,17 +212,17 @@ class Invoices extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["desc"] = $value;
+					$temp_row["desc"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if($record_counter == 3){
-					$temp_row["price"] = $value;
+					$temp_row["price"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["extn"] = $value;	
-					$calculated_total += $value;				
+					$temp_row["extn"] = $this->sir->format_dollar_value_for_db($value);
+					$calculated_total += $this->sir->format_dollar_value_for_db($value);
 
 					switch ($section_id) {
 						case 0:
@@ -356,11 +356,11 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
 		$calculated_total_cost = 0;
 
@@ -371,10 +371,10 @@ class Invoices extends CI_Controller {
 			$invoice_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				$calculated_total_cost += $extn;
 
@@ -591,17 +591,17 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
-		$service_charge = $this->input->post("base_service_charge");
-		$grand_base_total = $this->input->post("grand_base_total");
+		$service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
+		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
 		$routes_type_id = $this->input->post("client-routes-types");
 		$calculated_total_cost = 0;		
-		$flight_quantity = $this->input->post("flight-quantity");
+		$flight_quantity = trim($this->input->post("flight-quantity"));
 
 		$breakfast_items = $entree_items = $cabin_crew_items = $misc_items =
 		$wtp_items = $wt_items = $cw_items = $retro_items = $ii_items = $tech_crew_items = array();
@@ -621,19 +621,19 @@ class Invoices extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["desc"] = $value;
+					$temp_row["desc"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["percentage"] = $value;
+					$temp_row["percentage"] = trim($value);
 					$record_counter++;	
 				} else if($record_counter == 3){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["price"] = $value;
+					$temp_row["price"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;
 				} else if( $record_counter == 5 ){
-					$temp_row["extn"] = $value;
+					$temp_row["extn"] = $this->sir->format_dollar_value_for_db($value);
 
 					switch ($section_id) {
 						case 3:
@@ -841,14 +841,14 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
-		$service_charge = $this->input->post("base_service_charge");
-		$grand_base_total = $this->input->post("grand_base_total");
+		$service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
+		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
 		$routes_type_id = $this->input->post("client-routes-types");
 		$calculated_total_cost = 0;		
 		$flight_quantity = $this->input->post("flight-quantity");
@@ -871,19 +871,19 @@ class Invoices extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["desc"] = $value;
+					$temp_row["desc"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["percentage"] = $value;
+					$temp_row["percentage"] = trim($value);
 					$record_counter++;	
 				} else if($record_counter == 3){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["price"] = $value;
+					$temp_row["price"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;
 				} else if( $record_counter == 5 ){
-					$temp_row["extn"] = $value;
+					$temp_row["extn"] = $this->sir->format_dollar_value_for_db($value);
 
 					switch ($section_id) {
 						case 3:
@@ -1111,11 +1111,11 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
 		$calculated_total_cost = 0;
 
@@ -1128,10 +1128,10 @@ class Invoices extends CI_Controller {
 			$invoice_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				$calculated_total_cost += $extn;
 
@@ -1240,11 +1240,11 @@ class Invoices extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("base_total");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
 		$calculated_total_cost = 0;
 
@@ -1257,10 +1257,10 @@ class Invoices extends CI_Controller {
 			$invoice_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$desc = trim($this->input->post("desc-" . $i));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				$calculated_total_cost += $extn;
 

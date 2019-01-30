@@ -112,7 +112,7 @@
                 </div>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" id="client-flight-id-div">
                 <label class="control-label col-md-3 col-sm-3 col-xs-12" for="client-flight-id">Client Flights<span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
@@ -363,23 +363,37 @@
     }
 
     $("#client-id").change(function(){
-        var client_id = $(this).val();
+        var client_id = $(this).val();        
 
         if( client_id == 6 ){
           $("#other-client-div").hide();
           prep_fields_for_staff_requisition();
+          toggle_flight_flield('show');
+        } else if( client_id == 7 || client_id == 8){
+          toggle_flight_flield('hide');
         } else if( client_id == "other" ){
           $("#other-client-div").show();
           prep_fields_for_other_requisition();
+          toggle_flight_flield('show');
         } else if( client_id == "sanitation" ){
           $("#other-client-div").hide();
           prep_fields_for_sanitation_requisition();
+          toggle_flight_flield('show');
         } else {
           $("#other-client-div").hide();
           $("#flight-type-id").val( "" );
           get_client_flights(client_id);
+          toggle_flight_flield('show');
         }        
     });
+
+    function toggle_flight_flield(toggle){
+      if( toggle == "show" ){
+        $("#client-flight-id-div").show();
+      } else {
+        $("#client-flight-id-div").hide();
+      }
+    }
 
     function prep_fields_for_staff_requisition(){
       $("#flight-type-id").append("<option value='STAFF'>Staff</option>");

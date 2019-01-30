@@ -7,11 +7,17 @@ class Sir_model extends CI_Model
 		parent::__construct();
 	}
 
+	public function get_all_active_app_updates(){
+		$query = "select * from app_updates where start_date <= '" . date("Y-m-d") . "' and end_date >= '" . date("Y-m-d") ."'";
+
+		return Sir_model::format_query_result_as_array( $query );
+	}
+
 	public function format_dollar_value_for_db( $value ){
-		if(!empty($value)){
-			return sprintf("%0.2f", str_replace(",", "", $value));
+		if(!empty(trim($value))){
+			return sprintf("%0.2f", str_replace(",", "", trim($value)));
 		}
-		return null;
+		return 0;
 	}
 
 	public function get_no_of_requisitions_for_category( $category_id, $day ){

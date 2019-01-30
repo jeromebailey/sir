@@ -175,14 +175,16 @@
                       {
                         foreach($items as $key => $value)
                         {
-                          $price = ( !isset($value->price) ) ? 0 : $value->price;
-                          $amount = $value->amount;
+                          $price = ( !isset($value->price) ) ? 0 : trim($value->price);
+                          $amount = ( !isset($value->amount) ) ? 0 : trim($value->amount);
                           $item_total = $price*$amount;
-                          //echo "<pre>";print_r($value->qty);exit;?>
+                          //echo $value->amount;
+                          //echo $value->price;//exit;
+                          ?>
                           <tr>
-                            <td><?=$value->product_name;?></td>
+                            <td><?= stripslashes($value->product_name);?></td>
                             <td width="10%"><?=$price;?></td>
-                            <td width="10%"><?=$value->amount;?></td>
+                            <td width="10%"><?=$amount;?></td>
                             <td width="10%"><?=$value->unit;?></td>
                             <td width="10%"><?=$item_total;?></td>
                           </tr>

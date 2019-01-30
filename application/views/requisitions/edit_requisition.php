@@ -315,7 +315,7 @@
                         $items = json_decode( $requisition["details"] );
                         foreach ($items as $key => $value) {
                           $product_id = (!isset($value->product_id)) ? 0 : $value->product_id;
-                          $product_name_id = ($product_id == 0) ? $value->product_name : $value->product_name .' ('.$product_id.')';
+                          $product_name_id = ($product_id == 0) ? stripslashes($value->product_name) : stripslashes($value->product_name) .' ('.$product_id.')';
                           $price = ( !isset($value->price) ) ? 0 : $value->price;?>
                           <tr id="<?=$counter?>">
                             <td><input type="text" name="requisition-product-name-<?=$counter?>" id = "requisition-product-name-<?=$counter?>" value = "<?=$product_name_id?>" class = "form-control" readonly /></td>

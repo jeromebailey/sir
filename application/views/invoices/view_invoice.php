@@ -250,6 +250,7 @@
         var total = <?=$invoice["invoice_total_amount"]?>;
         var service_charge = <?=$invoice["service_charge_amount"]?>;
         var grand_total = <?=$invoice["grand_total_amount"]?>;
+        var currency_id = <?=$invoice["currency_id"]?>;
 
         toggle_item_currency_labels(currency_id);
 
@@ -283,9 +284,12 @@
     }
 
     function calculate_alternate_sub_total_currency_value( base_total ){
-      //var currency_id = $("#currency-id").val();
+      
+      console.log("currency_id: " + currency_id);
+      console.log("base_total: " + base_total);
+      //console.log( 'Ajax/change_currency_value/' + currency_id + '/' + base_total );
 
-      if( currency_id != '' && base_total != '' ){
+      if( parseInt(currency_id) != '' && parseFloat(base_total) != '' ){
         $.get( "<?=base_url('Ajax/change_currency_value/" + currency_id + "/" + base_total + "' );?>")
         .done(function( data ) {
           console.log( data  );
@@ -294,7 +298,8 @@
         });
 
       } else {
-        console.log("empty");
+        //console.log("is empty");
+        $("#alternate_total_value").text(0);
       }
     }
 
@@ -336,7 +341,8 @@
         });
 
       } else {
-        console.log("empty");
+        //console.log("empty");
+        $("#grand_alternate_total_value").text(0);
       }
     }
 

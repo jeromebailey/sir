@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - 2019-01-22
+- Modified create_purchase_order.php view file
+
+
+## [1.0.0] - 2019-01-09
+- Modified Requisitions Controller
+- Modified Requisitions_Model
+- Modified Products_Model
+- Modified Reports Controller
+- Added view to reports view folder
+- Modified views in reports view folder
+- Created table requisition_category_log
+- Created table inventory_category_log
+- Modified ProductScanner Controller
+
+## [1.0.0] - 2018-12-27
+- Created category_amount_history table to store the amount of items that were in a category at a given date
+- Created app_updates table to be able to log and show updates to the application to the users. The table was created to show updates to a particular group of users also
+
 ## [1.0.0] - 2018-05-12
 - Created daily_requisition_cost
 - Created monthly_requisition_cost

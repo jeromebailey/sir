@@ -167,7 +167,7 @@
                 </div>
               </div>
 
-              <div class="row">
+              <!--<div class="row">
                 <div class="col-md-6">
                   <p style="margin-top: 23px;"><strong>For Shoes order:</strong> Please specify width (Medium or Wide)</p>
                 </div>
@@ -177,7 +177,7 @@
                 </div>
               </div>
 
-              <br />
+              <br />-->
 
               <div class="row">
                 <div class="col-md-4">

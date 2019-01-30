@@ -114,10 +114,10 @@ class Forms extends CI_Controller {
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = addslashes($this->input->post("requisition-product-name-" . $i));
-				$amount = $this->input->post("requisition-amount-" . $i);
-				$unit = $this->input->post("requisition-unit-" . $i);
-				$price = $this->input->post("requisition-price-" . $i);
+				$product_name_id = addslashes(trim($this->input->post("requisition-product-name-" . $i)));
+				$amount = trim($this->input->post("requisition-amount-" . $i));
+				$unit = trim($this->input->post("requisition-unit-" . $i));
+				$price = trim($this->input->post("requisition-price-" . $i));
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
@@ -443,9 +443,9 @@ class Forms extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = $this->input->post("tail-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = trim($this->input->post("tail-no"));
 		$routes_type_id = $this->input->post("client-routes-types");
 		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
@@ -468,17 +468,17 @@ class Forms extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["desc"] = addslashes($value);
+					$temp_row["desc"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if($record_counter == 3){
-					$temp_row["price"] = $value;
+					$temp_row["price"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["extn"] = $value;
-					$calculated_total += $value;					
+					$temp_row["extn"] = $this->sir->format_dollar_value_for_db($value);
+					$calculated_total += $this->sir->format_dollar_value_for_db($value);
 
 					switch ($section_id) {
 						case 0:
@@ -621,16 +621,16 @@ class Forms extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
 		$client_route_type_id = $this->input->post("client-routes-types");
-		$tail_no = $this->input->post("tail-no");
+		$tail_no = trim($this->input->post("tail-no"));
 		$no_of_items = $this->input->post("no_of_items");
 		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
 		$base_service_charge = $this->sir->format_dollar_value_for_db($this->input->post("base_service_charge"));
 		$grand_base_total = $this->sir->format_dollar_value_for_db($this->input->post("grand_base_total"));
-		$flight_quantity = $this->input->post("flight-quantity");
+		$flight_quantity = trim($this->input->post("flight-quantity"));
 
 		$breakfast_items = $entree_items = $cabin_crew_items = $misc_items =
 		$wtp_items = $wt_items = $cw_items = $retro_items = $ii_items = $tech_crew_items = array();
@@ -649,20 +649,20 @@ class Forms extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["desc"] = addslashes($value);
+					$temp_row["desc"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["percentage"] = $value;
+					$temp_row["percentage"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;	
 				} else if($record_counter == 3){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 					$record_counter++;
 				} else if($record_counter == 4){
-					$temp_row["price"] = $value;
+					$temp_row["price"] = $this->sir->format_dollar_value_for_db($value);
 					$record_counter++;
 				} else if( $record_counter == 5 ){
-					$temp_row["extn"] = $value;
-					$calculated_total += $value;
+					$temp_row["extn"] = $this->sir->format_dollar_value_for_db($value);
+					$calculated_total += $this->sir->format_dollar_value_for_db($value);
 
 					switch ($section_id) {
 						case 3:
@@ -836,7 +836,7 @@ class Forms extends CI_Controller {
 		$placed_by = $this->input->post("placed-by");
 		$approved_by = $this->input->post("approved-by");
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("total_cost");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("total_cost"));
 
 		if( $no_of_items > 0 )
 		{
@@ -845,11 +845,11 @@ class Forms extends CI_Controller {
 			$po_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$part_no = addslashes($this->input->post("part-no-" . $i));
-				$desc = addslashes($this->input->post("desc-" . $i));
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$part_no = addslashes(trim($this->input->post("part-no-" . $i)));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				if( !empty($qty)  ){ //&& !empty($price)
 					$row["qty"] = $qty;
@@ -962,10 +962,10 @@ class Forms extends CI_Controller {
 		//echo "<pre>";print_r($temp_array);exit;
 
 		$client_id = $this->input->post("client-id");
-		$date_and_time = $this->input->post("date-and-time");
-		$flight_no = $this->input->post("flight-no");
-		$tail_no = addslashes($this->input->post("tail-no"));
-		$check_sheet_no = $this->input->post("check-sheet-no");
+		$date_and_time = trim($this->input->post("date-and-time"));
+		$flight_no = trim($this->input->post("flight-no"));
+		$tail_no = addslashes(trim($this->input->post("tail-no")));
+		$check_sheet_no = trim($this->input->post("check-sheet-no"));
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
 		$section_id = 1;
@@ -987,10 +987,10 @@ class Forms extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["description"] = addslashes($value);
+					$temp_row["description"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 
 					switch ($section_id) {
 						case 1:
@@ -1161,9 +1161,9 @@ class Forms extends CI_Controller {
 		$items_string = "";
 		$client_id = $this->input->post("client-id");
 		$invoice_no = $this->input->post("invoice_no");
-		$flight_date = ($this->input->post("flight-date") == null) ? date("Y-m-d") : date("Y-m-d", strtotime($this->input->post("flight-date")));
-		$disbursement_no = $this->input->post("disbursement-no");
-		$tail_no = addslashes($this->input->post("tail-no"));
+		$flight_date = (trim($this->input->post("flight-date")) == null) ? date("Y-m-d") : date("Y-m-d", strtotime(trim($this->input->post("flight-date"))));
+		$disbursement_no = trim($this->input->post("disbursement-no"));
+		$tail_no = addslashes(trim($this->input->post("tail-no")));
 		$no_of_items = $this->input->post("no_of_items");
 		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("base_total"));
 		$base_currency = $this->input->post("currency-id");
@@ -1176,14 +1176,14 @@ class Forms extends CI_Controller {
 			$invoice_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$desc = addslashes($this->input->post("desc-" . $i));
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				if( !empty($qty)  ){ //&& !empty($price)
 					$row["qty"] = $qty;
-					$row["desc"] = addslashes($desc);
+					$row["desc"] = $desc;
 					$row["price"] = $price;
 					$row["extn"] = $extn;
 					$calculated_total += $extn;
@@ -1195,8 +1195,7 @@ class Forms extends CI_Controller {
 				}
 			}
 
-			$invoice_details = json_encode($invoice_record);
-			
+			$invoice_details = json_encode($invoice_record);			
 			$calculated_total = $this->sir->format_dollar_value_for_db($calculated_total);
 
 			if( $calculated_total != $total_cost ){

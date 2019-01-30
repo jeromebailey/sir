@@ -17,6 +17,117 @@
         <!-- page content -->
         <div class="right_col" role="main">
 
+          <?
+          if( !empty( $app_updates ) ){
+            $app_update_count = count( $app_updates );
+            $app_update_string = "";
+
+            if( $app_update_count > 1 ){
+              $counter = 0;
+              foreach( $app_updates as $key => $value ){
+
+                $show_to_all_users = $value['all_employees'];
+                $admin_permission_group = $value['admin_permission_group'];
+                $department_id = $value['department_id'];
+                $app_update_string = $value['app_update_text'];
+
+                /*if( $counter == 0 ){
+                  $app_update_string .= $value['app_update_text'];
+                } else {
+                  $app_update_string .= "<hr>" . $value['app_update_text'] ."";
+                }
+                $counter++;*/
+                
+
+                if( $show_to_all_users == 1 ){?>
+                  <div class="alert alert-success alert-dismissible" role="alert">
+                    <h4 class="alert-heading">
+                      <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                    </h4>
+                    <?=$app_update_string;?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                <?} else {
+                  if( $department_id != null || $department_id != 0 ){
+                    if( $this->session->userdata('department_id') == $department_id ){?>
+                      <div class="alert alert-success alert-dismissible" role="alert">
+                        <h4 class="alert-heading">
+                          <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                        </h4>
+                        <?=$app_update_string;?>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                    <?} 
+                    } //end of check for department
+
+                    if( $admin_permission_group != null || $admin_permission_group != 0 ){
+                      if( $this->session->userdata('is_an_admin') == 1){?>
+                        <div class="alert alert-success alert-dismissible" role="alert">
+                          <h4 class="alert-heading">
+                            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                          </h4>
+                          <?=$app_update_string;?>
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                      <?}                
+                    }//end of check for permission group
+                  } //end of else to show to all users
+              } //end of foreach              
+            } else {
+              $show_to_all_users = $app_updates[0]['all_employees'];
+              $admin_permission_group = $app_updates[0]['admin_permission_group'];
+              $department_id = $app_updates[0]['department_id'];
+              $app_update_string .= $app_updates[0]['app_update_text'];
+
+              if( $show_to_all_users == 1 ){?>
+                <div class="alert alert-success alert-dismissible" role="alert">
+                  <h4 class="alert-heading">
+                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                  </h4>
+                  <?=$app_update_string;?>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              <?} else {
+                if( $department_id != 0 ){
+                  if( $this->session->userdata('department_id') == $department_id ){?>
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                      <h4 class="alert-heading">
+                        <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                      </h4>
+                      <?=$app_update_string;?>
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                  <?} 
+                  } //end of check for department
+
+                  if( $admin_permission_group != 0 ){
+                    if( $this->session->userdata('is_an_admin') == 1){?>
+                      <div class="alert alert-success alert-dismissible" role="alert">
+                        <h4 class="alert-heading">
+                          <i class="fa fa-exclamation-circle" aria-hidden="true"></i> SIR Update!
+                        </h4>
+                        <?=$app_update_string;?>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                    <?}                
+                  }//end of check for permission group
+                } //end of else to show to all users
+              } //end of else for single update              
+            }  //end of check for app updates          
+          ?>
+
           <!-- top tiles -->
           <div class="row tile_count">
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
@@ -280,7 +391,7 @@
 
 
                 <!-- Start to do list -->
-                <div class="col-md-6 col-sm-6 col-xs-12">
+                <!--<div class="col-md-6 col-sm-6 col-xs-12">
                   <div class="x_panel">
                     <div class="x_title">
                       <h2>To Do List <small>Sample tasks</small></h2>
@@ -308,11 +419,11 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div>-->
                 <!-- End to do list -->
                 
                 <!-- start of weather widget -->
-                <div class="col-md-6 col-sm-6 col-xs-12">
+                <!--<div class="col-md-6 col-sm-6 col-xs-12">
                   <div class="x_panel">
                     <div class="x_title">
                       <h2>Daily active users <small>Sessions</small></h2>
@@ -338,7 +449,7 @@
                     </div>
                   </div>
 
-                </div>
+                </div>-->
                 <!-- end of weather widget -->
               </div>
             </div>

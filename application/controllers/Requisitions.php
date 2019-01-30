@@ -128,9 +128,9 @@ class Requisitions extends CI_Controller {
 			$client_flight_id = $this->input->post("client-flight-id");
 		}
 
-		$passenger_count = $this->input->post("passenger-count");
+		$passenger_count = trim($this->input->post("passenger-count"));
 		$no_of_items = $this->input->post("no_of_items");
-		$requisition_date = $this->input->post("requisition-date");
+		$requisition_date = trim($this->input->post("requisition-date"));
 		$total_requisition_cost = 0;
 
 		if( $no_of_items > 0 )
@@ -142,21 +142,21 @@ class Requisitions extends CI_Controller {
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = addslashes( $this->input->post("requisition-product-name-" . $i) );
-				$amount = $this->input->post("requisition-amount-" . $i);
+				$product_name_id = addslashes( trim($this->input->post("requisition-product-name-" . $i) ));
+				$amount = $this->sir->format_dollar_value_for_db($this->input->post("requisition-amount-" . $i));
 				$unit = $this->input->post("requisition-unit-" . $i);
-				$price = $this->input->post("requisition-price-" . $i);
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("requisition-price-" . $i));
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
-					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
-					$product_id = $this->products->get_product_id_from_product_name_id(trim($product_name_id));
+					$product_name = $this->products->get_product_name_from_product_name_id($product_name_id);
+					$product_id = $this->products->get_product_id_from_product_name_id($product_name_id);
 					
 					if( empty($product_id) ){
 						//echo "nothing";exit;
 						$selected_product_price = 0;
 
-						$row["product_name"] = addslashes($product_name);
+						$row["product_name"] = $product_name;
 						$row["amount"] = $amount;
 						$row["unit"] = $unit;
 						$row["price"] = $price;
@@ -180,7 +180,7 @@ class Requisitions extends CI_Controller {
 						$selected_product_price = $product_details[0]["price"];
 
 						$row["product_id"] = $product_id;
-						$row["product_name"] = addslashes($product_name);
+						$row["product_name"] = $product_name;
 						$row["amount"] = $amount;
 						$row["unit"] = $unit;
 						$row["price"] = $price;
@@ -213,8 +213,7 @@ class Requisitions extends CI_Controller {
 				}
 			} //end of for loop			
 
-			$details = json_encode($record);
-			
+			$details = json_encode($record);			
 
 			$data = array(
 				"client_id" => $client_id,
@@ -337,9 +336,9 @@ class Requisitions extends CI_Controller {
 			$client_flight_id = $this->input->post("client-flight-id");
 		}
 
-		$passenger_count = $this->input->post("passenger-count");
+		$passenger_count = trim($this->input->post("passenger-count"));
 		$no_of_items = $this->input->post("no_of_items");
-		$requisition_date = $this->input->post("requisition-date");
+		$requisition_date = trim($this->input->post("requisition-date"));
 
 		$old_data = $this->requisitions->get_requisition_by_id($requisition_id);
 
@@ -360,14 +359,14 @@ class Requisitions extends CI_Controller {
 
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$product_name_id = addslashes($this->input->post("requisition-product-name-" . $i));
-				$amount = $this->input->post("requisition-amount-" . $i);
+				$product_name_id = addslashes(trim($this->input->post("requisition-product-name-" . $i)));
+				$amount = $this->sir->format_dollar_value_for_db($this->input->post("requisition-amount-" . $i));
 				$unit = $this->input->post("requisition-unit-" . $i);
-				$price = $this->input->post("requisition-price-" . $i);
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("requisition-price-" . $i));
 
 				if( !empty($product_name_id) && !empty($amount) ){
 
-					$product_name = trim($this->products->get_product_name_from_product_name_id($product_name_id));
+					$product_name = $this->products->get_product_name_from_product_name_id($product_name_id);
 					$product_id = $this->products->get_product_id_from_product_name_id(trim($product_name_id));
 					//echo "<pre>";print_r($product_id_result);exit;
 					//echo $product_id = $product_id_result[0]["product_id"];exit;
@@ -376,7 +375,7 @@ class Requisitions extends CI_Controller {
 						//echo "nothing";exit;
 						$selected_product_price = 0;
 
-						$row["product_name"] = addslashes($product_name);
+						$row["product_name"] = $product_name;
 						$row["amount"] = $amount;
 						$row["unit"] = $unit;
 						$row["price"] = $price;
@@ -475,6 +474,7 @@ class Requisitions extends CI_Controller {
 
 		try{
 			$this->requisitions->dispatch_requisition($requisition_id);
+			$this->requisitions->add_requisition_category_log( $requisition_id );
 			$this->sir_session->add_status_message("Your Requisition has been dispatched!", "success");
 		} catch( Exception $ex ){
 			$this->xxx->log_exception( $ex->getMessage() );

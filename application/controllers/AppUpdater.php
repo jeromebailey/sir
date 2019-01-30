@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Dashboard extends CI_Controller {
+class AppUpdater extends CI_Controller {
 
 	function __construct(){
 		parent::__construct();
@@ -46,9 +46,6 @@ class Dashboard extends CI_Controller {
 		$requisition_sales_this_month = $this->requisitions->get_total_requisition_sales_for_a_month();
 		$requisition_sales_this_year = $this->requisitions->get_total_requisition_sales_for_a_year();
 		//echo "<pre>";print_r($last_login_for_user);exit;
-		$app_updates = $this->sir->get_all_active_app_updates();
-
-		//echo "<pre>";print_r( $this->session->userdata() );exit;
 
 
 		$data = array(
@@ -67,8 +64,7 @@ class Dashboard extends CI_Controller {
 			"requisition_sales_today" => '$' . number_format( $requisition_sales_today[0]["total_cost"], 2),
 			"requisition_sales_this_week" => '$' .number_format( $requisition_sales_this_week[0]["total_cost"], 2),
 			"requisition_sales_this_month" => '$' .number_format( $requisition_sales_this_month[0]["total_cost"], 2),
-			"requisition_sales_this_year" => '$' .number_format( $requisition_sales_this_year[0]["total_cost"], 2),
-			"app_updates" => $app_updates
+			"requisition_sales_this_year" => '$' .number_format( $requisition_sales_this_year[0]["total_cost"], 2)
 			);
 
 		$this->load->view('dashboard/sir_dashboard', $data);

@@ -167,7 +167,7 @@ class PurchaseOrders extends CI_Controller {
 		//$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("total_cost");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("total_cost"));
 
 		if( $no_of_items > 0 )
 		{
@@ -176,11 +176,11 @@ class PurchaseOrders extends CI_Controller {
 			$po_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$part_no = $this->input->post("part-no-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$part_no = addslashes(trim($this->input->post("part-no-" . $i)));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $tgus->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				if( !empty($qty)  ){ //&& !empty($price)
 					$row["qty"] = $qty;
@@ -277,7 +277,7 @@ class PurchaseOrders extends CI_Controller {
 		$placed_by = $this->input->post("placed-by");
 		//$approved_by = $this->input->post("approved-by");
 		$no_of_items = $this->input->post("no_of_items");
-		$total_cost = $this->input->post("total_cost");
+		$total_cost = $this->sir->format_dollar_value_for_db($this->input->post("total_cost"));
 
 		if( $no_of_items > 0 )
 		{
@@ -286,11 +286,11 @@ class PurchaseOrders extends CI_Controller {
 			$po_record = array();
 			for($i = 1; $i <= $no_of_items; $i++)
 			{
-				$qty = $this->input->post("qty-" . $i);
-				$part_no = $this->input->post("part-no-" . $i);
-				$desc = $this->input->post("desc-" . $i);
-				$price = $this->input->post("price-" . $i);
-				$extn = $this->input->post("extn-" . $i);
+				$qty = trim($this->input->post("qty-" . $i));
+				$part_no = addslashes(trim($this->input->post("part-no-" . $i)));
+				$desc = addslashes(trim($this->input->post("desc-" . $i)));
+				$price = $this->sir->format_dollar_value_for_db($this->input->post("price-" . $i));
+				$extn = $this->sir->format_dollar_value_for_db($this->input->post("extn-" . $i));
 
 				if( !empty($qty)  ){ //&& !empty($price)
 					$row["qty"] = $qty;

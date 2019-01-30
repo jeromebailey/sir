@@ -125,10 +125,10 @@ class FlightCheckSheets extends CI_Controller {
 		//echo "<pre>";print_r($temp_array);exit;
 
 		$client_id = $this->input->post("client-id");
-		$date_and_time = $this->input->post("date-and-time");
-		$flight_no = $this->input->post("flight-no");
-		$tail_no = $this->input->post("tail-no");
-		$check_sheet_no = $this->input->post("check-sheet-no");
+		$date_and_time = trim($this->input->post("date-and-time"));
+		$flight_no = trim($this->input->post("flight-no"));
+		$tail_no = trim($this->input->post("tail-no"));
+		$check_sheet_no = trim($this->input->post("check-sheet-no"));
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
 		$section_id = 1;
@@ -150,10 +150,10 @@ class FlightCheckSheets extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["description"] = $value;
+					$temp_row["description"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 
 					switch ($section_id) {
 						case 1:
@@ -242,9 +242,9 @@ class FlightCheckSheets extends CI_Controller {
 		$data = array(
 			'client_id' => $client_id,
 			'date_time' => date("Y-m-d H:i:s", strtotime($date_and_time)),
-			'flight_no' => trim($flight_no),
-			'tail_no' => trim($tail_no),
-			'check_sheet_no' => trim($check_sheet_no),
+			'flight_no' => $flight_no,
+			'tail_no' => $tail_no,
+			'check_sheet_no' => $check_sheet_no,
 			'cycle' => $cycle,
 			'breakfast_crew_meals' => json_encode($breakfast_crew_meals),
 			'breakfast_first_class_meals' => json_encode($breakfast_first_class),			
@@ -344,10 +344,10 @@ class FlightCheckSheets extends CI_Controller {
 		//echo "<pre>";print_r($temp_array);exit;
 
 		$client_id = $this->input->post("client-id");
-		$date_and_time = $this->input->post("date-and-time");
-		$flight_no = $this->input->post("flight-no");
-		$tail_no = $this->input->post("tail-no");
-		$check_sheet_no = $this->input->post("check-sheet-no");
+		$date_and_time = trim($this->input->post("date-and-time"));
+		$flight_no = trim($this->input->post("flight-no"));
+		$tail_no = trim($this->input->post("tail-no"));
+		$check_sheet_no = trim($this->input->post("check-sheet-no"));
 		$cycle = $this->input->post("cycle");
 		$total_items_added = $this->input->post("total_items_added");
 		$section_id = 1;
@@ -369,10 +369,10 @@ class FlightCheckSheets extends CI_Controller {
 				$section_id = $key_parts[0];
 
 				if( $record_counter == 1 ){
-					$temp_row["description"] = $value;
+					$temp_row["description"] = addslashes(trim($value));
 					$record_counter++;	
 				} else if( $record_counter == 2 ){
-					$temp_row["qty"] = $value;
+					$temp_row["qty"] = trim($value);
 
 					switch ($section_id) {
 						case 1:

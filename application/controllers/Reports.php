@@ -117,7 +117,7 @@ class Reports extends CI_Controller {
 	}
 
 	public function inventory_total_per_category(){
-		$PageTitle = "Total Value Per Category In Inventory";
+		$PageTitle = "Total Value Per Category In Inventory as at: " . date("F d, Y");
 
 		$category_id = $this->uri->segment(3);
 		$categories = $this->categories->get_all_categories();
@@ -248,6 +248,14 @@ class Reports extends CI_Controller {
 		$requisition_results = $this->requisitions->search_requisitions_by_date_range($start_date, $end_date);
 		//echo "<pre>";print_r($requisition_results);exit;
 
+		if( $start_date == $end_date ){
+			$title_date_part = " for " . date( "F d, Y", strtotime($start_date) );
+		} else {
+			$title_date_part = " between " . date( "F d", strtotime($start_date)) . " and " . date( "F d, Y", strtotime($end_date));
+		}
+
+		$PageTitle = $PageTitle . $title_date_part;
+
 		$data = array(
 			"page_title" => $PageTitle,
 			"start_date" => $start_date,
@@ -256,6 +264,116 @@ class Reports extends CI_Controller {
 		);
 
 		$this->load->view('reports/total_requisition_by_date_range', $data);
-	}	
+	}
+
+	public function inventory_category_log(){
+		$PageTitle = "Inventory Category Item Log";
+
+		$start_date = date("Y-m-d");
+		$end_date = date("Y-m-d");
+		$category_id = null;
+
+		$categories = $this->categories->get_all_categories();
+
+		$inventory_category_log = $this->products->search_inventory_category_log(null, null, null);
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"inventory_category_log" => $inventory_category_log,
+			"categories" => $categories
+		);
+
+		$this->load->view('reports/inventory_category_item_level_cost_log', $data);
+	}
+
+	public function do_search_inventory_category_item_level_cost_by_date_range(){
+		$PageTitle = "Inventory Category Item Log";
+
+		$start_date = date("Y-m-d", strtotime($this->input->post("start-date")));
+		$end_date = date("Y-m-d", strtotime($this->input->post("end-date")));
+		$category_id = $this->input->post("product-category");
+
+		$categories = $this->categories->get_all_categories();
+
+		$inventory_category_log = $this->products->search_inventory_category_log($start_date, $end_date, $category_id);
+
+		if( $start_date == $end_date ){
+			$title_date_part = " for " . date( "F d, Y", strtotime($start_date) );
+		} else {
+			$title_date_part = " between " . date( "F d", strtotime($start_date)) . " and " . date( "F d, Y", strtotime($end_date));
+		}
+
+		$PageTitle = $PageTitle . $title_date_part;
+
+		//echo "<pre>";print_r($inventory_category_log);exit;
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"inventory_category_log" => $inventory_category_log,
+			"categories" => $categories,
+			"category_id" => $category_id
+		);
+
+		$this->load->view('reports/inventory_category_item_level_cost_log', $data);
+	}
+
+	public function requisition_category_log(){
+		$PageTitle = "Requisition Category Item Log";
+
+		$start_date = date("Y-m-d");
+		$end_date = date("Y-m-d");
+		$category_id = null;
+
+		$categories = $this->categories->get_all_categories();
+
+		$requisition_category_log = $this->requisitions->search_requisition_category_log(null, null, null);
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"requisition_category_log" => $requisition_category_log,
+			"categories" => $categories
+		);
+
+		$this->load->view('reports/requisition_category_item_level_cost_log', $data);
+	}
+
+	public function do_search_requisition_category_item_level_cost_by_date_range(){
+		$PageTitle = "Requisition Category Item Log";
+
+		$start_date = date("Y-m-d", strtotime($this->input->post("start-date")));
+		$end_date = date("Y-m-d", strtotime($this->input->post("end-date")));
+		$category_id = $this->input->post("product-category");
+
+		$categories = $this->categories->get_all_categories();
+
+		$requisition_category_log = $this->requisitions->search_requisition_category_log($start_date, $end_date, $category_id);
+
+		if( $start_date == $end_date ){
+			$title_date_part = " for " . date( "F d, Y", strtotime($start_date) );
+		} else {
+			$title_date_part = " between " . date( "F d", strtotime($start_date)) . " and " . date( "F d, Y", strtotime($end_date));
+		}
+
+		$PageTitle = $PageTitle . $title_date_part;
+
+		//echo "<pre>";print_r($inventory_category_log);exit;
+
+		$data = array(
+			"page_title" => $PageTitle,
+			"start_date" => $start_date,
+			"end_date" => $end_date,
+			"requisition_category_log" => $requisition_category_log,
+			"categories" => $categories,
+			"category_id" => $category_id
+		);
+
+		$this->load->view('reports/requisition_category_item_level_cost_log', $data);
+	}
 
 }

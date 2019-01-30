@@ -275,6 +275,13 @@ class Products extends CI_Controller {
 			"unit_id" => $uom_id
 		);
 
+		try{
+			$this->products->add_inventory_category_log( $category_id );
+		} catch( mysqli_sql_exception $query_exception ){
+			$this->xxx->log_exception( "Tried to execute query for 'updating inventory_category_log': " .$err->getMessage() );
+		 	show_error("An internal error occurred trying to execture a database query", $status_code, $heading = 'Database Query Execution Error Encountered');
+		}
+
 		if( $this->products->update_product_stock_level( $product_info_data, $current_stock_level, $new_stock_level, $product_id )){
 			$this->sir_session->add_status_message("Product stock information was successfully update", "success");
 		} else {

@@ -16,6 +16,206 @@ class Products_model extends CI_Model
 		$this->product_price_changes_table = "product_price_changes";
 	}
 
+	public function add_inventory_category_log( $category_id ){
+		$dairy_cooler = $dry_stores = $freezer = $meat_freezer = $vegetable_cooler = $paper_packaging = $sanitation = $prepared_meals = "";
+		$todays_date = date("Y-m-d");
+		$inventory_category_ids = array(1,2,3,4,5,6,7,9);
+
+		if( $category_id != null ){
+
+			$product_category_items = $this->get_inventory_by_category_with_product_item_total_cost( $category_id );
+
+			if( in_array( $category_id, $inventory_category_ids ) ){ 
+          		//remove id from inventory category ids to mark it being used and leave the ids that did not have any values for the requisition
+          		unset( $inventory_category_ids[$category_id] );
+          	}
+
+          	switch( $category_id ){
+          		case 1:
+          			$dairy_cooler = json_encode($product_category_items);
+          		break;
+
+          		case 2:
+          			$dry_stores = json_encode($product_category_items);
+          		break;
+
+          		case 3:
+          			$freezer = json_encode($product_category_items);
+          		break;
+
+          		case 4:
+          			$meat_freezer = json_encode($product_category_items);
+          		break;
+
+          		case 5:
+          			$vegetable_cooler = json_encode($product_category_items);
+          		break;
+
+          		case 6:
+          			$paper_packaging = json_encode($product_category_items);
+          		break;
+
+          		case 7:
+          			$sanitation = json_encode($product_category_items);
+          		break;
+
+          		case 9:
+          			$prepared_meals = json_encode($product_category_items);
+          		break;
+          	} //end of switch
+
+          	//loop on ids left in array to get the old values
+			foreach( $inventory_category_ids as $key => $value ){
+				//echo $value . " --- ";
+				$old_product_category_items = $this->products->get_inventory_by_category_with_product_item_total_cost( $value );
+
+				//echo $value . "<pre>";print_r( $old_product_category_items );
+
+				switch( $value ){
+              		case 1:
+              			$dairy_cooler = json_encode($old_product_category_items);
+              		break;
+
+              		case 2:
+              			$dry_stores = json_encode($old_product_category_items);
+              		break;
+
+              		case 3:
+              			$freezer = json_encode($old_product_category_items);
+              		break;
+
+              		case 4:
+              			$meat_freezer = json_encode($old_product_category_items);
+              		break;
+
+              		case 5:
+              			$vegetable_cooler = json_encode($old_product_category_items);
+              		break;
+
+              		case 6:
+              			$paper_packaging = json_encode($old_product_category_items);
+              		break;
+
+              		case 7:
+              			$sanitation = json_encode($old_product_category_items);
+              		break;
+
+              		case 9:
+              			$prepared_meals = json_encode($old_product_category_items);
+              		break;
+              	} //end of switch
+			}//end of foreach loop on category ids that are left in array
+
+			$inventory_log_data = array(
+				"log_date" => $todays_date,
+				"dairy_cooler_log" => $dairy_cooler,
+				"dry_stores_log" => $dry_stores,
+				"freezer_log" => $freezer,
+				"meat_freezer_log" => $meat_freezer,
+				"vegetable_cooler_log" => $vegetable_cooler,
+				"paper_packaging_log" => $paper_packaging,
+				"sanitation_log" => $sanitation,
+				"prepared_meals_log" => $prepared_meals
+			);
+
+			try{
+				$log_for_today = $this->get_inventory_log_for_today( $todays_date );
+
+				if( !empty( $log_for_today ) ){
+					$log_id = $log_for_today[0]["log_id"];
+					try{
+						return $this->db->update( "inventory_category_log", $inventory_log_data, "log_id = " . $log_id );
+					} catch( Exception $ex ){
+						$this->xxx->log_exception( "Tried to update inventory category log for date: " . date("Y-m-d") . " --" .$ex->getMessage() );
+					} catch( mysqli_sql_exception $sql_e ){
+						$this->xxx->log_exception( "Tried to execute query for 'updating inventory_category_log': " .$err->getMessage() );
+						 show_error("An internal error occurred trying to execture a database query", $status_code, $heading = 'Database Query Execution Error Encountered');
+					}					
+				} else {
+					try{
+						return $this->db->insert( "inventory_category_log", $inventory_log_data );
+					} catch( Exception $ex ){
+						$this->xxx->log_exception( "Tried to insert inventory category log for date: " . date("Y-m-d") . " --" .  $ex->getMessage() );
+					} catch( mysqli_sql_exception $sql_e ){
+						$this->xxx->log_exception( "Tried to execute query for 'inserting inventory_category_log': " .$err->getMessage() );
+						 show_error("An internal error occurred trying to execture a database query", $status_code, $heading = 'Database Query Execution Error Encountered');
+					}				
+				} //end of else for inventory log for today
+			} catch( ArgumentCountError $err ){
+				$this->xxx->log_exception( "Tried to get inventory category log for date: " . date("Y-m-d") . " --" .$err->getMessage() );
+				 show_error("An internal error occurred trying to retrieve a requisition with key: " . $requisition_id, $status_code = "404", $heading = 'Database Retrieval Error Was Encountered');
+			} //enf of catch
+			catch( mysqli_sql_exception $sql_e ){
+				$this->xxx->log_exception( "Tried to execute query for 'get_inventory_log_for_today': " .$err->getMessage() );
+				 show_error("An internal error occurred trying to execture a database query", $status_code, $heading = 'Database Query Execution Error Encountered');
+			}
+		} //end of check for category id
+	} //enf of function
+
+	public function get_inventory_log_for_today( $todays_date ){
+		$query = "SELECT * FROM `inventory_category_log` WHERE log_date = '$todays_date'";
+
+		return $this->sir->format_query_result_as_array($query);
+	}
+
+	public function inventory_log_exists_for_today( $todays_date ){
+		$query = "SELECT * FROM `inventory_category_log` WHERE log_date = '$todays_date'";
+
+		$result = $this->sir->format_query_result_as_array($query);
+
+		if( empty($result) )
+			return false;
+		else
+			return true;
+	}
+
+	public function search_inventory_category_log($start_date, $end_date, $category_id){
+		if( $start_date == null && $end_date == null ){
+			return null;
+		} else {
+
+			switch( $category_id ){
+          		case 1:
+          			$column_data = "dairy_cooler_log";
+          		break;
+
+          		case 2:
+          			$column_data = "dry_stores_log";
+          		break;
+
+          		case 3:
+          			$column_data = "freezer_log";
+          		break;
+
+          		case 4:
+          			$column_data = "meat_freezer_log";
+          		break;
+
+          		case 5:
+          			$column_data = "vegetable_cooler_log";
+          		break;
+
+          		case 6:
+          			$column_data = "paper_packaging_log";
+          		break;
+
+          		case 7:
+          			$column_data = "sanitation_log";
+          		break;
+
+          		case 9:
+          			$column_data = "prepared_meals_log";
+          		break;
+          	} //end of switch
+
+			$query = "SELECT log_id, log_date, $column_data 'column_data'
+						FROM `inventory_category_log` 
+						where log_date between '$start_date' and '$end_date';";
+
+			return $this->sir->format_query_result_as_array($query);
+		}		
+	}
+
 	public function log_product_price_changes( $old_new_product_prices ){
 		return $this->db->insert_batch( $this->product_price_changes_table, $old_new_product_prices );
 	}
@@ -222,6 +422,19 @@ class Products_model extends CI_Model
 		return $this->sir->format_query_result_as_array($query);
 	}
 
+	public function get_inventory_item_by_category_with_product_item_total_cost( $product_id ){
+		$query = "SELECT p.`product_id`, p.`product_name`, p.`description`, c.`category_name`, p.`barcode`, p.`product_category_id`,
+					l.`current_stock_level`, p.price, TRUNCATE(l.`current_stock_level` * p.price, 2) item_total_cost, u.`unit_abbreviation`, p.unit_id
+					FROM products p
+					INNER JOIN product_location_categories c ON c.`category_id` = p.`product_category_id`
+					LEFT JOIN product_stock_levels l ON l.`product_id` = p.`product_id`
+					LEFT JOIN measurement_units u ON u.`unit_id` = p.`unit_id`
+					WHERE p.product_id = $product_id
+					ORDER BY p.`product_name`";
+
+		return $this->sir->format_query_result_as_array($query);
+	}
+
 	public function get_product_id_from_product_name($product_name){
         $query = "select product_id from products where product_name = '$product_name'";
 
@@ -250,7 +463,7 @@ class Products_model extends CI_Model
 			$previous_stock_level_result = $this->get_stock_level_by_product_id($product_id);
 			$previous_stock_level = $previous_stock_level_result[0]["current_stock_level"];
 
-			$new_product_stock_level = $current_stock_level + $new_stock_level;
+			$new_product_stock_level = $current_stock_level; // + $new_stock_level;
 
 			$stock_level_data = array(
 				//"product_id" = >$product_id,
@@ -499,7 +712,7 @@ class Products_model extends CI_Model
 			$last_occurrence_of_open_bracket = strrpos($product_name_id, "(");
 			$last_occurrence_of_close_bracket = strrpos($product_name_id, ")");
 
-			return substr(trim($product_name_id), $last_occurrence_of_open_bracket+1, $last_occurrence_of_close_bracket-($last_occurrence_of_open_bracket+1));
+			return trim(substr(trim($product_name_id), $last_occurrence_of_open_bracket+1, $last_occurrence_of_close_bracket-($last_occurrence_of_open_bracket+1)));
 		} //end of if
 	} //end of function
 
@@ -510,9 +723,8 @@ class Products_model extends CI_Model
 			} else {
 				$last_occurrence_of_open_bracket = strrpos($product_name_id, "(");
 
-				return substr($product_name_id, 0, $last_occurrence_of_open_bracket);
-			}
-			
+				return addslashes(trim(substr($product_name_id, 0, $last_occurrence_of_open_bracket)));
+			}			
 		} //end of if
 	} //end of function
 

@@ -220,13 +220,13 @@
                     <tr>
                       <td colspan="2">Sub Total</td>
                       <td><span id="currency-label">USD</span></td>
-                      <td><input type="text" name="base_total" id="base_total" class="form-control" readonly="readonly" /></td>
+                      <td><input type="text" name="base_total" id="base_total" class="form-control" readonly="readonly" value="0" /></td>
                       <td></td>
                     </tr>
                     <tr>
                       <td colspan="2"></td>
                       <td><span id="alternate-total">KYD</span></td>
-                      <td><input type="text" name="alternate_total_value" id="alternate_total_value" class="form-control" readonly="readonly" /></td>
+                      <td><input type="text" name="alternate_total_value" id="alternate_total_value" class="form-control" readonly="readonly" value="0" /></td>
                       <td></td>
                     </tr>
 
@@ -240,7 +240,7 @@
                     <tr>
                       <td colspan="2"></td>
                       <td><span id="service-charge-alternate-total">KYD</span></td>
-                      <td><input type="text" name="alternate_service_charge" id="alternate_service_charge" class="form-control" readonly="readonly" /></td>
+                      <td><input type="text" name="alternate_service_charge" id="alternate_service_charge" class="form-control" readonly="readonly" value="0" /></td>
                       <td></td>
                     </tr>
 
@@ -248,13 +248,13 @@
                     <tr>
                       <td colspan="2"><strong>Grand Total</strong></td>
                       <td> <span id="grand-total-currency-label">USD</span></td>
-                      <td><input type="text" name="grand_base_total" id="grand_base_total" class="form-control" readonly="readonly" /></td>
+                      <td><input type="text" name="grand_base_total" id="grand_base_total" class="form-control" readonly="readonly" value="0" /></td>
                       <td></td>
                     </tr>
                     <tr>
                       <td colspan="2"></td>
                       <td><span id="grand-total-alternate-total">KYD</span></td>
-                      <td><input type="text" name="grand_alternate_total_value" id="grand_alternate_total_value" class="form-control" readonly="readonly" /></td>
+                      <td><input type="text" name="grand_alternate_total_value" id="grand_alternate_total_value" class="form-control" readonly="readonly" value="0" /></td>
                       <td></td>
                     </tr>
 

@@ -18,6 +18,11 @@
         <div class="right_col" role="main">
 
           <div class="x_content">
+            <ol class="breadcrumb">
+              <li><a href="<?=base_url('Reports');?>">Reports</a></li>
+              <li class="active"><?=$page_title;?></li>
+            </ol>
+            
             <h3><?=$page_title;?></h3>
 
             <div class="row">
