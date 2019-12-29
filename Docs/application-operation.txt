@@ -1,5 +1,0 @@
-Inventory Stock operation
-
-The inventory date is set and all products that are added will be done to the date set
-Once the amount for the product is updated, it will create an inventory history that will have the last 
-amount and the amount of products
